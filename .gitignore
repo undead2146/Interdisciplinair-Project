@@ -5,6 +5,7 @@
 
 Local/
 .vscode/
+.*
 
 # User-specific files
 *.rsuser
