@@ -19,4 +19,8 @@
     <ProjectReference Include="..\InterdisciplinairProject.Core\InterdisciplinairProject.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Fixtures\Data\" />
+  </ItemGroup>
+
 </Project>
