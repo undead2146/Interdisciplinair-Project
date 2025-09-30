@@ -1,0 +1,34 @@
+{
+  "naam": "RGB PAR",
+  "aantalK": 4,
+  "kanalen": {
+    "Dimmer": {
+      "type": "dim",
+      "bereik": [
+        0,
+        255
+      ]
+    },
+    "Red": {
+      "type": "kleur_r",
+      "bereik": [
+        0,
+        255
+      ]
+    },
+    "Green": {
+      "type": "kleur_g",
+      "bereik": [
+        0,
+        255
+      ]
+    },
+    "Blue": {
+      "type": "kleur_b",
+      "bereik": [
+        0,
+        255
+      ]
+    }
+  }
+}
