@@ -2,51 +2,55 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 
-namespace InterdiscplinairProject.ViewModels;
-
-/// <summary>
-/// Main ViewModel for the InterdisciplinairProject application.
-/// <remarks>
-/// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
-/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
-/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
-/// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
-/// </remarks>
-/// <seealso cref="ObservableObject" />
-/// <seealso cref="MainWindow" />
-/// </summary>
-public partial class MainViewModel : ObservableObject
+namespace InterdiscplinairProject.ViewModels
 {
-    [ObservableProperty]
-    private string title = "InterdisciplinairProject - DMX Lighting Control";
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MainViewModel"/> class.
-    /// </summary>
-    public MainViewModel()
+    public partial class MainViewModel : ObservableObject
     {
-        Debug.WriteLine("[DEBUG] MainViewModel constructor called");
+        [ObservableProperty]
+        private string title = "InterdisciplinairProject - DMX Lighting Control";
 
-        // Initialize ViewModel, e.g., load services from DI if injected
-        OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
-        Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
-    }
+        [ObservableProperty]
+        private object? currentView;
 
-    /// <summary>
-    /// Gets the command to open the fixture settings view.
-    /// </summary>
-    public RelayCommand OpenFixtureSettingsCommand { get; private set; }
+        public RelayCommand OpenFixturesCommand { get; }
+        public RelayCommand OpenFixtureSettingsCommand { get; }
+        public RelayCommand OpenSceneCommand { get; }
 
-    /// <summary>
-    /// Opens the fixture settings view window.
-    /// </summary>
-    private void OpenFixtureSettings()
-    {
-        Debug.WriteLine("[DEBUG] OpenFixtureSettings() called - Fixture Settings button clicked");
-        var fixtureSettingsView = new InterdisciplinairProject.Views.FixtureSettingsView();
-        Debug.WriteLine("[DEBUG] FixtureSettingsView instance created");
-        fixtureSettingsView.Show();
-        Debug.WriteLine("[DEBUG] FixtureSettingsView.Show() called - window should be visible now");
+        public MainViewModel()
+        {
+            Debug.WriteLine("[DEBUG] MainViewModel ctor");
+            OpenFixturesCommand = new RelayCommand(OpenFixtures);
+            OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
+            OpenSceneCommand = new RelayCommand(OpenScene);
+
+            // Default landing view
+            CurrentView = new TextBlock
+            {
+                Text = "Welcome — choose a module above",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 18
+            };
+        }
+
+        private void OpenFixtures()
+        {
+            // IMPORTANT: MainWindowFixtures must be a UserControl now
+            CurrentView = new InterdisciplinairProject.Fixtures.Views.MainWindowFixtures();
+        }
+
+        private void OpenFixtureSettings()
+        {
+            // Must be a UserControl now (we’ll convert the view below)
+            CurrentView = new InterdisciplinairProject.Views.FixtureSettingsView();
+        }
+
+        private void OpenScene()
+        {
+            // Placeholder — you can replace with your real Scene view later
+            CurrentView = new InterdisciplinairProject.Views.SceneView();
+        }
     }
 }

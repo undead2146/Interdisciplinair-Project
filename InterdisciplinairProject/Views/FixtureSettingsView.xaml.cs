@@ -19,7 +19,7 @@ namespace InterdisciplinairProject.Views
     /// <summary>
     /// Interaction logic for FixtureSettingsView.xaml.
     /// </summary>
-    public partial class FixtureSettingsView : Window
+    public partial class FixtureSettingsView : UserControl
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FixtureSettingsView"/> class.
@@ -42,7 +42,7 @@ namespace InterdisciplinairProject.Views
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[DEBUG] Cancel button clicked");
-            Close();
+            
         }
     }
 }

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="StyleCop.Analyzers">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -18,9 +18,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InterdisciplinairProject.Core\InterdisciplinairProject.Core.csproj" />
-    <ProjectReference Include="..\InterdisciplinairProject.Features\Fixture\Fixture.csproj" />
-    <ProjectReference Include="..\InterdisciplinairProject.Features\Scene\Scene.csproj" />
-    <ProjectReference Include="..\InterdisciplinairProject.Features\Show\Show.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Fixtures\Resources\" />
   </ItemGroup>
 
 </Project>
