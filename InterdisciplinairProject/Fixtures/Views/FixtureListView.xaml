@@ -6,21 +6,14 @@
         mc:Ignorable="d"
         Title="Fixtures" Height="500" Width="600">
     <DockPanel>
-        <!-- Top menu with Import/Export -->
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Import JSON" Command="{Binding ImportCommand}" />
-                <MenuItem Header="Export JSON" Command="{Binding ExportCommand}" />
-            </MenuItem>
-        </Menu>
 
         <!-- Left side: Create / Clear buttons -->
         <StackPanel DockPanel.Dock="Left" Width="150" Margin="5">
-            <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
+            <Button Content="Create Fixture" Margin="0,0,0,5"/>
         </StackPanel>
 
         <!-- Main list of fixtures -->
-        <ListView ItemsSource="{Binding Fixtures}" SelectedItem="{Binding SelectedFixture}" Margin="5">
+        <ListView Margin="5">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel>

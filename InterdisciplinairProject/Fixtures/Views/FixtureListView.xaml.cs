@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InterdisciplinairProject.Fixtures.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,16 +13,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace InterdisciplinairProject.Fixtures.View
+namespace InterdisciplinairProject.Fixtures.Views
 {
     /// <summary>
-    /// Interaction logic for FixtureWindow.xaml
+    /// Interaction logic for FixtureListView.xaml
     /// </summary>
-    public partial class FixtureWindow : Window
+    public partial class FixtureListView : Window
     {
-        public FixtureWindow()
+        public FixtureListView()
         {
             InitializeComponent();
+            DataContext = new FixtureListViewModel();
         }
     }
 }

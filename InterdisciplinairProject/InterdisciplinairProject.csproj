@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Fixtures\Data\" />
+    <Folder Include="Fixtures\Resources\" />
   </ItemGroup>
 
 </Project>
