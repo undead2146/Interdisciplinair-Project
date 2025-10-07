@@ -33,14 +33,14 @@ namespace InterdisciplinairProject.Fixtures.Views
 
             if (string.IsNullOrEmpty(name)) 
             {
-                MessageBox.Show("Gelieve een geldige naam in te vullen");
+                MessageBox.Show("Please fill in a valid name");
                 return;
             }
 
             // Root JSON-object
             var root = new JsonObject
             {
-                ["naam"] = FixtureNameTextBox.Text ?? string.Empty
+                ["name"] = FixtureNameTextBox.Text ?? string.Empty
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
