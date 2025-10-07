@@ -37,6 +37,21 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
+            // map 'data' aanmaken
+            string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
+            Directory.CreateDirectory(dataDir);
+
+            // file name
+            string safeName = string.Concat(name.Split(System.IO.Path.GetInvalidFileNameChars()));
+            string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
+
+            //checken of bestand al bestaat
+            if (File.Exists(filePath)) 
+            {
+                MessageBox.Show("There already exists a fixture with this name");
+                return;
+            }
+
             // Root JSON-object
             var root = new JsonObject
             {
@@ -45,15 +60,6 @@ namespace InterdisciplinairProject.Fixtures.Views
 
             var options = new JsonSerializerOptions { WriteIndented = true };
             string json = root.ToJsonString(options);
-
-            // map 'data' aanmaken
-            string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-            Directory.CreateDirectory(dataDir);
-
-            // file name
-            string rawName = FixtureNameTextBox.Text ?? "fixture";
-            string safeName = string.Concat(rawName.Split(System.IO.Path.GetInvalidFileNameChars()));
-            string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
 
             try
             {
