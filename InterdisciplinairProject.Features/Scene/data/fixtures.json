@@ -1,0 +1,51 @@
+{
+  "fixtures": [
+    {
+      "fixtureId": "led-spot-a",
+      "name": "Spotlight A",
+      "channels": {
+        "intensity": null,
+        "color_temperature": null,
+        "strobe": null
+      }
+    },
+    {
+      "fixtureId": "rgb-wash-b",
+      "name": "Wash Light B",
+      "channels": {
+        "red": null,
+        "green": null,
+        "blue": null,
+        "dimmer": null
+      }
+    },
+    {
+      "fixtureId": "moving-head-c",
+      "name": "Moving Head C",
+      "channels": {
+        "pan": null,
+        "tilt": null,
+        "gobo": null,
+        "color": null,
+        "intensity": null
+      }
+    },
+    {
+      "fixtureId": "laser-d",
+      "name": "Laser D",
+      "channels": {
+        "power": null,
+        "pattern": null,
+        "speed": null
+      }
+    },
+    {
+      "fixtureId": "strobe-e",
+      "name": "Strobe E",
+      "channels": {
+        "rate": null,
+        "brightness": null
+      }
+    }
+  ]
+}
