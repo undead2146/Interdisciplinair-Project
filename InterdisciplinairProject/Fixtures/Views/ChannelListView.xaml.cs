@@ -30,6 +30,13 @@ namespace InterdisciplinairProject.Fixtures.Views
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             string name = FixtureNameTextBox.Text;
+
+            if (string.IsNullOrEmpty(name)) 
+            {
+                MessageBox.Show("Gelieve een geldige naam in te vullen");
+                return;
+            }
+
             // Root JSON-object
             var root = new JsonObject
             {
