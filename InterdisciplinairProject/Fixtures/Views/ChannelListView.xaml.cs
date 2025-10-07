@@ -58,12 +58,12 @@ namespace InterdisciplinairProject.Fixtures.Views
             try
             {
                 File.WriteAllText(filePath, json);
-                MessageBox.Show($"Opgeslagen naar {filePath}");
+                MessageBox.Show($"Fixture is saved succesfully");
                 this.Close();
             }
             catch (IOException ioEx)
             {
-                MessageBox.Show($"Fout bij opslaan: {ioEx.Message}");
+                MessageBox.Show($"Error with saving fixture: {ioEx.Message}");
                 this.Close();
             }
         }
