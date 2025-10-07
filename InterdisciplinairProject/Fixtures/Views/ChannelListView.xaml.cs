@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +27,38 @@ namespace InterdisciplinairProject.Fixtures.Views
             InitializeComponent();
         }
 
-       
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            string name = FixtureNameTextBox.Text;
+            // Root JSON-object
+            var root = new JsonObject
+            {
+                ["naam"] = FixtureNameTextBox.Text ?? string.Empty
+            };
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = root.ToJsonString(options);
+
+            // map 'data' aanmaken
+            string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
+            Directory.CreateDirectory(dataDir);
+
+            // file name
+            string rawName = FixtureNameTextBox.Text ?? "fixture";
+            string safeName = string.Concat(rawName.Split(System.IO.Path.GetInvalidFileNameChars()));
+            string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
+
+            try
+            {
+                File.WriteAllText(filePath, json);
+                MessageBox.Show($"Opgeslagen naar {filePath}");
+                this.Close();
+            }
+            catch (IOException ioEx)
+            {
+                MessageBox.Show($"Fout bij opslaan: {ioEx.Message}");
+                this.Close();
+            }
+        }
     }
 }
