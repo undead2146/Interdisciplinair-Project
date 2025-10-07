@@ -10,6 +10,7 @@
         <Label Content="Fixture Name:" HorizontalAlignment="Left" Margin="53,28,0,0" VerticalAlignment="Top"/>
         <TextBox HorizontalAlignment="Left" x:Name="FixtureNameTextBox" Margin="151,32,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
         <Button Content="Save" Name="SaveButton" HorizontalAlignment="Left" Margin="117,364,0,0" VerticalAlignment="Top" Click="SaveButton_Click"/>
+        <Button Name="cancelBtn" Content="Cancel" HorizontalAlignment="Left" Height="28" Margin="286,374,0,0" VerticalAlignment="Top" Width="64" Click="cancelBtn_Click"/>
 
     </Grid>
 </Window>

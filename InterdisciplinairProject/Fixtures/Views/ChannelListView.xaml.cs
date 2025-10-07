@@ -60,5 +60,26 @@ namespace InterdisciplinairProject.Fixtures.Views
                 this.Close();
             }
         }
+
+        private void cancelBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+            messageBoxText: "Are you sure you want to cancel making this fixture?",
+            caption: "Confirm Cancel",
+            button: MessageBoxButton.YesNo,
+            icon: MessageBoxImage.Warning
+            );
+
+            if (result == MessageBoxResult.Yes)
+            {
+                //MessageBox.Show("fixture canceled\n\r");
+                this.Close();
+
+            }
+            else
+            {
+                //do nothing
+            }
+        }
     }
 }
