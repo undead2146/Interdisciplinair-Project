@@ -3,17 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
         mc:Ignorable="d"
         Title="Fixtures" Height="500" Width="600">
-    <DockPanel>
 
-        <!-- Left side: Create / Clear buttons -->
+    <!-- Bind the ViewModel directly -->
+    <Window.DataContext>
+        <local:FixtureListViewModel />
+    </Window.DataContext>
+
+    <DockPanel>
+        <!-- Left side: Create button -->
         <StackPanel DockPanel.Dock="Left" Width="150" Margin="5">
-            <Button Command="{Binding CreateFixtureCommand}" Content="Create Fixture" Margin="0,0,0,5"/>
+            <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
         </StackPanel>
 
         <!-- Main list of fixtures -->
-        <ListView Margin="5">
+        <ListView Margin="5" ItemsSource="{Binding Fixtures}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel>
@@ -24,4 +30,3 @@
         </ListView>
     </DockPanel>
 </Window>
-

@@ -8,5 +8,11 @@ namespace InterdisciplinairProject.Fixtures.Models
 {
     public class Fixture
     {
+        public string Name { get; set; }
+
+        public Fixture(string name)
+        {
+            Name = name;
+        }
     }
 }
