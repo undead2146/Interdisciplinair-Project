@@ -39,39 +39,39 @@ namespace InterdiscplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         Scenes.Add(scene);
-                        MessageBox.Show($"Scene '{scene.Name}' succesvol geïmporteerd!",
+                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!",
                             "Import", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("Deze scene is al geïmporteerd.",
+                        MessageBox.Show("This scene has already been imported.",
                             "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 catch (FileNotFoundException ex)
                 {
-                    MessageBox.Show($"Bestand niet gevonden: {ex.Message}",
-                        "Bestand niet gevonden", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"File not found: {ex.Message}",
+                        "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 catch (InvalidDataException ex)
                 {
-                    MessageBox.Show($"Ongeldige data in het bestand: {ex.Message}",
-                        "Ongeldige data", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Invalid data in the file: {ex.Message}",
+                        "Invalid Data", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (JsonException ex)
                 {
-                    MessageBox.Show($"Ongeldige JSON structuur: {ex.Message}",
-                        "JSON Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Invalid JSON structure: {ex.Message}",
+                        "JSON Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (IOException ex)
                 {
-                    MessageBox.Show($"Fout bij lezen van bestand: {ex.Message}",
-                        "Lezingsfout", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Error reading the file: {ex.Message}",
+                        "Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Onverwachte fout: {ex.Message}",
-                        "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Unexpected error: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

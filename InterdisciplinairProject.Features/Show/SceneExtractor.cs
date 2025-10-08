@@ -74,10 +74,9 @@ namespace Show
                 throw new JsonException(
                     $"The file contains invalid JSON: {ex.Message}", ex);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception(
-                    $"An unexpected error occurred: {ex.Message}", ex);
+                throw;
             }
         }
     }
