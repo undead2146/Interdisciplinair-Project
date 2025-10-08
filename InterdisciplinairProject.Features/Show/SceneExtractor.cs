@@ -1,11 +1,7 @@
 ﻿using Show.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
+using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Show
 {
@@ -13,26 +9,41 @@ namespace Show
     {
         /// <summary>
         /// Extracts a Scene object from a JSON file.
+        /// Throws descriptive exceptions if something goes wrong.
         /// </summary>
         /// <param name="jsonFilePath">The path to the JSON file containing the scene.</param>
         /// <returns>The deserialized Scene object.</returns>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
+        /// <exception cref="InvalidDataException"></exception>
+        /// <exception cref="JsonException"></exception>
         public static Scene ExtractScene(string jsonFilePath)
         {
             if (!File.Exists(jsonFilePath))
             {
-                Console.WriteLine($"File not found: {jsonFilePath}");
-                return new Scene();
+                throw new FileNotFoundException(
+                    $"The selected file could not be found: {jsonFilePath}");
             }
 
-            string jsonString = File.ReadAllText(jsonFilePath);
+            string jsonString;
+            try
+            {
+                jsonString = File.ReadAllText(jsonFilePath);
+            }
+            catch (IOException ex)
+            {
+                throw new IOException(
+                    $"An error occurred while reading the file: {ex.Message}", ex);
+            }
 
             try
             {
                 using JsonDocument doc = JsonDocument.Parse(jsonString);
+
                 if (!doc.RootElement.TryGetProperty("scene", out JsonElement sceneElement))
                 {
-                    Console.WriteLine("Scene property missing.");
-                    return new Scene();
+                    throw new InvalidDataException(
+                        "The JSON file does not contain a 'scene' property.");
                 }
 
                 var scene = new Scene
@@ -47,23 +58,26 @@ namespace Show
                 {
                     foreach (var fixture in fixtures.EnumerateArray())
                     {
-                        if (fixture.TryGetProperty("channels", out JsonElement channels))
+                        if (fixture.TryGetProperty("channels", out JsonElement channels) &&
+                            channels.TryGetProperty("dimmer", out JsonElement dimmerElem))
                         {
-                            if (channels.TryGetProperty("dimmer", out JsonElement dimmerElem))
-                            {
-                                scene.Dimmer = dimmerElem.GetInt32();
-                                break; // Only set the first found dimmer
-                            }
+                            scene.Dimmer = dimmerElem.GetInt32();
+                            break;
                         }
                     }
                 }
 
                 return scene;
             }
+            catch (JsonException ex)
+            {
+                throw new JsonException(
+                    $"The file contains invalid JSON: {ex.Message}", ex);
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error extracting scene: {ex.Message}");
-                return new Scene();
+                throw new Exception(
+                    $"An unexpected error occurred: {ex.Message}", ex);
             }
         }
     }
