@@ -37,11 +37,8 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
-            // map 'data' aanmaken
-            string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-            Directory.CreateDirectory(dataDir);
-
             // file name
+            string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
             string safeName = string.Concat(name.Split(System.IO.Path.GetInvalidFileNameChars()));
             string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
 
