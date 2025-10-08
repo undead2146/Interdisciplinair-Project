@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using Show;
 using Show.Model;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text.Json;
 using System.Windows;
 
 namespace InterdiscplinairProject.ViewModels
@@ -34,13 +36,42 @@ namespace InterdiscplinairProject.ViewModels
                 try
                 {
                     Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
-                    Scenes.Add(scene);
-
-                    MessageBox.Show($"Scene '{scene.Name}' succesvol geïmporteerd!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (!Scenes.Any(s => s.Id == scene.Id))
+                    {
+                        Scenes.Add(scene);
+                        MessageBox.Show($"Scene '{scene.Name}' succesvol geïmporteerd!",
+                            "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Deze scene is al geïmporteerd.",
+                            "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (FileNotFoundException ex)
+                {
+                    MessageBox.Show($"Bestand niet gevonden: {ex.Message}",
+                        "Bestand niet gevonden", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                catch (InvalidDataException ex)
+                {
+                    MessageBox.Show($"Ongeldige data in het bestand: {ex.Message}",
+                        "Ongeldige data", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (JsonException ex)
+                {
+                    MessageBox.Show($"Ongeldige JSON structuur: {ex.Message}",
+                        "JSON Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show($"Fout bij lezen van bestand: {ex.Message}",
+                        "Lezingsfout", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Fout bij importeren: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Onverwachte fout: {ex.Message}",
+                        "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
