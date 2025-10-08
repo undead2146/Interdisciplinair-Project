@@ -50,15 +50,9 @@ namespace InterdisciplinairProject.Fixtures.Views
             );
 
             this.DataContext = this;
-            this.Closed += ChannelListView_Closed; // Naam aangepast van MainWindow_Closed
         }
 
-        // --- Event Handlers uit Code 1 (Aangepast indien nodig) ---
-
-        private void ChannelListView_Closed(object? sender, System.EventArgs e)
-        {
-            SaveChannels(); // Roep de opslagmethode van de kanalen aan bij sluiten
-        }
+ 
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -103,8 +97,7 @@ namespace InterdisciplinairProject.Fixtures.Views
             try
             {
                 File.WriteAllText(filePath, json);
-                // Roep ook SaveChannels aan om de "channels_data.json" bij te werken (optioneel, maar veilig)
-                SaveChannels();
+
 
                 MessageBox.Show($"Fixture is saved succesfully");
                 this.Close();
@@ -134,24 +127,7 @@ namespace InterdisciplinairProject.Fixtures.Views
 
         // --- Hulpmethoden en Event Handlers uit Code 2 (MainWindow) ---
 
-        // De oorspronkelijke SaveChannels die "channels_data.json" opslaat
-        private void SaveChannels()
-        {
-            try
-            {
-                var channelsToSave = Channels
-                                           .Select(vm => new Channel { Name = vm.Name, Type = vm.Type })
-                                           .ToList();
 
-                JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(channelsToSave, options);
-                File.WriteAllText(DataFilePath, jsonString);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fout bij het opslaan van data: {ex.Message}", "Opslagfout", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
         // Hulpmethode om de initiële kanalen te laden
         private ObservableCollection<Channel> LoadChannelModels()
@@ -191,7 +167,6 @@ namespace InterdisciplinairProject.Fixtures.Views
             var newChannel = new ChannelViewModel(newModel);
             Channels.Add(newChannel);
 
-            SaveChannels();
 
             MessageBox.Show($"Nieuw kanaal toegevoegd: Kanaal {Channels.Count}.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -238,7 +213,6 @@ namespace InterdisciplinairProject.Fixtures.Views
                     }
                 }
 
-                SaveChannels();
                 e.Handled = true;
             }
         }
