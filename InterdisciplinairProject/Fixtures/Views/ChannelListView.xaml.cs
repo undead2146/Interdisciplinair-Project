@@ -97,7 +97,6 @@ namespace InterdisciplinairProject.Fixtures.Views
                 this.Close();
             }
         }
-        //df
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -112,12 +111,11 @@ namespace InterdisciplinairProject.Fixtures.Views
             {
                 this.Close();
             }
-            // Anders: do nothing
+            else
+            {
+                //do nothing
+            }
         }
-
-        // --- Hulpmethoden en Event Handlers uit Code 2 (MainWindow) ---
-
-
 
         // Hulpmethode om de initiële kanalen te laden
         private ObservableCollection<Channel> LoadChannelModels()
