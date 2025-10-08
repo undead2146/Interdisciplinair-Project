@@ -13,7 +13,7 @@
             <MenuItem Header="_Fixture">
             </MenuItem>
             <MenuItem Header="_Scene">
-                <MenuItem Header="_Import Scenes" />
+                    <MenuItem Header="_Import Scenes" Command="{Binding ImportScenesCommand}"/>
             </MenuItem>
             <MenuItem Header="_Show">
                 <MenuItem Header="_Open Showbuilder" />
