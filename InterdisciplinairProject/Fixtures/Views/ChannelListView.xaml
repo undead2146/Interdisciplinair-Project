@@ -3,14 +3,79 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views" 
+
         mc:Ignorable="d"
-        Title="nieuw dmx-fixture" Height="450" Width="400">
-    <Grid>
-        <Label Content="Fixture Name:" HorizontalAlignment="Left" Margin="53,28,0,0" VerticalAlignment="Top"/>
-        <TextBox HorizontalAlignment="Left" x:Name="FixtureNameTextBox" Margin="151,32,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120"/>
-        <Button Content="Save" Name="SaveButton" HorizontalAlignment="Left" Margin="117,364,0,0" VerticalAlignment="Top" Click="SaveButton_Click"/>
-        <Button Name="cancelBtn" Content="Cancel" HorizontalAlignment="Left" Height="28" Margin="286,374,0,0" VerticalAlignment="Top" Width="64" Click="cancelBtn_Click"/>
+        Title="nieuw dmx-fixture" Height="493" Width="400">
+    <Grid Margin="10,10,10,6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Label Content="Fixture Naam:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <TextBox x:Name="FixtureNameTextBox" TextWrapping="Wrap" VerticalAlignment="Center" Width="200" Padding="3"/>
+        </StackPanel>
+
+        <Button Grid.Row="1" Content="+ Nieuw Kanaal Toevoegen" 
+                Padding="10" Margin="0,0,0,10" 
+                Click="AddChannelButton_Click"
+                Background="#1E90FF" Foreground="White" FontWeight="Bold"/>
+
+        <ListBox x:Name="ChannelsListBox" 
+                 Grid.Row="2" 
+                 ItemsSource="{Binding Channels}"
+                 SelectionChanged="ChannelsListBox_SelectionChanged" Margin="0,0,0,51">
+            <ListBox.Resources>
+                <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </ListBox.Resources>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="0,2" Background="White" CornerRadius="3">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="EditTextBox" 
+                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                     Visibility="Collapsed" 
+                                     Grid.Column="0"
+                                     Style="{StaticResource EditingTextBoxStyle}"
+                                     KeyDown="EditTextBox_KeyDown" 
+                                     FocusManager.IsFocusScope="True"/>
+
+                            <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1" Text="{Binding Type, StringFormat=' ({0})'}" Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                            <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="Save" Name="SaveButton"  HorizontalAlignment="Left" Height="36" Margin="221,331,0,0" Grid.Row="2" VerticalAlignment="Top" Width="65" Click="SaveButton_Click"/>
+        <Button Name="cancelBtn" Content="Cancel" HorizontalAlignment="Left" Height="36" Margin="305,331,0,0" Grid.Row="2" VerticalAlignment="Top" Width="65" Click="cancelBtn_Click"/>
 
     </Grid>
 </Window>
