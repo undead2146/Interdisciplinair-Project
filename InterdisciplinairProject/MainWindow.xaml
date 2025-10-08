@@ -25,5 +25,16 @@
         <TextBox AcceptsReturn="True" />
     </DockPanel>
     <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" />
+        <ListView HorizontalAlignment="Left" Height="301" Margin="10,10,0,0"
+VerticalAlignment="Top" Width="164"
+Name="sceneListView">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding scenes.Name}"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Window>

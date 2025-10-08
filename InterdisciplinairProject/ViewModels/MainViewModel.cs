@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Show;
 using Show.Model;
+using System.Collections.ObjectModel;
 using System.Windows;
 
 
@@ -27,6 +28,8 @@ public partial class MainViewModel : ObservableObject
     private string? selectedScenePath;
 
     SceneExtractor sceneExtractor = new SceneExtractor();
+
+    ObservableCollection<Scene> scenes = new ObservableCollection<Scene>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -55,6 +58,7 @@ public partial class MainViewModel : ObservableObject
 
             System.Diagnostics.Debug.WriteLine($"Selected scene file: {selectedScenePath}");
             Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+            scenes.Add(scene);
             MessageBox.Show(scene.Id,scene.Name);
         }
     }
