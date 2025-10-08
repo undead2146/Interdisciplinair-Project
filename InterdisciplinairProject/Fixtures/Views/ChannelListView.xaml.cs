@@ -52,7 +52,7 @@ namespace InterdisciplinairProject.Fixtures.Views
             this.DataContext = this;
         }
 
- 
+
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
@@ -64,11 +64,8 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
-            // File path logica voor het opslaan van de Fixture metadata (uit Code 1)
+            // file name
             string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-            // Zorg ervoor dat de data directory bestaat voordat we erin schrijven
-            Directory.CreateDirectory(dataDir);
-
             string safeName = string.Concat(name.Split(System.IO.Path.GetInvalidFileNameChars()));
             string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
 
@@ -79,16 +76,10 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
-            // --- Combinatie: Voeg de kanalen van Code 2 toe aan de Fixture JSON van Code 1 ---
-            var channelsToSave = Channels
-                                .Select(vm => new Channel { Name = vm.Name, Type = vm.Type })
-                                .ToList();
-
-            // Root JSON-object (uit Code 1)
+            // Root JSON-object
             var root = new JsonObject
             {
-                ["name"] = FixtureNameTextBox.Text ?? string.Empty,
-                ["channels"] = JsonNode.Parse(JsonSerializer.Serialize(channelsToSave)) // Voeg de lijst met kanalen toe
+                ["name"] = FixtureNameTextBox.Text ?? string.Empty
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -97,8 +88,6 @@ namespace InterdisciplinairProject.Fixtures.Views
             try
             {
                 File.WriteAllText(filePath, json);
-
-
                 MessageBox.Show($"Fixture is saved succesfully");
                 this.Close();
             }
@@ -108,6 +97,7 @@ namespace InterdisciplinairProject.Fixtures.Views
                 this.Close();
             }
         }
+        //df
 
         private void cancelBtn_Click(object sender, RoutedEventArgs e)
         {
