@@ -8,6 +8,22 @@
         Title="{Binding Title}"
         Height="450" Width="800">
     <Grid>
-        <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" />
+        <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Fixture">
+            </MenuItem>
+            <MenuItem Header="_Scene">
+                <MenuItem Header="_Import Scenes" />
+            </MenuItem>
+            <MenuItem Header="_Show">
+                <MenuItem Header="_Open Showbuilder" />
+                <MenuItem Header="_Import Show" />
+                <MenuItem Header="_Save as..." />
+                <MenuItem Header="_Save" />
+            </MenuItem>
+        </Menu>
+        <TextBox AcceptsReturn="True" />
+    </DockPanel>
+    <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" />
     </Grid>
 </Window>
