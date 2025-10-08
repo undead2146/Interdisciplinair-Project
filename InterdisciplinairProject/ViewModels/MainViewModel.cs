@@ -48,13 +48,13 @@ public partial class MainViewModel : ObservableObject
 
         if (openFileDialog.ShowDialog() == true)
         {
-            SelectedScenePath = openFileDialog.FileName;
+            selectedScenePath = openFileDialog.FileName;
 
             // TODO: Implement scene import logic
             // Example: await _sceneService.ImportSceneAsync(SelectedScenePath);
 
-            System.Diagnostics.Debug.WriteLine($"Selected scene file: {SelectedScenePath}");
-            Scene scene = SceneExtractor.ExtractScene(SelectedScenePath);
+            System.Diagnostics.Debug.WriteLine($"Selected scene file: {selectedScenePath}");
+            Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
             MessageBox.Show(scene.Id,scene.Name);
         }
     }
