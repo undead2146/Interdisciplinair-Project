@@ -5,61 +5,44 @@ using Show.Model;
 using System.Collections.ObjectModel;
 using System.Windows;
 
-
-namespace InterdiscplinairProject.ViewModels;
-
-/// <summary>
-/// Main ViewModel for the InterdisciplinairProject application.
-/// <remarks>
-/// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
-/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
-/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
-/// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
-/// </remarks>
-/// <seealso cref="ObservableObject" />
-/// <seealso cref="MainWindow" />
-/// </summary>
-public partial class MainViewModel : ObservableObject
+namespace InterdiscplinairProject.ViewModels
 {
-    [ObservableProperty]
-    private string title = "InterdisciplinairProject - DMX Lighting Control";
-
-    [ObservableProperty]
-    private string? selectedScenePath;
-
-    SceneExtractor sceneExtractor = new SceneExtractor();
-
-    ObservableCollection<Scene> scenes = new ObservableCollection<Scene>();
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MainViewModel"/> class.
-    /// </summary>
-    public MainViewModel()
+    public partial class MainViewModel : ObservableObject
     {
-        // Initialize ViewModel, e.g., load services from DI if injected
+        [ObservableProperty]
+        private string title = "InterdisciplinairProject - DMX Lighting Control";
 
-    }
-    [RelayCommand]
-    private void ImportScenes()
-    {
-        var openFileDialog = new Microsoft.Win32.OpenFileDialog
+        [ObservableProperty]
+        private string? selectedScenePath;
+
+        public ObservableCollection<Scene> Scenes { get; } = new();
+
+        [RelayCommand]
+        private void ImportScenes()
         {
-            Title = "Import Scene",
-            Filter = "JSON files (*.json)|*.json",
-            Multiselect = false
-        };
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Import Scene",
+                Filter = "JSON files (*.json)|*.json",
+                Multiselect = false
+            };
 
-        if (openFileDialog.ShowDialog() == true)
-        {
-            selectedScenePath = openFileDialog.FileName;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                selectedScenePath = openFileDialog.FileName;
 
-            // TODO: Implement scene import logic
-            // Example: await _sceneService.ImportSceneAsync(SelectedScenePath);
+                try
+                {
+                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+                    Scenes.Add(scene);
 
-            System.Diagnostics.Debug.WriteLine($"Selected scene file: {selectedScenePath}");
-            Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
-            scenes.Add(scene);
-            MessageBox.Show(scene.Id,scene.Name);
+                    MessageBox.Show($"Scene '{scene.Name}' succesvol geïmporteerd!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fout bij importeren: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

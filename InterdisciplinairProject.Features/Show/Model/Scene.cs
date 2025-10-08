@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace Show.Model
 {
@@ -17,5 +12,8 @@ namespace Show.Model
 
         [JsonPropertyName("dimmer")]
         public int Dimmer { get; set; }
+
+        [JsonIgnore]
+        public string DisplayText => $"{Name} (ID: {Id}) - Dimmer: {Dimmer}%";
     }
 }

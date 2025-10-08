@@ -7,34 +7,83 @@
         mc:Ignorable="d"
         Title="{Binding Title}"
         Height="450" Width="800">
-    <Grid>
-        <DockPanel>
+
+    <DockPanel>
+        <!-- Menu -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Fixture">
-            </MenuItem>
+            <MenuItem Header="_Fixture"/>
             <MenuItem Header="_Scene">
-                    <MenuItem Header="_Import Scenes" Command="{Binding ImportScenesCommand}"/>
+                <MenuItem Header="_Import Scenes" Command="{Binding ImportScenesCommand}"/>
             </MenuItem>
             <MenuItem Header="_Show">
-                <MenuItem Header="_Open Showbuilder" />
-                <MenuItem Header="_Import Show" />
-                <MenuItem Header="_Save as..." />
-                <MenuItem Header="_Save" />
+                <MenuItem Header="_Open Showbuilder"/>
+                <MenuItem Header="_Import Show"/>
+                <MenuItem Header="_Save as..."/>
+                <MenuItem Header="_Save"/>
             </MenuItem>
         </Menu>
-        <TextBox AcceptsReturn="True" />
+
+        <!-- Hoofdinhoud -->
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Titel -->
+                <RowDefinition Height="*"/>
+                <!-- Bestaande ListView -->
+                <RowDefinition Height="Auto"/>
+                <!-- Titel voor nieuwe ListView -->
+                <RowDefinition Height="2*"/>
+                <!-- Nieuwe ListView -->
+            </Grid.RowDefinitions>
+
+            <!-- Titel -->
+            <TextBlock Text="{Binding Title}" 
+                       FontSize="18" 
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,10,0,20" />
+
+            <!-- BESTAANDE LISTVIEW -->
+            <ListView x:Name="fixtureListView"
+                      Grid.Row="1"
+                      Margin="10"
+                      BorderBrush="#DDD"
+                      BorderThickness="1"
+                      Background="#FAFAFA">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Fixture Name" Width="200" DisplayMemberBinding="{Binding FixtureName}" />
+                        <GridViewColumn Header="Type" Width="150" DisplayMemberBinding="{Binding Type}" />
+                        <GridViewColumn Header="Channel" Width="100" DisplayMemberBinding="{Binding Channel}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <!-- Titel voor nieuwe sectie -->
+            <TextBlock Text="Imported Scenes"
+                       Grid.Row="2"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Margin="10,20,0,5"
+                       Foreground="#333" />
+
+            <!-- NIEUWE LISTVIEW voor geïmporteerde scenes -->
+            <ListView x:Name="sceneListView"
+                      Grid.Row="3"
+                      ItemsSource="{Binding Scenes}"
+                      Margin="10"
+                      BorderBrush="#CCC"
+                      BorderThickness="1"
+                      Background="#FAFAFA">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Header="ID" Width="150" DisplayMemberBinding="{Binding Id}" />
+                        <GridViewColumn Header="Dimmer" Width="100" DisplayMemberBinding="{Binding Dimmer}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+        </Grid>
     </DockPanel>
-    <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" />
-        <ListView HorizontalAlignment="Left" Height="301" Margin="10,10,0,0"
-VerticalAlignment="Top" Width="164"
-Name="sceneListView">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding scenes.Name}"></TextBlock>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </Grid>
 </Window>
