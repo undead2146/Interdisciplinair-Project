@@ -17,6 +17,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InterdisciplinairProject.Core\InterdisciplinairProject.Core.csproj" />
+    <ProjectReference Include="..\InterdisciplinairProject.Features\Fixture\Fixture.csproj" />
+    <ProjectReference Include="..\InterdisciplinairProject.Features\Scene\Scene.csproj" />
+    <ProjectReference Include="..\InterdisciplinairProject.Features\Scene\Show.csproj" />
   </ItemGroup>
 
 </Project>
