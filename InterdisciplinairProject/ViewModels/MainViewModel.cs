@@ -1,5 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Show;
+using Show.Model;
+using System.Windows;
+
 
 namespace InterdiscplinairProject.ViewModels;
 
@@ -21,12 +25,16 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private string? selectedScenePath;
+
+    SceneExtractor sceneExtractor = new SceneExtractor();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
     /// </summary>
     public MainViewModel()
     {
         // Initialize ViewModel, e.g., load services from DI if injected
+
     }
     [RelayCommand]
     private void ImportScenes()
@@ -40,12 +48,14 @@ public partial class MainViewModel : ObservableObject
 
         if (openFileDialog.ShowDialog() == true)
         {
-            selectedScenePath = openFileDialog.FileName;
+            SelectedScenePath = openFileDialog.FileName;
 
             // TODO: Implement scene import logic
             // Example: await _sceneService.ImportSceneAsync(SelectedScenePath);
 
-            System.Diagnostics.Debug.WriteLine($"Selected scene file: {selectedScenePath}");
+            System.Diagnostics.Debug.WriteLine($"Selected scene file: {SelectedScenePath}");
+            Scene scene = SceneExtractor.ExtractScene(SelectedScenePath);
+            MessageBox.Show(scene.Id,scene.Name);
         }
     }
 }
