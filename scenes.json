@@ -1,0 +1,17 @@
+{
+  "scene": {
+    "id": "scene-001",
+    "name": "My First Scene",
+    "universe": 1,
+    "fixtures": [
+      {
+        "fixtureId": "led-par-56",
+        "instanceId": "fixture-inst-001",
+        "name": "LED Par 1",
+        "channels": {
+          "dimmer": null
+        }
+      }
+    ]
+  }
+}
