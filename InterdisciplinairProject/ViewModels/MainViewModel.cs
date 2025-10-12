@@ -15,7 +15,7 @@ namespace InterdiscplinairProject.ViewModels
         private string title = "InterdisciplinairProject - DMX Lighting Control";
 
         [ObservableProperty]
-        private string? selectedScenePath;
+        private Scene? selectedScene;
 
         public ObservableCollection<Scene> Scenes { get; } = new();
 
@@ -33,13 +33,14 @@ namespace InterdiscplinairProject.ViewModels
             {
                 if (openFileDialog.ShowDialog() == true)
                 {
-                    SelectedScenePath = openFileDialog.FileName;
+                    string selectedScenePath = openFileDialog.FileName;
 
-                    Scene scene = SceneExtractor.ExtractScene(SelectedScenePath);
+                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         Scenes.Add(scene);
                         MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                        SelectedScene = scene;
                     }
                     else
                     {
@@ -51,6 +52,12 @@ namespace InterdiscplinairProject.ViewModels
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        [RelayCommand]
+        private void OnSceneSelectionChanged(object selectedItem)
+        {
+            SelectedScene = selectedItem as Scene;
         }
     }
 }
