@@ -26,53 +26,30 @@ namespace InterdiscplinairProject.ViewModels
             {
                 Title = "Import Scene",
                 Filter = "JSON files (*.json)|*.json",
-                Multiselect = false
+                Multiselect = false,
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                selectedScenePath = openFileDialog.FileName;
-
-                try
+                if (openFileDialog.ShowDialog() == true)
                 {
-                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+                    SelectedScenePath = openFileDialog.FileName;
+
+                    Scene scene = SceneExtractor.ExtractScene(SelectedScenePath);
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         Scenes.Add(scene);
-                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!",
-                            "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
                     {
-                        MessageBox.Show("This scene has already been imported.",
-                            "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("This scene has already been imported.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
-                catch (FileNotFoundException ex)
-                {
-                    MessageBox.Show($"File not found: {ex.Message}",
-                        "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                catch (InvalidDataException ex)
-                {
-                    MessageBox.Show($"Invalid data in the file: {ex.Message}",
-                        "Invalid Data", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch (JsonException ex)
-                {
-                    MessageBox.Show($"Invalid JSON structure: {ex.Message}",
-                        "JSON Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show($"Error reading the file: {ex.Message}",
-                        "Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Unexpected error: {ex.Message}",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
