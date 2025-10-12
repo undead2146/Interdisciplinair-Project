@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using InterdisciplinairProject.ViewModels;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -22,6 +23,7 @@ namespace InterdisciplinairProject.Views
         public FixtureSettingsView()
         {
             InitializeComponent();
+            DataContext = new FixtureSettingsViewModel();
         }
     }
 }
