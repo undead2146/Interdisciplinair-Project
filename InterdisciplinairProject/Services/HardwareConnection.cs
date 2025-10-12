@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,18 +22,23 @@ public class HardwareConnection : IHardwareConnection
     /// </summary>
     public HardwareConnection()
     {
+        Debug.WriteLine("[DEBUG] HardwareConnection constructor called");
         string appFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "InterdisciplinairProject");
+        Debug.WriteLine($"[DEBUG] HardwareConnection app folder: {appFolder}");
 
         // Ensure the directory exists
         Directory.CreateDirectory(appFolder);
+        Debug.WriteLine("[DEBUG] HardwareConnection directory created/verified");
 
         _scenesFilePath = Path.Combine(appFolder, "scenes.json");
+        Debug.WriteLine($"[DEBUG] HardwareConnection scenes file path: {_scenesFilePath}");
 
         // Initialize scenes.json if missing: try several candidates; otherwise create minimal scaffold
         if (!File.Exists(_scenesFilePath))
         {
+            Debug.WriteLine("[DEBUG] HardwareConnection scenes.json not found, attempting to copy from candidates");
             var candidates = new[]
             {
                 Path.Combine(AppContext.BaseDirectory, "InterdisciplinairProject.Features", "Scene", "data", "scenes.json"),
@@ -43,15 +49,22 @@ public class HardwareConnection : IHardwareConnection
                 if (File.Exists(src))
                 {
                     File.Copy(src, _scenesFilePath);
+                    Debug.WriteLine($"[DEBUG] HardwareConnection copied scenes.json from: {src}");
                     break;
                 }
             }
 
             if (!File.Exists(_scenesFilePath))
             {
+                Debug.WriteLine("[DEBUG] HardwareConnection creating default scenes.json");
                 File.WriteAllText(_scenesFilePath, "{\n  \"scene\": { \"id\": \"default\", \"name\": \"Default\", \"universe\": 1, \"fixtures\": [] }\n}");
             }
         }
+        else
+        {
+            Debug.WriteLine("[DEBUG] HardwareConnection scenes.json already exists");
+        }
+        Debug.WriteLine("[DEBUG] HardwareConnection initialization complete");
     }
 
     /// <summary>
@@ -63,21 +76,29 @@ public class HardwareConnection : IHardwareConnection
     /// <returns>True if successful, otherwise false.</returns>
     public async Task<bool> SetChannelValueAsync(string fixtureInstanceId, string channelName, byte value)
     {
+        Debug.WriteLine($"[DEBUG] SetChannelValueAsync called: fixture={fixtureInstanceId}, channel={channelName}, value={value}");
         try
         {
             // Valideer de waarde (0-255)
             if (value < 0 || value > 255)
             {
+                Debug.WriteLine($"[DEBUG] SetChannelValueAsync validation failed: value {value} out of range");
                 throw new ArgumentOutOfRangeException(nameof(value), "Waarde moet tussen 0 en 255 zijn");
             }
+
+            Debug.WriteLine("[DEBUG] SetChannelValueAsync validation passed");
 
             // Lees het scenes bestand
             if (!File.Exists(_scenesFilePath))
             {
+                Debug.WriteLine($"[DEBUG] SetChannelValueAsync scenes file not found: {_scenesFilePath}");
                 throw new FileNotFoundException($"Scenes bestand niet gevonden: {_scenesFilePath}");
             }
 
+            Debug.WriteLine($"[DEBUG] SetChannelValueAsync reading scenes file: {_scenesFilePath}");
+
             string jsonContent = await File.ReadAllTextAsync(_scenesFilePath);
+            Debug.WriteLine($"[DEBUG] SetChannelValueAsync read {jsonContent.Length} characters from scenes file");
 
             // Parse JSON met System.Text.Json
             var options = new JsonSerializerOptions
@@ -91,18 +112,22 @@ public class HardwareConnection : IHardwareConnection
             using Utf8JsonWriter writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
 
             // Schrijf de aangepaste JSON
+            Debug.WriteLine("[DEBUG] SetChannelValueAsync writing modified JSON");
             WriteModifiedJson(doc.RootElement, writer, fixtureInstanceId, channelName, value);
 
             writer.Flush();
 
             // Schrijf terug naar bestand
             string updatedJson = Encoding.UTF8.GetString(stream.ToArray());
+            Debug.WriteLine($"[DEBUG] SetChannelValueAsync writing {updatedJson.Length} characters back to scenes file");
             await File.WriteAllTextAsync(_scenesFilePath, updatedJson);
 
+            Debug.WriteLine("[DEBUG] SetChannelValueAsync completed successfully");
             return true;
         }
         catch (Exception ex)
         {
+            Debug.WriteLine($"[DEBUG] SetChannelValueAsync failed with exception: {ex.Message}");
             Console.WriteLine($"Fout bij het updaten van kanaal: {ex.Message}");
             return false;
         }
