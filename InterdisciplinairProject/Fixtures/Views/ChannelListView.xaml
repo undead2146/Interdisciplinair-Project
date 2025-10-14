@@ -62,10 +62,6 @@
                                 <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                 </StackPanel>
-
-                                <!-- Type info -->
-                                <TextBlock Grid.Column="1" Text="{Binding Type, StringFormat=' ({0})'}" 
-                                           Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
                             </Grid>
 
                             <!-- Dropdown panel (shown when IsExpanded = true) -->

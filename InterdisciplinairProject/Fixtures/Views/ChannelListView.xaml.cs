@@ -14,13 +14,9 @@ using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
-    /// <summary>
-    /// Interaction logic for ChannelListView.xaml
-    /// Dit is de samengevoegde klasse.
-    /// </summary>
     public partial class ChannelListView : Window
     {
-        // --- Constanten en Properties uit Code 2 ---
+        // --- Constanten en Properties ---
         private const string DataFilePath = "channels_data.json"; // Pad voor het opslaan van de kanalen
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
         public ChannelViewModel? SelectedChannel { get; set; }
@@ -77,7 +73,7 @@ namespace InterdisciplinairProject.Fixtures.Views
                 var channelObj = new JsonObject
                 {
                     ["Name"] = channelVm.Name ?? string.Empty,
-                    ["Type"] = channelVm.Type ?? string.Empty
+                    ["Type"] = channelVm.SelectedType ?? string.Empty
                 };
                 channelsArray.Add(channelObj);
             }
