@@ -23,47 +23,19 @@ public class HardwareConnection : IHardwareConnection
     public HardwareConnection()
     {
         Debug.WriteLine("[DEBUG] HardwareConnection constructor called");
-        string appFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InterdisciplinairProject");
-        Debug.WriteLine($"[DEBUG] HardwareConnection app folder: {appFolder}");
 
-        // Ensure the directory exists
-        Directory.CreateDirectory(appFolder);
-        Debug.WriteLine("[DEBUG] HardwareConnection directory created/verified");
-
-        _scenesFilePath = Path.Combine(appFolder, "scenes.json");
+        _scenesFilePath = FindScenesFile();
         Debug.WriteLine($"[DEBUG] HardwareConnection scenes file path: {_scenesFilePath}");
 
-        // Initialize scenes.json if missing: try several candidates; otherwise create minimal scaffold
-        if (!File.Exists(_scenesFilePath))
-        {
-            Debug.WriteLine("[DEBUG] HardwareConnection scenes.json not found, attempting to copy from candidates");
-            var candidates = new[]
-            {
-                Path.Combine(AppContext.BaseDirectory, "InterdisciplinairProject.Features", "Scene", "data", "scenes.json"),
-                Path.Combine(AppContext.BaseDirectory, "scenes.json"),
-            };
-            foreach (var src in candidates)
-            {
-                if (File.Exists(src))
-                {
-                    File.Copy(src, _scenesFilePath);
-                    Debug.WriteLine($"[DEBUG] HardwareConnection copied scenes.json from: {src}");
-                    break;
-                }
-            }
-
-            if (!File.Exists(_scenesFilePath))
-            {
-                Debug.WriteLine("[DEBUG] HardwareConnection creating default scenes.json");
-                File.WriteAllText(_scenesFilePath, "{\n  \"scene\": { \"id\": \"default\", \"name\": \"Default\", \"universe\": 1, \"fixtures\": [] }\n}");
-            }
-        }
-        else
+        if (File.Exists(_scenesFilePath))
         {
             Debug.WriteLine("[DEBUG] HardwareConnection scenes.json already exists");
         }
+        else
+        {
+            Debug.WriteLine("[DEBUG] HardwareConnection scenes.json not found - ViewModel will create it");
+        }
+
         Debug.WriteLine("[DEBUG] HardwareConnection initialization complete");
     }
 
@@ -76,7 +48,10 @@ public class HardwareConnection : IHardwareConnection
     /// <returns>True if successful, otherwise false.</returns>
     public async Task<bool> SetChannelValueAsync(string fixtureInstanceId, string channelName, byte value)
     {
-        Debug.WriteLine($"[DEBUG] SetChannelValueAsync called: fixture={fixtureInstanceId}, channel={channelName}, value={value}");
+        var msg = $"[HARDWARE] SetChannelValueAsync: fixture={fixtureInstanceId}, channel={channelName}, value={value}";
+        Debug.WriteLine(msg);
+        Console.WriteLine(msg);
+        
         try
         {
             // Valideer de waarde (0-255)
@@ -122,7 +97,11 @@ public class HardwareConnection : IHardwareConnection
             Debug.WriteLine($"[DEBUG] SetChannelValueAsync writing {updatedJson.Length} characters back to scenes file");
             await File.WriteAllTextAsync(_scenesFilePath, updatedJson);
 
-            Debug.WriteLine("[DEBUG] SetChannelValueAsync completed successfully");
+            var successMsg = $"[HARDWARE] ✓ Successfully updated {channelName}={value} in {fixtureInstanceId}";
+            Debug.WriteLine(successMsg);
+            Console.WriteLine(successMsg);
+            Console.WriteLine($"[HARDWARE] File updated: {_scenesFilePath}");
+            
             return true;
         }
         catch (Exception ex)
@@ -261,9 +240,24 @@ public class HardwareConnection : IHardwareConnection
     {
         if (fixtureElement.TryGetProperty("instanceId", out JsonElement instanceId))
         {
-            return instanceId.GetString() == targetInstanceId;
+            var actualInstanceId = instanceId.GetString();
+            var isMatch = actualInstanceId == targetInstanceId;
+            Debug.WriteLine($"[DEBUG] IsTargetFixture: comparing '{actualInstanceId}' with '{targetInstanceId}' = {isMatch}");
+            return isMatch;
         }
 
+        Debug.WriteLine($"[DEBUG] IsTargetFixture: no instanceId property found, looking for fixtureId");
+        
+        // Fallback: try fixtureId if instanceId doesn't exist
+        if (fixtureElement.TryGetProperty("fixtureId", out JsonElement fixtureId))
+        {
+            var actualFixtureId = fixtureId.GetString();
+            var isMatch = actualFixtureId == targetInstanceId;
+            Debug.WriteLine($"[DEBUG] IsTargetFixture: comparing fixtureId '{actualFixtureId}' with '{targetInstanceId}' = {isMatch}");
+            return isMatch;
+        }
+
+        Debug.WriteLine($"[DEBUG] IsTargetFixture: no instanceId or fixtureId found, returning false");
         return false;
     }
 
@@ -280,6 +274,7 @@ public class HardwareConnection : IHardwareConnection
         string targetChannel,
         byte value)
     {
+        Debug.WriteLine($"[DEBUG] WriteModifiedChannels called: targetChannel='{targetChannel}', value={value}");
         writer.WriteStartObject();
 
         bool channelFound = false;
@@ -289,11 +284,13 @@ public class HardwareConnection : IHardwareConnection
 
             if (channel.Name.Equals(targetChannel, StringComparison.OrdinalIgnoreCase))
             {
+                Debug.WriteLine($"[DEBUG] Found matching channel '{channel.Name}', updating from {channel.Value} to {value}");
                 writer.WriteNumberValue(value);
                 channelFound = true;
             }
             else
             {
+                Debug.WriteLine($"[DEBUG] Writing channel '{channel.Name}' unchanged: {channel.Value}");
                 WriteJsonValue(channel.Value, writer);
             }
         }
@@ -301,10 +298,71 @@ public class HardwareConnection : IHardwareConnection
         // Als het kanaal nog niet bestaat, voeg het toe
         if (!channelFound)
         {
+            Debug.WriteLine($"[DEBUG] Channel '{targetChannel}' not found, adding it with value {value}");
             writer.WritePropertyName(targetChannel);
             writer.WriteNumberValue(value);
         }
 
         writer.WriteEndObject();
+        Debug.WriteLine($"[DEBUG] WriteModifiedChannels completed");
+    }
+
+    private string FindScenesFile()
+    {
+        // Try to find project root by searching upwards from BaseDirectory
+        var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
+        Debug.WriteLine($"[DEBUG] Starting search from: {currentDir.FullName}");
+        
+        while (currentDir != null)
+        {
+            var scenesPath = Path.Combine(currentDir.FullName, "scenes.json");
+            Debug.WriteLine($"[DEBUG] Checking: {scenesPath}");
+            
+            if (File.Exists(scenesPath))
+            {
+                Debug.WriteLine($"[DEBUG] ✓ Found scenes.json in: {scenesPath}");
+                return scenesPath;
+            }
+
+            // Also check if this directory contains the .sln file (project root indicator)
+            var slnFiles = currentDir.GetFiles("*.sln");
+            if (slnFiles.Length > 0)
+            {
+                Debug.WriteLine($"[DEBUG] Found .sln file in: {currentDir.FullName}");
+                var projectRootScenes = Path.Combine(currentDir.FullName, "scenes.json");
+                
+                if (File.Exists(projectRootScenes))
+                {
+                    Debug.WriteLine($"[DEBUG] ✓ Found scenes.json at project root: {projectRootScenes}");
+                    return projectRootScenes;
+                }
+                
+                Debug.WriteLine($"[DEBUG] No scenes.json at project root, will create it");
+
+                // Create default scenes.json at project root
+                var defaultContent = @"{
+  ""scene"": {
+    ""id"": ""default"",
+    ""name"": ""Default"",
+    ""universe"": 1,
+    ""fixtures"": []
+  }
+}";
+                File.WriteAllText(projectRootScenes, defaultContent);
+                return projectRootScenes;
+            }
+
+            currentDir = currentDir.Parent;
+        }
+
+        Debug.WriteLine($"[DEBUG] Could not find project root, using AppData");
+        
+        // Fallback to AppData
+        var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InterdisciplinairProject");
+        Directory.CreateDirectory(appFolder);
+        var appDataScenesPath = Path.Combine(appFolder, "scenes.json");
+
+        Debug.WriteLine($"[DEBUG] Using AppData scenes path: {appDataScenesPath}");
+        return appDataScenesPath;
     }
 }
