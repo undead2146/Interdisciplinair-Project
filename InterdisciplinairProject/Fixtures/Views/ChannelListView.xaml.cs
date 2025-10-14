@@ -47,7 +47,7 @@ namespace InterdisciplinairProject.Fixtures.Views
             string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
 
 
-            //---- fout checks ----//
+            // fout checks
             if (File.Exists(filePath))
             {
                 MessageBox.Show("There already exists a fixture with this name");
@@ -60,7 +60,7 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
-            //channels fout cgheck
+            // channels fout cgheck
             foreach (ChannelViewModel channelVm in ChannelsListBox.Items) 
             {
                 if (string.IsNullOrWhiteSpace(channelVm.Name))
@@ -79,7 +79,7 @@ namespace InterdisciplinairProject.Fixtures.Views
 
             }
 
-            // Root JSON-object
+            // Json aanmaken
             var channelsArray = new JsonArray();
 
             foreach (var ch in Channels)
