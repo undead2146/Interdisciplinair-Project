@@ -10,16 +10,10 @@ using System.Windows.Input; // Nodig voor Code 2 KeyEventArgs
 using System.Collections.ObjectModel; // Nodig voor Code 2 ObservableCollection
 using InterdisciplinairProject.Fixtures.ViewModels;
 using System.Windows.Media; // Nodig voor ChannelViewModel (uit Code 2)
+using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
-    // HET MODEL: De 'Channel' class uit Code 2, verplaatst naar hier (of idealiter naar een apart Models-bestand)
-    public class Channel
-    {
-        public string Name { get; set; }
-        public string Type { get; set; }
-    }
-
     /// <summary>
     /// Interaction logic for ChannelListView.xaml
     /// Dit is de samengevoegde klasse.
@@ -76,10 +70,23 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return;
             }
 
+            //channels
+            var channelsArray = new JsonArray();
+            foreach (ChannelViewModel channelVm in ChannelsListBox.Items) 
+            {
+                var channelObj = new JsonObject
+                {
+                    ["Name"] = channelVm.Name ?? string.Empty,
+                    ["Type"] = channelVm.Type ?? string.Empty
+                };
+                channelsArray.Add(channelObj);
+            }
+
             // Root JSON-object
             var root = new JsonObject
             {
-                ["name"] = FixtureNameTextBox.Text ?? string.Empty
+                ["name"] = name,
+                ["channels"] = channelsArray
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };

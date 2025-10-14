@@ -51,12 +51,12 @@
 
                                 <!-- Editable text box -->
                                 <TextBox x:Name="EditTextBox" 
-                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                             Visibility="Collapsed" 
-                             Grid.Column="0"
-                             Style="{StaticResource EditingTextBoxStyle}"
-                             KeyDown="EditTextBox_KeyDown" 
-                             FocusManager.IsFocusScope="True"/>
+                                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                         Visibility="Collapsed" 
+                                         Grid.Column="0"
+                                         Style="{StaticResource EditingTextBoxStyle}"
+                                         KeyDown="EditTextBox_KeyDown" 
+                                         FocusManager.IsFocusScope="True"/>
 
                                 <!-- Normal display -->
                                 <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
@@ -65,23 +65,23 @@
 
                                 <!-- Type info -->
                                 <TextBlock Grid.Column="1" Text="{Binding Type, StringFormat=' ({0})'}" 
-                               Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
+                                           Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
                             </Grid>
 
                             <!-- Dropdown panel (shown when IsExpanded = true) -->
                             <Border x:Name="OptionsPanel" 
-                        Visibility="Collapsed" 
-                        Margin="0,6,0,0" 
-                        Padding="6" 
-                        Background="#F5F7FB" 
-                        CornerRadius="4" 
-                        BorderBrush="#D0D0D0" 
-                        BorderThickness="1">
+                                    Visibility="Collapsed" 
+                                    Margin="0,6,0,0" 
+                                    Padding="6" 
+                                    Background="#F5F7FB" 
+                                    CornerRadius="4" 
+                                    BorderBrush="#D0D0D0" 
+                                    BorderThickness="1">
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Text="Selecteer kannaal type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                     <ComboBox ItemsSource="{Binding AvailableTypes}"
-                                  SelectedItem="{Binding SelectedType, Mode=TwoWay}"
-                                  Width="180"/>
+                                              SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+                                              Width="180"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
