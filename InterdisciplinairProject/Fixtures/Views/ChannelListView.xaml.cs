@@ -158,22 +158,32 @@ namespace InterdisciplinairProject.Fixtures.Views
 
             MessageBox.Show($"Nieuw kanaal toegevoegd: Kanaal {Channels.Count}.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-
         private void ChannelsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0 && e.AddedItems[0] is ChannelViewModel newSelection)
             {
-                // Stop de bewerking van het vorige kanaal
+                // Collapse previous channel
                 if (SelectedChannel != null && SelectedChannel != newSelection)
                 {
+                    SelectedChannel.IsExpanded = false;
                     SelectedChannel.IsEditing = false;
                 }
 
-                // Start de bewerking van het geselecteerde kanaal
-                newSelection.IsEditing = true;
+                // Toggle expansion for the new selection
+                newSelection.IsExpanded = !newSelection.IsExpanded;
                 SelectedChannel = newSelection;
             }
         }
+
+        private void ChannelsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ChannelsListBox.SelectedItem is ChannelViewModel selected)
+            {
+                selected.IsEditing = true;
+            }
+        }
+
+
 
         private void EditTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {

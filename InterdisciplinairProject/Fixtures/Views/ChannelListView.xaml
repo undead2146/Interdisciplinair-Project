@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views" 
-
+        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
         mc:Ignorable="d"
         Title="nieuw dmx-fixture" Height="493" Width="400">
+
     <Grid Margin="10,10,10,6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -27,7 +27,10 @@
         <ListBox x:Name="ChannelsListBox" 
                  Grid.Row="2" 
                  ItemsSource="{Binding Channels}"
-                 SelectionChanged="ChannelsListBox_SelectionChanged" Margin="0,0,0,51">
+                 SelectionChanged="ChannelsListBox_SelectionChanged"
+                 MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
+                 Margin="0,0,0,51">
+
             <ListBox.Resources>
                 <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
                     <Setter Property="BorderThickness" Value="0"/>
@@ -36,46 +39,80 @@
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </Style>
             </ListBox.Resources>
-
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="0,2" Background="White" CornerRadius="3">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                                <!-- Editable text box -->
+                                <TextBox x:Name="EditTextBox" 
+                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                             Visibility="Collapsed" 
+                             Grid.Column="0"
+                             Style="{StaticResource EditingTextBoxStyle}"
+                             KeyDown="EditTextBox_KeyDown" 
+                             FocusManager.IsFocusScope="True"/>
 
-                            <TextBox x:Name="EditTextBox" 
-                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                                     Visibility="Collapsed" 
-                                     Grid.Column="0"
-                                     Style="{StaticResource EditingTextBoxStyle}"
-                                     KeyDown="EditTextBox_KeyDown" 
-                                     FocusManager.IsFocusScope="True"/>
+                                <!-- Normal display -->
+                                <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </StackPanel>
 
-                            <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
-                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                <!-- Type info -->
+                                <TextBlock Grid.Column="1" Text="{Binding Type, StringFormat=' ({0})'}" 
+                               Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
+                            </Grid>
 
-                            <TextBlock Grid.Column="1" Text="{Binding Type, StringFormat=' ({0})'}" Margin="5,0,0,0" Foreground="Gray" VerticalAlignment="Center"/>
-                        </Grid>
+                            <!-- Dropdown panel (shown when IsExpanded = true) -->
+                            <Border x:Name="OptionsPanel" 
+                        Visibility="Collapsed" 
+                        Margin="0,6,0,0" 
+                        Padding="6" 
+                        Background="#F5F7FB" 
+                        CornerRadius="4" 
+                        BorderBrush="#D0D0D0" 
+                        BorderThickness="1">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Selecteer kannaal type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
+                                    <ComboBox ItemsSource="{Binding AvailableTypes}"
+                                  SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+                                  Width="180"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </Border>
 
                     <DataTemplate.Triggers>
+                        <!-- Show textbox when editing -->
                         <DataTrigger Binding="{Binding IsEditing}" Value="True">
                             <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                             <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
                         </DataTrigger>
-                    </DataTemplate.Triggers>
 
+                        <!-- Show dropdown area when expanded -->
+                        <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                            <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-        </ListBox>
-        <Button Content="Save" Name="SaveButton"  HorizontalAlignment="Left" Height="36" Margin="221,331,0,0" Grid.Row="2" VerticalAlignment="Top" Width="65" Click="SaveButton_Click"/>
-        <Button Name="cancelBtn" Content="Cancel" HorizontalAlignment="Left" Height="36" Margin="305,331,0,0" Grid.Row="2" VerticalAlignment="Top" Width="65" Click="cancelBtn_Click"/>
 
+        </ListBox>
+
+        <Button Content="Save" Name="SaveButton"  
+                HorizontalAlignment="Left" Height="36" Margin="221,331,0,0" 
+                Grid.Row="2" VerticalAlignment="Top" Width="65" 
+                Click="SaveButton_Click"/>
+
+        <Button Name="cancelBtn" Content="Cancel" 
+                HorizontalAlignment="Left" Height="36" Margin="305,331,0,0" 
+                Grid.Row="2" VerticalAlignment="Top" Width="65" 
+                Click="cancelBtn_Click"/>
     </Grid>
 </Window>
