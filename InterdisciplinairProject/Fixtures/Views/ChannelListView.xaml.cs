@@ -1,5 +1,8 @@
-﻿using System;
+﻿using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Fixtures.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel; // Nodig voor Code 2 ObservableCollection
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -7,10 +10,7 @@ using System.Text.Json.Nodes; // Nodig voor Code 1
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input; // Nodig voor Code 2 KeyEventArgs
-using System.Collections.ObjectModel; // Nodig voor Code 2 ObservableCollection
-using InterdisciplinairProject.Fixtures.ViewModels;
 using System.Windows.Media; // Nodig voor ChannelViewModel (uit Code 2)
-using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
@@ -21,24 +21,17 @@ namespace InterdisciplinairProject.Fixtures.Views
         public ObservableCollection<ChannelViewModel> Channels { get; set; }
         public ChannelViewModel? SelectedChannel { get; set; }
 
-        public static List<string> ChannelTypes { get; } = new List<string>
-        {
-            "dim", "kleur", "pan", "tilt", "strobe", "iris", "focus"
-        };
-        // ---------------------------------------------
 
         public ChannelListView()
         {
             InitializeComponent();
-
+            
             // --- Initialisatie logica uit Code 2 ---
-            var loadedChannels = LoadChannelModels();
+            //var loadedChannels = LoadChannelModels();
 
             // Zet de geladen modellen om in ViewModels
-            Channels = new ObservableCollection<ChannelViewModel>(
-                loadedChannels.Select(c => new ChannelViewModel(c))
-            );
-
+            Channels = new ObservableCollection<ChannelViewModel>();
+            
             this.DataContext = this;
         }
 
@@ -48,37 +41,57 @@ namespace InterdisciplinairProject.Fixtures.Views
         {
             string name = FixtureNameTextBox.Text;
 
-            if (string.IsNullOrEmpty(name))
-            {
-                MessageBox.Show("Please fill in a valid name");
-                return;
-            }
-
-            // file name
+            // files
             string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
             string safeName = string.Concat(name.Split(System.IO.Path.GetInvalidFileNameChars()));
             string filePath = System.IO.Path.Combine(dataDir, safeName + ".json");
 
-            //checken of bestand al bestaat
+
+            //---- fout checks ----//
             if (File.Exists(filePath))
             {
                 MessageBox.Show("There already exists a fixture with this name");
                 return;
             }
 
-            //channels
-            var channelsArray = new JsonArray();
+            if (string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("Please fill in a valid name");
+                return;
+            }
+
+            //channels fout cgheck
             foreach (ChannelViewModel channelVm in ChannelsListBox.Items) 
+            {
+                if (string.IsNullOrWhiteSpace(channelVm.Name))
+                {
+                    MessageBox.Show("Each channel must have a name.",
+                        "Missing Channel Name", MessageBoxButton.OK);
+                    return;
+                }
+                if (string.IsNullOrEmpty(channelVm.SelectedType))
+                {
+                    MessageBox.Show($"Please select a type for channel '{channelVm.Name}'.",
+                        "Missing Channel Type", MessageBoxButton.OK);
+                    return;
+                }
+
+
+            }
+
+            // Root JSON-object
+            var channelsArray = new JsonArray();
+
+            foreach (var ch in Channels)
             {
                 var channelObj = new JsonObject
                 {
-                    ["Name"] = channelVm.Name ?? string.Empty,
-                    ["Type"] = channelVm.SelectedType ?? string.Empty
+                    ["Name"] = ch.Name,
+                    ["Type"] = ch.SelectedType
                 };
                 channelsArray.Add(channelObj);
             }
 
-            // Root JSON-object
             var root = new JsonObject
             {
                 ["name"] = name,
@@ -152,14 +165,11 @@ namespace InterdisciplinairProject.Fixtures.Views
         private void AddChannelButton_Click(object sender, RoutedEventArgs e)
         {
             // Maak een nieuw Model
-            var newModel = new Channel { Name = $"Nieuw Kanaal {Channels.Count + 1}", Type = "kleur" };
+            var newModel = new Channel { Name = $"Nieuw Kanaal {Channels.Count + 1}", Type = string.Empty };
 
             // Maak een nieuwe ViewModel en voeg toe
             var newChannel = new ChannelViewModel(newModel);
             Channels.Add(newChannel);
-
-
-            MessageBox.Show($"Nieuw kanaal toegevoegd: Kanaal {Channels.Count}.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void ChannelsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
