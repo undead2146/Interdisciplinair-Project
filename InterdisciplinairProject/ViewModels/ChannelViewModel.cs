@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using InterdisciplinairProject.Features.Fixture;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -19,7 +20,10 @@ public class ChannelViewModel : INotifyPropertyChanged
     {
         Name = name;
         _value = value;
-        Debug.WriteLine($"[DEBUG] ChannelViewModel created: {Name} = {value}");
+        Type = ChannelTypeHelper.GetChannelTypeFromName(name);
+        Symbol = ChannelTypeHelper.GetSymbol(Type);
+        ColorHex = ChannelTypeHelper.GetColorHex(Type);
+        Debug.WriteLine($"[DEBUG] ChannelViewModel created: {Name} = {value}, Type: {Type}, Symbol: {Symbol}, Color: {ColorHex}");
     }
 
     /// <summary>
@@ -31,6 +35,21 @@ public class ChannelViewModel : INotifyPropertyChanged
     /// Gets the name of the channel.
     /// </summary>
     public string Name { get; }
+
+    /// <summary>
+    /// Gets the type of the channel.
+    /// </summary>
+    public ChannelType Type { get; }
+
+    /// <summary>
+    /// Gets the symbol/icon for this channel type.
+    /// </summary>
+    public string Symbol { get; }
+
+    /// <summary>
+    /// Gets the color hex string for this channel type.
+    /// </summary>
+    public string ColorHex { get; }
 
     /// <summary>
     /// Gets or sets the value of the channel (0-255).
