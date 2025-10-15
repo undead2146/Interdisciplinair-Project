@@ -1,0 +1,39 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using InterdisciplinairProject.Core.Models;
+
+namespace InterdisciplinairProject.Core.Interfaces;
+
+/// <summary>
+/// Repository interface for scene data.
+/// </summary>
+public interface ISceneRepository
+{
+    /// <summary>
+    /// Gets all scenes.
+    /// </summary>
+    /// <returns>A list of scenes.</returns>
+    Task<List<Scene>> GetAllScenesAsync();
+
+    /// <summary>
+    /// Gets a scene by ID.
+    /// </summary>
+    /// <param name="id">The scene ID.</param>
+    /// <returns>The scene or null.</returns>
+    Task<Scene?> GetSceneByIdAsync(Guid id);
+
+    /// <summary>
+    /// Saves a scene.
+    /// </summary>
+    /// <param name="scene">The scene to save.</param>
+    /// <returns>A task.</returns>
+    Task SaveSceneAsync(Scene scene);
+
+    /// <summary>
+    /// Deletes a scene by ID.
+    /// </summary>
+    /// <param name="id">The scene ID.</param>
+    /// <returns>A task.</returns>
+    Task DeleteSceneAsync(Guid id);
+}
