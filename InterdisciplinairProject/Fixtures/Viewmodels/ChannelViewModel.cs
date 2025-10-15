@@ -43,6 +43,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string selectedType;
 
+        // NEW: slider value for Rood/Groen/Blauw/Wit (0-255)
+        [ObservableProperty]
+        private int level = 0;
+
+        // NEW: free text parameter for Lamp/Ster/Klok/Ventilator
+        [ObservableProperty]
+        private string? parameter;
+
         public ChannelViewModel(Channel model)
         {
             _model = model;

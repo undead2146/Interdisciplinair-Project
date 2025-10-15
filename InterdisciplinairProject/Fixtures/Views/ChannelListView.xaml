@@ -76,10 +76,26 @@
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Text="Selecteer kanaal type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                     <ComboBox ItemsSource="{Binding AvailableTypes}"
-                                              SelectedItem="{Binding SelectedType, Mode=TwoWay}"
-                                              Width="180"/>
+                                              SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Width="180"/>         
+
+                                    <!-- Slider for Rood/Groen/Blauw/Wit -->
+                                    <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                        <TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                        <Slider Minimum="0" Maximum="255"
+                                         Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                        <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+
+                                    <!-- Text input for Lamp/Ster/Klok/Ventilator -->
+                                    <StackPanel x:Name="TypeInputPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                        <TextBlock Text="Input value" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                        <TextBox x:Name="inputValue" Text="{Binding Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
+
                         </StackPanel>
                     </Border>
 
@@ -95,6 +111,43 @@
                         <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                             <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
                         </DataTrigger>
+
+                        <!-- Show RGBW slider when SelectedType is one of Rood/Groen/Blauw/Wit -->
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Rood">
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Groen">
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Blauw">
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Wit">
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+
+                        <!-- Show text input when SelectedType is one of Lamp/Ster/Klok/Ventilator -->
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Lamp">
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Ster">
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Klok">
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding SelectedType}" Value="Ventilator">
+                            <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+
                     </DataTemplate.Triggers>
                 </DataTemplate>
             </ListBox.ItemTemplate>
