@@ -87,7 +87,8 @@ namespace InterdisciplinairProject.Fixtures.Views
                 var channelObj = new JsonObject
                 {
                     ["Name"] = ch.Name,
-                    ["Type"] = ch.SelectedType
+                    ["Type"] = ch.SelectedType,
+                    ["value"] = ch.Level
                 };
                 channelsArray.Add(channelObj);
             }
@@ -96,6 +97,7 @@ namespace InterdisciplinairProject.Fixtures.Views
             {
                 ["name"] = name,
                 ["channels"] = channelsArray
+                
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
