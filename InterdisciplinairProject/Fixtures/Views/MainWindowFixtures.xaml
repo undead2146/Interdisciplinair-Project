@@ -1,0 +1,22 @@
+﻿<Window x:Class="InterdisciplinairProject.Fixtures.Views.MainWindowFixtures"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
+        xmlns:views="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+        mc:Ignorable="d"
+        Title="MainWindowFixtures" Height="500" Width="600">
+    <Window.DataContext>
+        <local:FixtureListViewModel/>
+    </Window.DataContext>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Left" Width="150" Margin="5">
+            <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
+        </StackPanel>
+
+        <views:FixtureListView Margin="5" />
+
+    </DockPanel>
+</Window>

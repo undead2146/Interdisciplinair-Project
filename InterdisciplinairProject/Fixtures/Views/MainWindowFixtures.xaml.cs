@@ -1,7 +1,6 @@
 ﻿using InterdisciplinairProject.Fixtures.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +16,11 @@ using System.Windows.Shapes;
 namespace InterdisciplinairProject.Fixtures.Views
 {
     /// <summary>
-    /// Interaction logic for FixtureListView.xaml
+    /// Interaction logic for MainWindowFixtures.xaml
     /// </summary>
-    public partial class FixtureListView : UserControl
+    public partial class MainWindowFixtures : Window
     {
-        public FixtureListView()
+        public MainWindowFixtures()
         {
             InitializeComponent();
         }
