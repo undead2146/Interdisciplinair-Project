@@ -17,16 +17,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
     {
         public ObservableCollection<Fixture> Fixtures { get; } = new();
 
-        public ICommand CreateFixtureCommand { get; }
         public ICommand ImportFixtureCommand { get; }
         public ICommand ExportFixtureCommand { get; }
+        public ICommand OpenFixtureCommand { get; }
 
         private readonly string _dataFolder;
         private FileSystemWatcher _watcher;
 
+        public event EventHandler<string>? FixtureSelected;
         private Fixture? _selectedFixture;
-        public Fixture? SelectedFixture
+        public Fixture? SelectedFixture 
         {
+            //ook belangrijk voor wisselen van views!!!!
+            //dus niet verwijderen
             get => _selectedFixture;
             set
             {
@@ -41,9 +44,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public FixtureListViewModel()
         {
-            CreateFixtureCommand = new RelayCommand(CreateFixture);
             ImportFixtureCommand = new RelayCommand(ImportFixture);
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
+
+            // Navigatie event triggeren
+            OpenFixtureCommand = new RelayCommand(() =>
+            {
+                if (_selectedFixture != null)
+                {
+                    string json = System.Text.Json.JsonSerializer.Serialize(_selectedFixture);
+                    FixtureSelected?.Invoke(this, json);
+                }
+            });
 
             // Base directory: bin\Debug\net8.0-windows
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -56,14 +68,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         // Commands
         // ------------------------------------------------------------
-        private void CreateFixture()
-        {
-            var window = new ChannelListView
-            {
-                Owner = System.Windows.Application.Current.MainWindow
-            };
-            window.ShowDialog();
-        }
+
 
         private void ImportFixture()
         {

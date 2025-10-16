@@ -23,7 +23,7 @@ namespace InterdisciplinairProject.Fixtures.Views
         public MainWindowFixtures()
         {
             InitializeComponent();
-            DataContext = new FixtureListViewModel();
+            DataContext = new MainWindowFixturesViewModel();
         }
     }
 }

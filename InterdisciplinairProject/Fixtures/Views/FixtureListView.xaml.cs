@@ -24,5 +24,13 @@ namespace InterdisciplinairProject.Fixtures.Views
         {
             InitializeComponent();
         }
+
+        private void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ViewModels.FixtureListViewModel vm && vm.OpenFixtureCommand.CanExecute(null))
+            {
+                vm.OpenFixtureCommand.Execute(null);
+            }
+        }
     }
 }
