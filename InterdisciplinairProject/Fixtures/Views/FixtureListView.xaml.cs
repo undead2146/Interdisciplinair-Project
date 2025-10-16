@@ -19,11 +19,12 @@ namespace InterdisciplinairProject.Fixtures.Views
     /// <summary>
     /// Interaction logic for FixtureListView.xaml
     /// </summary>
-    public partial class FixtureListView : UserControl
+    public partial class FixtureListView : Window
     {
         public FixtureListView()
         {
             InitializeComponent();
+            DataContext = new FixtureListViewModel();
         }
     }
 }
