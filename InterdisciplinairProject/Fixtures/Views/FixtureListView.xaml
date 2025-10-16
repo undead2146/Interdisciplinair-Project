@@ -7,19 +7,29 @@
         mc:Ignorable="d"
         Title="Fixtures" Height="500" Width="600">
 
-    <!-- Bind the ViewModel directly -->
     <Window.DataContext>
         <local:FixtureListViewModel />
     </Window.DataContext>
 
     <DockPanel>
-        <!-- Left side: Create button -->
-        <StackPanel DockPanel.Dock="Left" Width="150" Margin="5">
-            <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
-        </StackPanel>
+        <!-- Left panel -->
+        <DockPanel DockPanel.Dock="Left" Width="150" Margin="5">
+            <!-- Top section -->
+            <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
+            </StackPanel>
 
-        <!-- Main list of fixtures -->
-        <ListView Margin="5" ItemsSource="{Binding Fixtures}">
+            <!-- Bottom section -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0" VerticalAlignment="Bottom">
+                <Button Content="Import" Command="{Binding ImportFixtureCommand}" Margin="0,0,0,5"/>
+                <Button Content="Export" Command="{Binding ExportFixtureCommand}" Margin="0,0,0,5"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Main ListView -->
+        <ListView Margin="5"
+                  ItemsSource="{Binding Fixtures}"
+                  SelectedItem="{Binding SelectedFixture, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel>
