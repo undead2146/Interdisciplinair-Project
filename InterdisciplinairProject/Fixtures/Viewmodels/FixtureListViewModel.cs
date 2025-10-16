@@ -50,7 +50,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             _dataFolder = Path.Combine(baseDir, "data");
 
-            LoadFixturesFromFiles();
+            ReloadFixturesFromFiles();
             StartWatchingDataFolder();
         }
 
@@ -251,8 +251,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         // Fixture management
         // ------------------------------------------------------------
-        private void LoadFixturesFromFiles()
+        public void ReloadFixturesFromFiles()
         {
+            Fixtures.Clear();
             if (!Directory.Exists(_dataFolder)) return;
 
             foreach (var file in Directory.GetFiles(_dataFolder, "*.json"))

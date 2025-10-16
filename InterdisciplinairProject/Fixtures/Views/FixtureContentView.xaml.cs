@@ -21,40 +21,9 @@ namespace InterdisciplinairProject.Fixtures.Views
     /// </summary>
     public partial class FixtureContentView : UserControl
     {
-        public event EventHandler? BackRequested;
-        public event EventHandler? EditRequested;
-
         public FixtureContentView()
         {
             InitializeComponent();
-        }
-
-        public void LoadFixtureContentFromJson(string json) 
-        {
-            if (string.IsNullOrWhiteSpace(json)) return;
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            try 
-            {
-            }
-            catch (JsonException ex) 
-            {
-                MessageBox.Show("Json kan niet worden geladen: {ex.Message }", "Fout");
-            }
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e) 
-        {
-            BackRequested?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void EditButton_Click(object sender, RoutedEventArgs e)
-        {
-            EditRequested?.Invoke(this, EventArgs.Empty);
         }
     }
 }

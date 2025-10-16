@@ -78,6 +78,11 @@
                     Height="32"
                     HorizontalAlignment="Right"
                     Command="{Binding EditCommand}"/>
+            <Button Content="Verwijder" 
+                    Command="{Binding DeleteCommand}" 
+                    Background="#E57373" 
+                    Foreground="White" 
+                    Width="100"/>
         </Grid>
     </Grid>
 </UserControl>

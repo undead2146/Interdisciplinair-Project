@@ -25,7 +25,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand BackCommand { get; }
         public ICommand EditCommand { get; }
+        public ICommand DeleteCommand { get; }
 
+        public event EventHandler? DeleteRequested;
         public event EventHandler? BackRequested;
         public event EventHandler? EditRequested;
 
@@ -33,6 +35,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, EventArgs.Empty));
+            DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
 
             LoadFromJson(json);
         }
