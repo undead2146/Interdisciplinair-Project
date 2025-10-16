@@ -14,8 +14,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureContentViewModel : ObservableObject
     {
-        private string? _name = string.Empty;
-
+        private string? _name;
         public string? Name
         {
             get => _name;

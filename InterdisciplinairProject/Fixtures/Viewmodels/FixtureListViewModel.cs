@@ -28,8 +28,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private Fixture? _selectedFixture;
         public Fixture? SelectedFixture 
         {
-            //ook belangrijk voor wisselen van views!!!!
-            //dus niet verwijderen
             get => _selectedFixture;
             set
             {
@@ -46,16 +44,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             ImportFixtureCommand = new RelayCommand(ImportFixture);
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
-
-            // Navigatie event triggeren
-            OpenFixtureCommand = new RelayCommand(() =>
-            {
-                if (_selectedFixture != null)
-                {
-                    string json = System.Text.Json.JsonSerializer.Serialize(_selectedFixture);
-                    FixtureSelected?.Invoke(this, json);
-                }
-            });
+            OpenFixtureCommand = new RelayCommand(OpenFixture);
 
             // Base directory: bin\Debug\net8.0-windows
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -233,6 +222,29 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Error exporting fixture: " + ex.Message);
+            }
+        }
+
+        private void OpenFixture()
+        {
+            if (SelectedFixture == null)
+                return;
+
+            string filePath = Path.Combine(_dataFolder, SelectedFixture.Name + ".json");
+            if (!File.Exists(filePath))
+            {
+                System.Windows.MessageBox.Show("Fixture JSON-bestand niet gevonden.");
+                return;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(filePath);
+                FixtureSelected?.Invoke(this, json);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Fout bij het laden van fixture: " + ex.Message);
             }
         }
 

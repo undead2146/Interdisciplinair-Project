@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Show", "InterdisciplinairPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterdisciplinairProject.Tests", "InterdisciplinairProject.Tests\InterdisciplinairProject.Tests.csproj", "{D641FA77-BCF2-43E4-946C-F35C2F4E4601}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,5 +110,8 @@ Global
 		{3BA889C7-161E-474C-96E5-DBFCE023F49A} = {41C4046D-44C8-1A81-9B72-76E71F66E79E}
 		{108C135E-9A18-443B-AF3B-31E2C70DF045} = {41C4046D-44C8-1A81-9B72-76E71F66E79E}
 		{D641FA77-BCF2-43E4-946C-F35C2F4E4601} = {41C4046D-44C8-1A81-9B72-76E71F66E79E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F3C3CC8B-37FF-4BEF-9D7D-21B8F300CB6A}
 	EndGlobalSection
 EndGlobal
