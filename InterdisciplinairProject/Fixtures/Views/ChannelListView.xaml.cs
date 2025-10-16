@@ -2,15 +2,15 @@
 using InterdisciplinairProject.Fixtures.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel; // Nodig voor Code 2 ObservableCollection
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes; // Nodig voor Code 1
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input; // Nodig voor Code 2 KeyEventArgs
-using System.Windows.Media; // Nodig voor ChannelViewModel (uit Code 2)
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
@@ -25,9 +25,6 @@ namespace InterdisciplinairProject.Fixtures.Views
         public ChannelListView()
         {
             InitializeComponent();
-            
-            // --- Initialisatie logica uit Code 2 ---
-            //var loadedChannels = LoadChannelModels();
 
             // Zet de geladen modellen om in ViewModels
             Channels = new ObservableCollection<ChannelViewModel>();
@@ -88,7 +85,7 @@ namespace InterdisciplinairProject.Fixtures.Views
                 {
                     ["Name"] = ch.Name,
                     ["Type"] = ch.SelectedType,
-                    ["value"] = ch.Level
+                    ["value"] = ch.Parameter
                 };
                 channelsArray.Add(channelObj);
             }
@@ -133,35 +130,6 @@ namespace InterdisciplinairProject.Fixtures.Views
             {
                 //do nothing
             }
-        }
-
-        // Hulpmethode om de initiële kanalen te laden
-        private ObservableCollection<Channel> LoadChannelModels()
-        {
-            if (File.Exists(DataFilePath))
-            {
-                try
-                {
-                    string jsonString = File.ReadAllText(DataFilePath);
-                    var loadedChannels = JsonSerializer.Deserialize<List<Channel>>(jsonString);
-                    if (loadedChannels != null)
-                    {
-                        return new ObservableCollection<Channel>(loadedChannels);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Fout bij het laden van data: {ex.Message}", "Laadfout", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-
-            // Standaard kanalen als het bestand niet bestaat of het laden mislukt
-            return new ObservableCollection<Channel>
-            {
-                new Channel { Name = "Intensiteit", Type = "dim"},
-                new Channel { Name = "Positie X", Type = "pan"},
-                new Channel { Name = "Positie Y", Type = "tilt"}
-            };
         }
 
         private void AddChannelButton_Click(object sender, RoutedEventArgs e)
