@@ -14,8 +14,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureContentViewModel : ObservableObject
     {
-        private string _name;
-        public string Name
+        private string? _name = string.Empty;
+
+        public string? Name
         {
             get => _name;
             set => SetProperty(ref _name, value);
