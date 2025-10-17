@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -32,6 +31,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             "Lamp",
             "Ster",
             "Klok",
+            "Tilt",
             "Ventilator",
             "Rood",
             "Groen",

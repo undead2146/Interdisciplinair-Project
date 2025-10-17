@@ -1,15 +1,13 @@
-﻿using InterdisciplinairProject.Fixtures.Models;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Fixtures.Views;
+using Microsoft.Win32;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
-using System.Threading;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.Win32;
-using System.ComponentModel;
-using System.Collections.Generic;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {

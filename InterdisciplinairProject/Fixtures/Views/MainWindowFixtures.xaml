@@ -17,6 +17,10 @@
         <DataTemplate DataType="{x:Type local:FixtureContentViewModel}">
             <views:FixtureContentView />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:FixtureCreateViewModel}">
+            <views:FixtureCreateView />
+        </DataTemplate>
     </Window.Resources>
 
     <DockPanel>

@@ -1,12 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Views;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
@@ -46,12 +40,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void CreateFixture()
         {
-            var window = new ChannelListView
+            var createVm = new FixtureCreateViewModel();
+
+            // Terugkoppeling wanneer gebruiker op "Cancel" of "Save" drukt
+            createVm.BackRequested += (_, __) =>
             {
-                Owner = System.Windows.Application.Current.MainWindow
+                fixtureListVm.ReloadFixturesFromFiles();
+                CurrentViewModel = fixtureListVm;
             };
-            window.ShowDialog();
+
+            CurrentViewModel = createVm;
         }
+
         private void OnFixtureDelete(string fixtureName)
         {
             string dataFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
