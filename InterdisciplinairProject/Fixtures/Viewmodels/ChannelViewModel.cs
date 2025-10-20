@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -32,6 +31,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             "Lamp",
             "Ster",
             "Klok",
+            "Tilt",
             "Ventilator",
             "Rood",
             "Groen",
@@ -42,6 +42,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // Geselecteerd type in de dropdown
         [ObservableProperty]
         private string selectedType;
+
+        // NEW: slider value for Rood/Groen/Blauw/Wit (0-255)
+        [ObservableProperty]
+        private int level = 0;
+
+        // NEW: free text parameter for Lamp/Ster/Klok/Ventilator
+        [ObservableProperty]
+        private string? parameter;
 
         public ChannelViewModel(Channel model)
         {
