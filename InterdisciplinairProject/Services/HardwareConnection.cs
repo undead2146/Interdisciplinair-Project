@@ -51,7 +51,7 @@ public class HardwareConnection : IHardwareConnection
         var msg = $"[HARDWARE] SetChannelValueAsync: fixture={fixtureInstanceId}, channel={channelName}, value={value}";
         Debug.WriteLine(msg);
         Console.WriteLine(msg);
-        
+
         try
         {
             // Valideer de waarde (0-255)
@@ -101,7 +101,7 @@ public class HardwareConnection : IHardwareConnection
             Debug.WriteLine(successMsg);
             Console.WriteLine(successMsg);
             Console.WriteLine($"[HARDWARE] File updated: {_scenesFilePath}");
-            
+
             return true;
         }
         catch (Exception ex)
@@ -247,7 +247,7 @@ public class HardwareConnection : IHardwareConnection
         }
 
         Debug.WriteLine($"[DEBUG] IsTargetFixture: no instanceId property found, looking for fixtureId");
-        
+
         // Fallback: try fixtureId if instanceId doesn't exist
         if (fixtureElement.TryGetProperty("fixtureId", out JsonElement fixtureId))
         {
@@ -312,12 +312,12 @@ public class HardwareConnection : IHardwareConnection
         // Try to find project root by searching upwards from BaseDirectory
         var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
         Debug.WriteLine($"[DEBUG] Starting search from: {currentDir.FullName}");
-        
+
         while (currentDir != null)
         {
             var scenesPath = Path.Combine(currentDir.FullName, "scenes.json");
             Debug.WriteLine($"[DEBUG] Checking: {scenesPath}");
-            
+
             if (File.Exists(scenesPath))
             {
                 Debug.WriteLine($"[DEBUG] ✓ Found scenes.json in: {scenesPath}");
@@ -330,13 +330,13 @@ public class HardwareConnection : IHardwareConnection
             {
                 Debug.WriteLine($"[DEBUG] Found .sln file in: {currentDir.FullName}");
                 var projectRootScenes = Path.Combine(currentDir.FullName, "scenes.json");
-                
+
                 if (File.Exists(projectRootScenes))
                 {
                     Debug.WriteLine($"[DEBUG] ✓ Found scenes.json at project root: {projectRootScenes}");
                     return projectRootScenes;
                 }
-                
+
                 Debug.WriteLine($"[DEBUG] No scenes.json at project root, will create it");
 
                 // Create default scenes.json at project root
@@ -356,7 +356,7 @@ public class HardwareConnection : IHardwareConnection
         }
 
         Debug.WriteLine($"[DEBUG] Could not find project root, using AppData");
-        
+
         // Fallback to AppData
         var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InterdisciplinairProject");
         Directory.CreateDirectory(appFolder);
