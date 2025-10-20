@@ -120,12 +120,12 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             Debug.WriteLine($"[DEBUG]   - fixtureInstanceId: '{_currentFixture.FixtureId}'");
             Debug.WriteLine($"[DEBUG]   - channelName: '{channelVm.Name}'");
             Debug.WriteLine($"[DEBUG]   - value: {channelVm.Value}");
-            
+
             var result = await _hardwareConnection.SetChannelValueAsync(
                 _currentFixture.FixtureId,
                 channelVm.Name,
                 channelVm.Value);
-            
+
             Debug.WriteLine($"[DEBUG] SetChannelValueAsync returned: {result}");
         }
         else
@@ -139,12 +139,12 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         // Try to find project root by searching upwards from BaseDirectory
         var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
         Debug.WriteLine($"[DEBUG] Starting search from: {currentDir.FullName}");
-        
+
         while (currentDir != null)
         {
             var scenesPath = Path.Combine(currentDir.FullName, "scenes.json");
             Debug.WriteLine($"[DEBUG] Checking: {scenesPath}");
-            
+
             if (File.Exists(scenesPath))
             {
                 Debug.WriteLine($"[DEBUG] ✓ Found scenes.json in: {scenesPath}");
@@ -157,13 +157,13 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             {
                 Debug.WriteLine($"[DEBUG] Found .sln file in: {currentDir.FullName}");
                 var projectRootScenes = Path.Combine(currentDir.FullName, "scenes.json");
-                
+
                 if (File.Exists(projectRootScenes))
                 {
                     Debug.WriteLine($"[DEBUG] ✓ Found scenes.json at project root: {projectRootScenes}");
                     return projectRootScenes;
                 }
-                
+
                 Debug.WriteLine($"[DEBUG] No scenes.json at project root, will create it");
 
                 // Create default scenes.json at project root
@@ -183,7 +183,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         }
 
         Debug.WriteLine($"[DEBUG] Could not find project root, using AppData");
-        
+
         // Fallback to AppData
         var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InterdisciplinairProject");
         Directory.CreateDirectory(appFolder);
@@ -272,7 +272,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     private Fixture CreateDefaultFixture()
     {
         Debug.WriteLine("[DEBUG] CreateDefaultFixture called - will create fixture in scenes.json");
-        
+
         var defaultFixture = new Fixture
         {
             FixtureId = "fixture-inst-default",
