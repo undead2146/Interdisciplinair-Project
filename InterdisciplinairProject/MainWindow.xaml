@@ -8,6 +8,35 @@
         Title="{Binding Title}"
         Height="450" Width="800">
     <Grid>
-        <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="18" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar with Navigation for scene settings (Currently only Fixture Settings) -->
+        <Border Grid.Row="0" Background="LightGray" BorderBrush="Gray" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <TextBlock Text="{Binding Title}" 
+                          FontSize="16" 
+                          FontWeight="Bold" 
+                          VerticalAlignment="Center"/>
+                <Button Content="Fixture Settings" 
+                        Command="{Binding OpenFixtureSettingsCommand}"
+                        Margin="20,0,0,0" 
+                        Padding="10,5"
+                        Background="LightBlue"
+                        BorderBrush="Blue"
+                        BorderThickness="1"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Background="White">
+            <TextBlock Text="Welcome to DMX Lighting Control" 
+                      HorizontalAlignment="Center" 
+                      VerticalAlignment="Center" 
+                      FontSize="18" 
+                      Foreground="Gray"/>
+        </Grid>
     </Grid>
 </Window>
