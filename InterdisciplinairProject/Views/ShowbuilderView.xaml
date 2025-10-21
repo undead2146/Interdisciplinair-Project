@@ -5,33 +5,66 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InterdisciplinairProject.Views"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        mc:Ignorable="d" 
-        Height="auto" Width="auto">
-    <Grid>
-        <!-- Hoofdinhoud -->
-        <Grid Margin="0">
+        mc:Ignorable="d"
+        Title="ShowbuilderView" Height="450" Width="800"
+        Background="White">
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" Background="White" BorderThickness="0">
+            <MenuItem Header="_Fixture"/>
+            <MenuItem Header="_Scene">
+                <MenuItem Header="_Import Scenes" Command="{Binding ImportScenesCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Show">
+                <MenuItem Header="_Open Showbuilder"/>
+                <MenuItem Header="_Import Show"/>
+                <MenuItem Header="_Save as..."/>
+                <MenuItem Header="_Save"/>
+            </MenuItem>
+        </Menu>
+
+        <ToolBarTray DockPanel.Dock="Top" Background="White" IsLocked="True">
+            <ToolBar Background="White"
+                     BorderBrush="Transparent"
+                     BorderThickness="0"
+                     Padding="4,2">
+                <ToolBar.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="White"/>
+                    </Style>
+                </ToolBar.Resources>
+
+                <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
+                <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0"/>
+                <Button Content="Import Show" Command="{Binding ImportShowCommand}" Margin="2,0"/>
+                <Button Content="Save" Command="{Binding SaveCommand}" Margin="2,0"/>
+                <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="2,0"/>
+                <Button Content="Create Show" Command="{Binding CreateShowCommand}" Margin="2,0"/>
+            </ToolBar>
+        </ToolBarTray>
+
+        <Grid>
+            <Grid.Margin>0</Grid.Margin>
             <Grid.ColumnDefinitions>
-                <!-- column for imported scenes -->
                 <ColumnDefinition Width="1*"/>
-                <!-- column for data of scenes -->
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Titel -->
             <TextBlock Text="{Binding Title}" 
-               FontSize="18" 
-               FontWeight="Bold"
-               HorizontalAlignment="Center"
-               Margin="0,10,0,20" />
+                       FontSize="18" 
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,10,0,20" 
+                       Grid.ColumnSpan="2"/>
 
-            <!-- LISTVIEW voor geïmporteerde scenes -->
             <ListView x:Name="sceneListView"
-              Margin="0,0,5,0"
-              Grid.Column="0"
-              ItemsSource="{Binding Scenes}"
-              BorderBrush="#CCC"
-              BorderThickness="1"
-              Background="#FAFAFA">
+                      Margin="0,0,5,0"
+                      Grid.Column="0"
+                      ItemsSource="{Binding Scenes}"
+                      BorderBrush="#CCC"
+                      BorderThickness="1"
+                      Background="#FAFAFA">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}" />
@@ -39,7 +72,6 @@
                         <GridViewColumn Header="Dimmer" Width="auto" DisplayMemberBinding="{Binding Dimmer}" />
                     </GridView>
                 </ListView.View>
-
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}" CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
@@ -47,22 +79,20 @@
                 </i:Interaction.Triggers>
             </ListView>
 
-            <!-- GRIDSPLITTER between column 0 and 1 -->
             <GridSplitter Grid.Column="0"
-                Width="5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Stretch"
-                Background="Gray"
-                ShowsPreview="True" />
+                          Width="5"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Stretch"
+                          Background="Gray"
+                          ShowsPreview="True" />
 
-            <!-- LISTVIEW voor data van fixture -->
             <ListView x:Name="fixtureListView"
-              Grid.Column="1"
-              Margin="10"
-              BorderBrush="#DDD"
-              BorderThickness="1"
-              Background="#FAFAFA"
-              ItemsSource="{Binding SelectedScene.Fixtures}">
+                      Grid.Column="1"
+                      Margin="10"
+                      BorderBrush="#DDD"
+                      BorderThickness="1"
+                      Background="#FAFAFA"
+                      ItemsSource="{Binding SelectedScene.Fixtures}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Fixture id" Width="200" DisplayMemberBinding="{Binding Id}" />
