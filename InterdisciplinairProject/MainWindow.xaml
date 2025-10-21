@@ -15,8 +15,8 @@
             <MenuItem Header="_Scene"/>
             <MenuItem Header="_Show"/>
         </Menu>
-    </DockPanel>
-    <Grid>
+        <Grid>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -49,5 +49,6 @@
                       FontSize="18" 
                       Foreground="Gray"/>
         </Grid>
-    </Grid>
+        </Grid>
+    </DockPanel>
 </Window>
