@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace InterdisciplinairProject.Features.Fixture;
+namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
 /// Represents a lighting fixture with its properties and channels.

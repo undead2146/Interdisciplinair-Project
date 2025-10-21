@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using InterdisciplinairProject.Core.Interfaces;
-using InterdisciplinairProject.Features.Fixture;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Services;
 
 namespace InterdisciplinairProject.ViewModels;

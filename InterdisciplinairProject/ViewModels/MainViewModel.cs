@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace InterdisciplinairProject.ViewModels;
@@ -24,7 +23,7 @@ public partial class MainViewModel : ObservableObject
     private string title = "InterdisciplinairProject - DMX Lighting Control";
 
     [ObservableProperty]
-    private UserControl currentView;
+    private UserControl? currentView;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
