@@ -17,13 +17,11 @@ namespace InterdisciplinairProject.Views
     /// <summary>
     /// Interaction logic for ShowbuilderView.xaml
     /// </summary>
-    public partial class ShowbuilderView : Window
+    public partial class ShowbuilderView : UserControl
     {
         public ShowbuilderView()
         {
             InitializeComponent();
-
-            DataContext = new ViewModels.ShowbuilderViewModel();
         }
     }
 }
