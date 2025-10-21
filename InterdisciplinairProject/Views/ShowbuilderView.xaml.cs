@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InterdisciplinairProject.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +20,11 @@ namespace InterdisciplinairProject.Views
     /// </summary>
     public partial class ShowbuilderView : UserControl
     {
-        public ShowbuilderView()
+        public ShowbuilderView(ShowbuilderViewModel showbuilderViewModel)
         {
             InitializeComponent();
+            DataContext = showbuilderViewModel;
         }
+
     }
 }

@@ -58,6 +58,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenShowBuilder()
     {
-        CurrentView = new ShowbuilderView();
+        ShowbuilderViewModel showbuilderViewModel = new ShowbuilderViewModel();
+        CurrentView = new ShowbuilderView(showbuilderViewModel);
     }
 }

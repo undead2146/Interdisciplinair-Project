@@ -9,12 +9,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.IO;
+using System.Text.Json;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
         public ObservableCollection<Scene> Scenes { get; } = new();
+
+        private string? _currentShowPath;
+
+        [ObservableProperty]
+        private string? currentShowName;
 
         [RelayCommand]
         private void ImportScenes()
@@ -48,6 +55,73 @@ namespace InterdisciplinairProject.ViewModels
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        [RelayCommand]
+        private void SaveAs()
+        {
+            try
+            {
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "Save Show As",
+                    Filter = "JSON files (*.json)|*.json",
+                    DefaultExt = ".json",
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    FileName = string.IsNullOrWhiteSpace(CurrentShowName) ? "NewShow.json" : $"{CurrentShowName}.json",
+                    AddExtension = true,
+                    OverwritePrompt = true
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    string path = saveFileDialog.FileName;
+                    SaveShowToPath(path);
+                    _currentShowPath = path;
+                    MessageBox.Show($"Show saved to '{path}'", "Save As", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private void Save()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(_currentShowPath))
+                {
+                    SaveAs();
+                    return;
+                }
+
+                SaveShowToPath(_currentShowPath);
+                MessageBox.Show($"Show saved to '{_currentShowPath}'", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveShowToPath(string path)
+        {
+            var showObject = new
+            {
+                name = CurrentShowName ?? string.Empty,
+                scenes = Scenes.ToList()
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+            };
+
+            string json = JsonSerializer.Serialize(showObject, options);
+            File.WriteAllText(path, json, System.Text.Encoding.UTF8);
         }
     }
 }
