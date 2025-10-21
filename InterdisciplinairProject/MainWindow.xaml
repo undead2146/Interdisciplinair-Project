@@ -12,7 +12,7 @@
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Fixture" Command="{Binding OpenFixtureSettingsCommand}"/>
+            <MenuItem Header="_Fixture"/>
             <MenuItem Header="_Scene" Command="{Binding OpenSceneBuilderCommand}"/>
             <MenuItem Header="_Show" Command="{Binding OpenShowBuilderCommand}"/>
         </Menu>
