@@ -16,6 +16,9 @@ namespace InterdisciplinairProject.ViewModels
     {
         public ObservableCollection<Scene> Scenes { get; } = new();
 
+        [ObservableProperty]
+        public Scene? selectedScene;
+
         [RelayCommand]
         private void ImportScenes()
         {
@@ -48,6 +51,12 @@ namespace InterdisciplinairProject.ViewModels
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        [RelayCommand]
+        private void SceneSelectionChanged(Scene selectedScene)
+        {
+            SelectedScene = selectedScene;
         }
     }
 }

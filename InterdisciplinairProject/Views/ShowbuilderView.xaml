@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InterdisciplinairProject.Views"
+        xmlns:views="clr-namespace:InterdisciplinairProject.Views"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        mc:Ignorable="d"
         Height="auto" Width="auto"
         Background="White">
 
@@ -32,37 +32,37 @@
 
         <Grid Margin="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{Binding Title}" 
-                       FontSize="18" 
-                       FontWeight="Bold"
-                       HorizontalAlignment="Center"
-                       Margin="0,10,0,20" 
-                       Grid.ColumnSpan="2"/>
+            <ListBox x:Name="sceneListView"
+                     Margin="0,10,5,0"
+                     Grid.Column="0"
+                     ItemsSource="{Binding Scenes}"
+                     BorderBrush="#CCC"
+                     BorderThickness="1"
+                     Background="#FAFAFA"
+                     SelectionMode="Single"
+                     HorizontalContentAlignment="Center">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
 
-            <ListView x:Name="sceneListView"
-                      Margin="0,10,5,0"
-                      Grid.Column="0"
-                      ItemsSource="{Binding Scenes}"
-                      BorderBrush="#CCC"
-                      BorderThickness="1"
-                      Background="#FAFAFA">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}" />
-                        <GridViewColumn Header="ID" Width="auto" DisplayMemberBinding="{Binding Id}" />
-                        <GridViewColumn Header="Dimmer" Width="auto" DisplayMemberBinding="{Binding Dimmer}" />
-                    </GridView>
-                </ListView.View>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <views:SceneControl x:Name="scenecontrol" Margin="0.5"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}" CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-            </ListView>
+            </ListBox>
 
             <GridSplitter Grid.Column="0"
                           Width="5"
@@ -71,7 +71,7 @@
 
             <ListView x:Name="fixtureListView"
                       Grid.Column="1"
-                      Margin="10"
+                      Margin="10,10,10,10"
                       BorderBrush="#DDD"
                       BorderThickness="1"
                       Background="#FAFAFA"

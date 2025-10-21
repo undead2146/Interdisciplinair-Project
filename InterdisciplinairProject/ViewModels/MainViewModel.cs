@@ -59,5 +59,6 @@ public partial class MainViewModel : ObservableObject
     private void OpenShowBuilder()
     {
         CurrentView = new ShowbuilderView();
+        Title = "InterdisciplinairProject - Showbuilder";
     }
 }
