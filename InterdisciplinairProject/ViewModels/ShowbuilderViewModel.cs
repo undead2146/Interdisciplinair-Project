@@ -5,17 +5,26 @@ using Show.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.IO;
 using System.Text.Json;
+using System.Windows.Controls;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
+        public Shows _show = new Shows();
+
         public ObservableCollection<Scene> Scenes { get; } = new();
 
         private string? _currentShowPath;
@@ -23,6 +32,24 @@ namespace InterdisciplinairProject.ViewModels
         [ObservableProperty]
         private string? currentShowName;
 
+        [RelayCommand]
+        private void ImportShow() 
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string jsonFilePath = System.IO.Path.Combine(path, "Show.json");
+            string jsonString = File.ReadAllText(jsonFilePath);
+
+            var doc = JsonDocument.Parse(jsonString);
+            if (!doc.RootElement.TryGetProperty("show", out var showElement))
+            {
+                throw new InvalidDataException("The JSON file does not contain a 'scene' property.");
+            }
+            
+            _show = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
+
+            MessageBox.Show(_show.DisplayText);
+        }
+        
         [RelayCommand]
         private void ImportScenes()
         {

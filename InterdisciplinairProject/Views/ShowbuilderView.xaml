@@ -84,7 +84,6 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-
         </Grid>
     </DockPanel>
 </UserControl>
