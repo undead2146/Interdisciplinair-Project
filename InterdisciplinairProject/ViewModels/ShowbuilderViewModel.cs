@@ -47,6 +47,8 @@ namespace InterdisciplinairProject.ViewModels
             
             _show = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
 
+            CurrentShowName = _show.Name;
+
             MessageBox.Show(_show.DisplayText);
         }
         
