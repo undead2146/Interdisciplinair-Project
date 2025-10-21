@@ -94,7 +94,6 @@ namespace InterdisciplinairProject.ViewModels
         {
             SelectedScene = selectedScene;
         }
-        
         private void SaveAs()
         {
             try
