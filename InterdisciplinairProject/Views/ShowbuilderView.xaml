@@ -9,6 +9,39 @@
         Title="ShowbuilderView" Height="450" Width="800"
         Background="White">
 
+    <Window.Resources>
+        <!-- Remove ToolBar Tray/Grip styling -->
+        <SolidColorBrush x:Key="ToolBarTrayBackground" Color="White"/>
+        <Style x:Key="ToolBarTrayStyle1" TargetType="{x:Type ToolBarTray}">
+            <Setter Property="Background" Value="{StaticResource ToolBarTrayBackground}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Source={x:Static SystemParameters.HighContrast}}" Value="true">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ToolBar style without overflow or gripper -->
+        <Style x:Key="ToolBarStyleClean" TargetType="{x:Type ToolBar}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToolBar}">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Padding="{TemplateBinding Padding}">
+                            <ToolBarPanel IsItemsHost="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="White" BorderThickness="0">
             <MenuItem Header="_Fixture"/>
@@ -23,17 +56,8 @@
             </MenuItem>
         </Menu>
 
-        <ToolBarTray DockPanel.Dock="Top" Background="White" IsLocked="True">
-            <ToolBar Background="White"
-                     BorderBrush="Transparent"
-                     BorderThickness="0"
-                     Padding="4,2">
-                <ToolBar.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="Background" Value="White"/>
-                    </Style>
-                </ToolBar.Resources>
-
+        <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource ToolBarTrayStyle1}">
+            <ToolBar Style="{StaticResource ToolBarStyleClean}">
                 <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
                 <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                 <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0"/>
@@ -44,8 +68,7 @@
             </ToolBar>
         </ToolBarTray>
 
-        <Grid>
-            <Grid.Margin>0</Grid.Margin>
+        <Grid Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="3*"/>
