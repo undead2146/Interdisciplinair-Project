@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Views;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 
-namespace InterdiscplinairProject.ViewModels;
+namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
 /// Main ViewModel for the InterdisciplinairProject application.
@@ -20,6 +22,9 @@ public partial class MainViewModel : ObservableObject
 {
     [ObservableProperty]
     private string title = "InterdisciplinairProject - DMX Lighting Control";
+
+    [ObservableProperty]
+    private UserControl currentView;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -48,5 +53,11 @@ public partial class MainViewModel : ObservableObject
         Debug.WriteLine("[DEBUG] FixtureSettingsView instance created");
         fixtureSettingsView.Show();
         Debug.WriteLine("[DEBUG] FixtureSettingsView.Show() called - window should be visible now");
+    }
+
+    [RelayCommand]
+    private void OpenShowBuilder()
+    {
+        CurrentView = new ShowbuilderView();
     }
 }
