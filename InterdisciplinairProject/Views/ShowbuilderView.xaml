@@ -22,6 +22,8 @@
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
                     <Button Content="Import Show" Command="{Binding ImportShowCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
+                    <Button Content="Open Show" Command="{Binding OpenShowCommand}" Margin="2,0"
+                    Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
                     <Button Content="Save" Command="{Binding SaveCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
                     <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="2,0" 

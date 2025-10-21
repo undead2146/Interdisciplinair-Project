@@ -143,6 +143,71 @@ namespace InterdisciplinairProject.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void OpenShow()
+        {
+            try
+            {
+                var openFileDialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "Open Existing Show",
+                    Filter = "JSON files (*.json)|*.json",
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedPath = openFileDialog.FileName;
+                    string jsonString = File.ReadAllText(selectedPath);
+
+                    // Probeer de JSON te parsen
+                    var doc = JsonDocument.Parse(jsonString);
+                    if (!doc.RootElement.TryGetProperty("show", out var showElement))
+                    {
+                        MessageBox.Show("Het geselecteerde bestand bevat geen geldige 'show'-structuur.",
+                                        "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var loadedShow = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
+
+                    if (loadedShow == null)
+                    {
+                        MessageBox.Show("Kon show niet deserialiseren. Bestand mogelijk corrupt.",
+                                        "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Reset huidige show
+                    _show = loadedShow;
+                    CurrentShowName = _show.Name;
+                    _currentShowPath = selectedPath;
+
+                    // Clear bestaande scènes en voeg nieuwe toe
+                    Scenes.Clear();
+                    if (_show.Scenes != null)
+                    {
+                        foreach (var scene in _show.Scenes)
+                            Scenes.Add(scene);
+                    }
+
+                    MessageBox.Show($"Show '{_show.Name}' succesvol geopend!",
+                                    "Show geladen", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (JsonException)
+            {
+                MessageBox.Show("Het geselecteerde bestand bevat ongeldige JSON.",
+                                "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Er is een fout opgetreden bij het openen van de show:\n{ex.Message}",
+                                "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void SaveShowToPath(string path)
         {
             var showObject = new
