@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using InterdiscplinairProject.ViewModels;
 
 namespace InterdiscplinairProject;
@@ -31,10 +32,14 @@ public partial class MainWindow : Window
     /// </summary>
     public MainWindow()
     {
+        Debug.WriteLine("[DEBUG] MainWindow constructor called");
+        Console.WriteLine("[DEBUG] MainWindow constructor called");
         InitializeComponent();
+        Debug.WriteLine("[DEBUG] MainWindow InitializeComponent completed");
+        Console.WriteLine("[DEBUG] MainWindow InitializeComponent completed");
 
         DataContext = new MainViewModel();
-
-        WindowState = WindowState.Maximized;
+        Debug.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
+        Console.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
     }
 }
