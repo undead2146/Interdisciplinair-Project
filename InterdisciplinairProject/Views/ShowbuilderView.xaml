@@ -1,0 +1,77 @@
+﻿<Window x:Class="InterdisciplinairProject.Views.ShowbuilderView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InterdisciplinairProject.Views"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Title="ShowbuilderView" Height="450" Width="800">
+    <Grid>
+        <!-- Hoofdinhoud -->
+        <Grid Margin="0">
+            <Grid.ColumnDefinitions>
+                <!-- column for imported scenes -->
+                <ColumnDefinition Width="1*"/>
+                <!-- column for data of scenes -->
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Titel -->
+            <TextBlock Text="{Binding Title}" 
+               FontSize="18" 
+               FontWeight="Bold"
+               HorizontalAlignment="Center"
+               Margin="0,10,0,20" />
+
+            <!-- LISTVIEW voor geïmporteerde scenes -->
+            <ListView x:Name="sceneListView"
+              Margin="0,0,5,0"
+              Grid.Column="0"
+              ItemsSource="{Binding Scenes}"
+              BorderBrush="#CCC"
+              BorderThickness="1"
+              Background="#FAFAFA">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Name" Width="auto" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Header="ID" Width="auto" DisplayMemberBinding="{Binding Id}" />
+                        <GridViewColumn Header="Dimmer" Width="auto" DisplayMemberBinding="{Binding Dimmer}" />
+                    </GridView>
+                </ListView.View>
+
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}" CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListView>
+
+            <!-- GRIDSPLITTER between column 0 and 1 -->
+            <GridSplitter Grid.Column="0"
+                Width="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                Background="Gray"
+                ShowsPreview="True" />
+
+            <!-- LISTVIEW voor data van fixture -->
+            <ListView x:Name="fixtureListView"
+              Grid.Column="1"
+              Margin="10"
+              BorderBrush="#DDD"
+              BorderThickness="1"
+              Background="#FAFAFA"
+              ItemsSource="{Binding SelectedScene.Fixtures}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Fixture id" Width="200" DisplayMemberBinding="{Binding Id}" />
+                        <GridViewColumn Header="Instance id" Width="150" DisplayMemberBinding="{Binding InstanceId}" />
+                        <GridViewColumn Header="Name" Width="100" DisplayMemberBinding="{Binding Name}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+        </Grid>
+    </Grid>
+</Window>

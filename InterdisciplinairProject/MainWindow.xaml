@@ -7,6 +7,15 @@
         mc:Ignorable="d"
         Title="{Binding Title}"
         Height="450" Width="800">
+
+    <DockPanel>
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Fixture"/>
+            <MenuItem Header="_Scene"/>
+            <MenuItem Header="_Show"/>
+        </Menu>
+    </DockPanel>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
