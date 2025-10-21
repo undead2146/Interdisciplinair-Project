@@ -42,4 +42,5 @@ public partial class MainWindow : Window
         Debug.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
         Console.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
     }
+
 }

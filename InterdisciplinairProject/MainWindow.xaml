@@ -12,7 +12,7 @@
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Fixture"/>
+            <MenuItem Header="_Fixture" Command="{Binding ImportShowCommand}"/>
             <MenuItem Header="_Scene"/>
             <MenuItem Header="_Show" Command="{Binding OpenShowBuilderCommand}"/>
         </Menu>

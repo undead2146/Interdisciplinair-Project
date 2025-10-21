@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:InterdisciplinairProject.Views"
         xmlns:views="clr-namespace:InterdisciplinairProject.Views"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:InterdisciplinairProject.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ShowbuilderViewModel}"
+             mc:Ignorable="d"
         Height="auto" Width="auto"
         Background="White">
 
@@ -84,7 +86,6 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-
         </Grid>
     </DockPanel>
 </UserControl>
