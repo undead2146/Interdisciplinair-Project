@@ -23,6 +23,31 @@
                 <MenuItem Header="_Save"/>
             </MenuItem>
         </Menu>
+        <ToolBarTray DockPanel.Dock="Top" Background="White">
+            <ToolBar Background="White"
+                 BorderBrush="Transparent"
+                 BorderThickness="0"
+                 Padding="4,2"
+                 ToolBarTray.IsLocked="True">
+                <ToolBar.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="LightGray"/>
+                    </Style>
+                </ToolBar.Resources>
+
+                <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
+                <TextBox Width="150"
+                     Text="{Binding CurrentShowName}"
+                     Margin="0,0,10,0"
+                     VerticalAlignment="Center"/>
+
+                <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0"/>
+                <Button Content="Import Show" Command="{Binding ImportShowCommand}" Margin="2,0"/>
+                <Button Content="Save" Command="{Binding SaveCommand}" Margin="2,0"/>
+                <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="2,0"/>
+                <Button Content="Create Show" Command="{Binding CreateShowCommand}" Margin="2,0"/>
+            </ToolBar>
+        </ToolBarTray>
 
         <!-- Hoofdinhoud -->
         <Grid Margin="0">
