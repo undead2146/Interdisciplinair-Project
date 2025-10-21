@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Controls;
 
 namespace InterdisciplinairProject.ViewModels;
@@ -30,7 +29,7 @@ public partial class MainViewModel : ObservableObject
     /// Gets or sets the current view displayed in the main window.
     /// </summary>
     [ObservableProperty]
-    private UserControl currentView;
+    private UserControl? currentView;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.

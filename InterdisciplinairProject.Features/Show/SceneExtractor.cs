@@ -1,7 +1,7 @@
 ﻿using Show.Model;
-using System;
-using System.IO;
 using System.Text.Json;
+
+#pragma warning disable SA1600
 
 namespace Show
 {
