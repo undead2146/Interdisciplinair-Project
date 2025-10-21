@@ -5,9 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="{Binding Title}"
-        Height="600"
-        Width="1000"
-        Background="#FFFFFF">
+        Height="450" Width="800">
+
+    <DockPanel>
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Fixture"/>
+            <MenuItem Header="_Scene"/>
+            <MenuItem Header="_Show"/>
+        </Menu>
+    </DockPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
         <!-- Title Bar with Navigation for scene settings (Currently only Fixture Settings) -->
         <Border Grid.Row="0" Background="#F5F5F5"  BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,15">
