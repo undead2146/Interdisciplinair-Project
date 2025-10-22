@@ -77,8 +77,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var detailVm = new FixtureContentViewModel(json);
             detailVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
-            detailVm.EditRequested += (_, __) => { /* open edit window */ };
             detailVm.DeleteRequested += (_, __) => OnFixtureDelete(detailVm.Name);
+            detailVm.EditRequested += (_, contentVm) =>
+            {
+                var editVm = new FixtureCreateViewModel(contentVm);
+                editVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
+                editVm.FixtureSaved += (_, __) =>
+                {
+                    fixtureListVm.ReloadFixturesFromFiles();
+                    CurrentViewModel = fixtureListVm;
+                };
+
+                CurrentViewModel = editVm;
+            };
 
             CurrentViewModel = detailVm;
         }

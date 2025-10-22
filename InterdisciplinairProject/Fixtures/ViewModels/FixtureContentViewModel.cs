@@ -24,12 +24,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public event EventHandler? DeleteRequested;
         public event EventHandler? BackRequested;
-        public event EventHandler? EditRequested;
+        public event EventHandler<FixtureContentViewModel>? EditRequested;
 
         public FixtureContentViewModel(string json)
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
-            EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, EventArgs.Empty));
+            EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
             DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
 
             LoadFromJson(json);
