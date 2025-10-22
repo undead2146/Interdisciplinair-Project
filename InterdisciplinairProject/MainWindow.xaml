@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InterdiscplinairProject"
         mc:Ignorable="d"
         Title="{Binding Title}"
         WindowState="Maximized"
@@ -12,7 +11,7 @@
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Fixture"/>
+            <MenuItem Header="_Fixture" Command="{Binding OpenFixtureBuilderCommand}"/>
             <MenuItem Header="_Scene" Command="{Binding OpenSceneBuilderCommand}"/>
             <MenuItem Header="_Show" Command="{Binding OpenShowBuilderCommand}"/>
         </Menu>
