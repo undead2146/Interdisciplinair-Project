@@ -92,8 +92,17 @@ public partial class ScenebuilderViewModel : ObservableObject
                 return;
             }
 
-            Scenes.Remove(scene);
-            SaveScenes();
+            var result = MessageBox.Show(
+             $"Weet je zeker dat je scene '{scene.Name}' wilt verwijderen?",
+             "Scene verwijderen",
+             MessageBoxButton.YesNo,
+             MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                Scenes.Remove(scene);
+                SaveScenes();
+            }
         }
         catch (Exception ex)
         {
