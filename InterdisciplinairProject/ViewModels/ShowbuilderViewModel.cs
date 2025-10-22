@@ -54,10 +54,17 @@ namespace InterdisciplinairProject.ViewModels
 
             MessageBox.Show(_show.DisplayText);
         }
-        
+
         [RelayCommand]
         private void ImportScenes()
         {
+            //check if a show is opened
+            if (_show == null || string.IsNullOrWhiteSpace(CurrentShowName))
+            {
+                MessageBox.Show("Create or open a show first.", "No Show Opened", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Import Scene",
@@ -72,9 +79,20 @@ namespace InterdisciplinairProject.ViewModels
                     string selectedScenePath = openFileDialog.FileName;
 
                     Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+
+                    //check if scene exists
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
+                        //add the scene to collection
                         Scenes.Add(scene);
+
+                        //add to the _show object
+                        if (_show.Scenes == null)
+                        {
+                            _show.Scenes = new List<Scene>();
+                        }
+                        _show.Scenes.Add(scene);
+
                         MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     else
