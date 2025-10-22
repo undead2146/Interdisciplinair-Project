@@ -3,32 +3,310 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:InterdisciplinairProject.Views" xmlns:viewmodels="clr-namespace:InterdisciplinairProject.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ShowbuilderViewModel}"
              mc:Ignorable="d"
              Width="auto" Height="auto">
 
-    <Border BorderBrush="Black" BorderThickness="1" Background="White" Padding="8">
+    <UserControl.Resources>
+        <local:PercentageHeightConverter x:Key="PercentageHeightConverter"/>
+        <local:GreaterThanConverter x:Key="GreaterThanConverter"/>
+        <local:PercentageStarConverter x:Key="PercentageStarConverter"/>
+        <local:InversePercentageConverter x:Key="InversePercentageConverter"/>
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <viewmodels:ShowbuilderViewModel/>
+    </UserControl.DataContext>
+
+    <Border BorderBrush="#E0E0E0" BorderThickness="2" CornerRadius="12" Padding="12" Margin="4">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFFFFF" Offset="0"/>
+                <GradientStop Color="#F8F9FA" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="12" ShadowDepth="4" Direction="270"/>
+        </Border.Effect>
+        
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-            <!-- top indicator circle -->
-            <Button Width="40" Height="40" />
+            <!-- top indicator button with toggle functionality (red/green) -->
+            <ToggleButton Width="50" Height="50" Margin="0,4" IsChecked="{Binding IsActive, Mode=TwoWay}">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Grid>
+                                        <Ellipse x:Name="ButtonEllipse" StrokeThickness="3">
+                                            <Ellipse.Stroke>
+                                                <SolidColorBrush Color="#C62828"/>
+                                            </Ellipse.Stroke>
+                                            <Ellipse.Fill>
+                                                <RadialGradientBrush>
+                                                    <GradientStop Color="#FFEBEE" Offset="0"/>
+                                                    <GradientStop Color="#FFCDD2" Offset="1"/>
+                                                </RadialGradientBrush>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                        <Ellipse Opacity="0.3">
+                                            <Ellipse.Fill>
+                                                <RadialGradientBrush>
+                                                    <GradientStop Color="White" Offset="0"/>
+                                                    <GradientStop Color="Transparent" Offset="0.7"/>
+                                                </RadialGradientBrush>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="ButtonEllipse" Property="Stroke">
+                                                <Setter.Value>
+                                                    <SolidColorBrush Color="#6FA96F"/>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter TargetName="ButtonEllipse" Property="Fill">
+                                                <Setter.Value>
+                                                    <RadialGradientBrush>
+                                                        <GradientStop Color="#E8F5E9" Offset="0"/>
+                                                        <GradientStop Color="#C8E6C9" Offset="1"/>
+                                                    </RadialGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ButtonEllipse" Property="Opacity" Value="0.8"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
 
-            <TextBlock Text="{Binding SceneId}" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,2" />
+            <!-- Scene ID with modern typography -->
+            <TextBlock Text="{Binding SelectedScene.Name, TargetNullValue='(No scene selected)'}" 
+                       FontWeight="SemiBold" 
+                       FontSize="16"
+                       Foreground="#2C3E50"
+                       HorizontalAlignment="Center" 
+                       Margin="0,8,0,4" />
 
-            <!-- vertical dimmer bar -->
-            <Border Width="48" Height="220" BorderBrush="#DDD" BorderThickness="2" CornerRadius="6" Margin="0,6" Background="#FFF">
-                <Slider Name="PART_DimmerSlider" Orientation="Vertical" Minimum="0" Maximum="100" Value="{Binding Dimmer, Mode=TwoWay}" HorizontalAlignment="Center" Width="auto"/>
+            <!-- vertical dimmer slider with modern design -->
+            <Border x:Name="SliderContainer" Width="60" Height="240" CornerRadius="4" Margin="0,8" Background="#F5F5F5">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="4" ShadowDepth="2" Direction="270"/>
+                </Border.Effect>
+                <Grid Margin="4">
+                    <!-- Rectangular border container -->
+                    <Border CornerRadius="2" BorderBrush="#E0E0E0" BorderThickness="2" Background="White" ClipToBounds="True">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="2" ShadowDepth="1" Direction="90"/>
+                        </Border.Effect>
+                        
+                        <!-- Yellow fill that grows from bottom inside the container -->
+                        <Border VerticalAlignment="Bottom" CornerRadius="0">
+                            <Border.Height>
+                                <MultiBinding Converter="{StaticResource PercentageHeightConverter}">
+                                    <Binding ElementName="PART_DimmerSlider" Path="Value"/>
+                                    <Binding ElementName="SliderContainer" Path="ActualHeight"/>
+                                </MultiBinding>
+                            </Border.Height>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#FFE082" Offset="0"/>
+                                    <GradientStop Color="#FFD54F" Offset="0.5"/>
+                                    <GradientStop Color="#FFC107" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </Border>
+                    
+                    <Slider Name="PART_DimmerSlider" 
+                            Orientation="Vertical" 
+                            Minimum="0" 
+                            Maximum="100" 
+                            Value="{Binding Dimmer, Mode=TwoWay}" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Stretch"
+                            Margin="0"
+                            Background="Transparent">
+                        <Slider.Style>
+                            <Style TargetType="Slider">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Slider">
+                                            <Grid>
+                                                <Border x:Name="TrackBackground" 
+                                                        Width="8" 
+                                                        CornerRadius="4"
+                                                        Background="Transparent"
+                                                        BorderBrush="Transparent" 
+                                                        BorderThickness="0"/>
+                                                <Track x:Name="PART_Track">
+                                                    <Track.DecreaseRepeatButton>
+                                                        <RepeatButton Command="Slider.DecreaseLarge">
+                                                            <RepeatButton.Style>
+                                                                <Style TargetType="RepeatButton">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Setter Property="BorderThickness" Value="0"/>
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="RepeatButton">
+                                                                                <Border Background="Transparent"/>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </RepeatButton.Style>
+                                                        </RepeatButton>
+                                                    </Track.DecreaseRepeatButton>
+                                                    <Track.IncreaseRepeatButton>
+                                                        <RepeatButton Command="Slider.IncreaseLarge">
+                                                            <RepeatButton.Style>
+                                                                <Style TargetType="RepeatButton">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Setter Property="BorderThickness" Value="0"/>
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="RepeatButton">
+                                                                                <Border Background="Transparent"/>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </RepeatButton.Style>
+                                                        </RepeatButton>
+                                                    </Track.IncreaseRepeatButton>
+                                                    <Track.Thumb>
+                                                        <Thumb>
+                                                            <Thumb.Template>
+                                                                <ControlTemplate TargetType="Thumb">
+                                                                    <Grid>
+                                                                        <Rectangle Width="52" Height="25" RadiusX="4" RadiusY="4" Stroke="White" StrokeThickness="2">
+                                                                            <Rectangle.Fill>
+                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                                                    <GradientStop Color="#42A5F5" Offset="0"/>
+                                                                                    <GradientStop Color="#2196F3" Offset="0.5"/>
+                                                                                    <GradientStop Color="#1976D2" Offset="1"/>
+                                                                                </LinearGradientBrush>
+                                                                            </Rectangle.Fill>
+                                                                            <Rectangle.Effect>
+                                                                                <DropShadowEffect Color="#1565C0" Opacity="0.6" BlurRadius="8" ShadowDepth="2"/>
+                                                                            </Rectangle.Effect>
+                                                                        </Rectangle>
+                                                                    </Grid>
+                                                                </ControlTemplate>
+                                                            </Thumb.Template>
+                                                        </Thumb>
+                                                    </Track.Thumb>
+                                                </Track>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Slider.Style>
+                    </Slider>
+                </Grid>
             </Border>
 
-            <!-- small squares for fade-in/out -->
-            <StackPanel Orientation="Vertical" Margin="0,8,0,0" HorizontalAlignment="Center">
-                <Rectangle Width="28" Height="28" Stroke="#333" Fill="White" Margin="0,4"/>
-                <TextBlock Text="Fade-in" FontSize="10" HorizontalAlignment="Center" />
-                <Rectangle Width="28" Height="28" Stroke="#333" Fill="White" Margin="0,8"/>
-                <TextBlock Text="Fade-out" FontSize="10" HorizontalAlignment="Center" />
+            <!-- Fade in/out buttons with modern styling -->
+            <StackPanel Orientation="Vertical" Margin="0,12,0,0" HorizontalAlignment="Center">
+                <Button Width="70" Height="36" Margin="0,4" Background="White" BorderBrush="#BDBDBD" BorderThickness="1.5">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" 
+                                                Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="4" ShadowDepth="2" Direction="270"/>
+                                            </Border.Effect>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M3,11 L11,3 M11,3 L7,3 M11,3 L11,7" Stroke="#2196F3" StrokeThickness="1.5" Width="14" Height="14" Margin="0,0,4,0"/>
+                                                <TextBlock Text="Fade-in" FontSize="10" Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                
+                <Button Width="70" Height="36" Margin="0,4" Background="White" BorderBrush="#BDBDBD" BorderThickness="1.5">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" 
+                                                Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="4" ShadowDepth="2" Direction="270"/>
+                                            </Border.Effect>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M3,3 L11,11 M11,11 L7,11 M11,11 L11,7" Stroke="#2196F3" StrokeThickness="1.5" Width="14" Height="14" Margin="0,0,4,0"/>
+                                                <TextBlock Text="Fade-out" FontSize="10" Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </StackPanel>
 
-            <!-- gear button -->
-            <Button Width="32" Height="32" Margin="0,10,0,0" HorizontalAlignment="Center">
-                <Path Data="M12,2 L15,2 L16,5 L19,6 L19,9 L16,10 L15,13 L12,13 L11,10 L8,9 L8,6 L11,5 Z" Fill="#444" Stretch="Uniform"/>
+            <!-- Settings gear button with modern styling -->
+            <Button Width="40" Height="40" Margin="0,12,0,4">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="border" Background="#607D8B" CornerRadius="20" BorderBrush="#546E7A" BorderThickness="1.5">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="6" ShadowDepth="3" Direction="270"/>
+                                        </Border.Effect>
+                                        <Path Data="M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78L12 2.34c-.03-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z" 
+                                              Fill="White" 
+                                              Stretch="Uniform" 
+                                              Width="20" 
+                                              Height="20"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="border" Property="Background" Value="#78909C"/>
+                                            <Setter TargetName="border" Property="BorderBrush" Value="#607D8B"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
             </Button>
         </StackPanel>
     </Border>
