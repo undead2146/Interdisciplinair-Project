@@ -10,18 +10,20 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace InterdisciplinairProject.Views
 {
     /// <summary>
-    /// Interaction logic for ShowbuilderView.xaml
+    /// Interaction logic for SceneView.xaml
     /// </summary>
-    public partial class ShowbuilderView : UserControl
+    public partial class SceneView : UserControl
     {
-        public ShowbuilderView()
+        public SceneView()
         {
-            InitializeComponent();
+            InitializeComponent(); 
+            // DataContext = new SceneViewModel(); // hook up when ready
         }
     }
 }

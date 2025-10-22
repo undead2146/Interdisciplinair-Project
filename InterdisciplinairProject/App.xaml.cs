@@ -1,6 +1,7 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 
-namespace InterdiscplinairProject;
+namespace InterdisciplinairProject;
 
 /// <summary>
 /// Interaction logic for <see cref="App.xaml"/>.
@@ -17,4 +18,15 @@ namespace InterdiscplinairProject;
 /// </summary>
 public partial class App : Application
 {
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        // map 'data' aanmaken
+        string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
+        if (!Directory.Exists(dataDir)) 
+        {
+            Directory.CreateDirectory(dataDir);
+        }
+    }
 }
