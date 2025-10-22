@@ -33,6 +33,9 @@ namespace InterdisciplinairProject.ViewModels
         private string? _currentShowPath;
 
         [ObservableProperty]
+        private string? currentShowId;
+
+        [ObservableProperty]
         private string? currentShowName;
         
         [RelayCommand]
@@ -163,6 +166,8 @@ namespace InterdisciplinairProject.ViewModels
 
                     // Reset huidige show
                     _show = loadedShow;
+
+                    CurrentShowId = _show.Id;
                     CurrentShowName = _show.Name;
                     _currentShowPath = selectedPath;
 
@@ -193,6 +198,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SaveShowToPath(string path)
         {
             // Zorg dat _show up-to-date is
+            _show.Id = CurrentShowId ?? GenerateRandomId();
             _show.Name = CurrentShowName ?? "Unnamed Show";
             _show.Scenes = Scenes.ToList();
 
@@ -209,6 +215,14 @@ namespace InterdisciplinairProject.ViewModels
 
             string json = JsonSerializer.Serialize(wrapper, options);
             File.WriteAllText(path, json, Encoding.UTF8);
+        }
+
+        private string GenerateRandomId()
+        {
+            Random rnd = new Random();
+            int number = rnd.Next(1, 999);
+            string id = number.ToString();
+            return id;
         }
     }
 }
