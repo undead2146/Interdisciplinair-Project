@@ -1,53 +1,51 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Show;
-using Show.Model;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Features.Show;
+
 using System.Windows;
 
-namespace InterdisciplinairProject.ViewModels
+namespace InterdisciplinairProject.ViewModels;
+
+/// <summary>
+/// ViewModel for building and managing shows, including importing scenes.
+/// </summary>
+public partial class ShowbuilderViewModel : ObservableObject
 {
-    public partial class ShowbuilderViewModel : ObservableObject
+    public ObservableCollection<Scene> Scenes { get; } = new();
+
+    [RelayCommand]
+    private void ImportScenes()
     {
-        public ObservableCollection<Scene> Scenes { get; } = new();
-
-        [RelayCommand]
-        private void ImportScenes()
+        var openFileDialog = new Microsoft.Win32.OpenFileDialog
         {
-            var openFileDialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Title = "Import Scene",
-                Filter = "JSON files (*.json)|*.json",
-                Multiselect = false,
-            };
+            Title = "Import Scene",
+            Filter = "JSON files (*.json)|*.json",
+            Multiselect = false,
+        };
 
-            try
+        try
+        {
+            if (openFileDialog.ShowDialog() == true)
             {
-                if (openFileDialog.ShowDialog() == true)
+                string selectedScenePath = openFileDialog.FileName;
+
+                Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+                if (!Scenes.Any(s => s.Id == scene.Id))
                 {
-                    string selectedScenePath = openFileDialog.FileName;
-
-                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
-                    if (!Scenes.Any(s => s.Id == scene.Id))
-                    {
-                        Scenes.Add(scene);
-                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show("This scene has already been imported.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    Scenes.Add(scene);
+                    MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("This scene has already been imported.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

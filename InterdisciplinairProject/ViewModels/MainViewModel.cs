@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Views;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,19 +9,28 @@ namespace InterdisciplinairProject.ViewModels
 {
 /// <summary>
 /// Main ViewModel for the InterdisciplinairProject application.
+/// </summary>
 /// <remarks>
 /// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
-/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
-/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
+/// It inherits from <see cref="ObservableObject"/> to enable property change notifications.
+/// Properties and commands here can bind to UI elements in <see cref="MainWindow"/>.
 /// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
 /// </remarks>
-/// <seealso cref="ObservableObject" />
-/// <seealso cref="MainWindow" />
-/// </summary>
-    public partial class MainViewModel : ObservableObject
-    {
-        [ObservableProperty]
-        private string title = "InterdisciplinairProject - DMX Lighting Control";
+/// <seealso cref="ObservableObject"/>
+/// <seealso cref="MainWindow"/>
+public partial class MainViewModel : ObservableObject
+{
+    /// <summary>
+    /// Gets or sets the window title.
+    /// </summary>
+    [ObservableProperty]
+    private string title = "InterdisciplinairProject - DMX Lighting Control";
+
+    /// <summary>
+    /// Gets or sets the current view displayed in the main window.
+    /// </summary>
+    [ObservableProperty]
+    private UserControl? currentView;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -40,9 +50,6 @@ namespace InterdisciplinairProject.ViewModels
             OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
             OpenSceneCommand = new RelayCommand(OpenScene);
 
-            public RelayCommand OpenFixturesCommand { get; }
-            public RelayCommand OpenFixtureSettingsCommand { get; }
-            public RelayCommand OpenSceneCommand { get; }
             // Default landing view
             CurrentView = new TextBlock
             {
@@ -70,5 +77,23 @@ namespace InterdisciplinairProject.ViewModels
             // Placeholder � you can replace with your real Scene view later
             CurrentView = new InterdisciplinairProject.Views.SceneView();
         }
+    }
+
+    /// <summary>
+    /// Opens the show builder view.
+    /// </summary>
+    [RelayCommand]
+    private void OpenShowBuilder()
+    {
+        CurrentView = new ShowbuilderView();
+    }
+
+    /// <summary>
+    /// Opens the scene builder view.
+    /// </summary>
+    [RelayCommand]
+    private void OpenSceneBuilder()
+    {
+        CurrentView = new ScenebuilderView();
     }
 }

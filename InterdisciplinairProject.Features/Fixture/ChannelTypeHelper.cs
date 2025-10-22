@@ -1,4 +1,4 @@
-using System;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.Features.Fixture;
 

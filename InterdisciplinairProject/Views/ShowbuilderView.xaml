@@ -1,12 +1,12 @@
-﻿<Window x:Class="InterdisciplinairProject.Views.ShowbuilderView"
+﻿<UserControl x:Class="InterdisciplinairProject.Views.ShowbuilderView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InterdisciplinairProject.Views"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        mc:Ignorable="d"
-        Title="ShowbuilderView" Height="450" Width="800">
+        mc:Ignorable="d" 
+        Height="auto" Width="auto">
     <Grid>
         <!-- Hoofdinhoud -->
         <Grid Margin="0">
@@ -74,4 +74,4 @@
 
         </Grid>
     </Grid>
-</Window>
+</UserControl>

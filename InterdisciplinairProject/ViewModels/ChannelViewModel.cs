@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Features.Fixture;
 
 namespace InterdisciplinairProject.ViewModels;
