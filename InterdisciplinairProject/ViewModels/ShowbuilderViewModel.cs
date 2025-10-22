@@ -34,25 +34,39 @@ namespace InterdisciplinairProject.ViewModels
 
         [ObservableProperty]
         private string? currentShowName;
-
+        
         [RelayCommand]
-        private void ImportShow() 
+        private void ImportScenes()
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string jsonFilePath = System.IO.Path.Combine(path, "Show.json");
-            string jsonString = File.ReadAllText(jsonFilePath);
-
-            var doc = JsonDocument.Parse(jsonString);
-            if (!doc.RootElement.TryGetProperty("show", out var showElement))
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                throw new InvalidDataException("The JSON file does not contain a 'scene' property.");
+                Title = "Import Scene",
+                Filter = "JSON files (*.json)|*.json",
+                Multiselect = false,
+            };
+
+            try
+            {
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    string selectedScenePath = openFileDialog.FileName;
+
+                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+                    if (!Scenes.Any(s => s.Id == scene.Id))
+                    {
+                        Scenes.Add(scene);
+                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("This scene has already been imported.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
             }
-            
-            _show = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
-
-            CurrentShowName = _show.Name;
-
-            MessageBox.Show(_show.DisplayText);
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         [RelayCommand]
