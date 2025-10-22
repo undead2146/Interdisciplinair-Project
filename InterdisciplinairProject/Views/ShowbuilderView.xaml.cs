@@ -26,6 +26,5 @@ namespace InterdisciplinairProject.Views
 
             DataContext = showBuilderViewModel;
         }
-
     }
 }

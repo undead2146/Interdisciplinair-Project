@@ -15,10 +15,6 @@
         <converters:InversePercentageConverter x:Key="InversePercentageConverter"/>
     </UserControl.Resources>
 
-    <UserControl.DataContext>
-        <viewmodels:ShowbuilderViewModel/>
-    </UserControl.DataContext>
-
     <Border BorderBrush="#E0E0E0" BorderThickness="2" CornerRadius="12" Padding="12" Margin="4">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -87,7 +83,7 @@
             </ToggleButton>
 
             <!-- Scene ID with modern typography -->
-            <TextBlock Text="{Binding SelectedScene.Name, TargetNullValue='(No scene selected)'}" 
+            <TextBlock Text="{Binding Id}" 
                        FontWeight="SemiBold" 
                        FontSize="16"
                        Foreground="#2C3E50"

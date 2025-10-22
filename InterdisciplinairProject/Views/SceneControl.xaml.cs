@@ -11,7 +11,6 @@ namespace InterdisciplinairProject.Views
         public SceneControl()
         {
             InitializeComponent();
-            this.DataContext = this;
         }
     }
 }
