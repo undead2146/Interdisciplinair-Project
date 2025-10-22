@@ -20,11 +20,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand OpenFixtureCommand { get; }
 
         private readonly string _fixturesFolder;
-        private FileSystemWatcher _watcher;
+        private FileSystemWatcher? _watcher;
 
         public event EventHandler<string>? FixtureSelected;
+
         private Fixture? _selectedFixture;
-        public Fixture? SelectedFixture 
+        public Fixture? SelectedFixture
         {
             get => _selectedFixture;
             set
@@ -57,17 +58,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         // ------------------------------------------------------------
-        // Commands
+        // IMPORT
         // ------------------------------------------------------------
-
-
         private void ImportFixture()
         {
             var dialog = new OpenFileDialog
             {
                 Title = "Select a Fixture JSON file",
-                Filter = "JSON files (*.json)|*.json",
-                InitialDirectory = _fixturesFolder
+                Filter = "JSON files (*.json)|*.json"
             };
 
             if (dialog.ShowDialog() != true)
@@ -86,20 +84,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return;
                 }
 
-                // Allowed channel types
+                // --- Validation ---
                 var allowedTypes = new HashSet<string>
                 {
                     "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit"
                 };
 
-                // Collect missing fields
                 var missingFields = new List<string>();
-
                 string? name = root["name"]?.ToString();
+                string? manufacturer = root["manufacturer"]?.ToString();
+
                 if (string.IsNullOrWhiteSpace(name))
                     missingFields.Add("'name'");
-
-                string? manufacturer = root["manufacturer"]?.ToString();
                 if (string.IsNullOrWhiteSpace(manufacturer))
                     missingFields.Add("'manufacturer'");
 
@@ -135,32 +131,35 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 if (missingFields.Count > 0)
                 {
-                    string message = "The following required fields are missing or invalid:\n- " + string.Join("\n- ", missingFields);
+                    string message = "The following required fields are missing or invalid:\n- " +
+                                     string.Join("\n- ", missingFields);
                     System.Windows.MessageBox.Show(message);
-                    return; // Stop import because validation failed
-                }
-
-                // Check for duplicate fixture name
-                if (FixturesExists(name!))
-                {
-                    System.Windows.MessageBox.Show($"Error importing fixture: Fixture '{name}' already exists");
                     return;
                 }
 
-                // Validation passed — copy file into data folder
-                string targetFile = Path.Combine(_fixturesFolder, Path.GetFileName(jsonPath));
-                if (!Directory.Exists(_fixturesFolder))
-                    Directory.CreateDirectory(_fixturesFolder);
+                if (string.IsNullOrWhiteSpace(name))
+                    return;
 
-                File.Copy(jsonPath, targetFile, overwrite: true);
+                // --- Prevent duplicates ---
+                string targetFile = Path.Combine(_fixturesFolder, name + ".json");
+                if (FixturesExists(name) || File.Exists(targetFile))
+                {
+                    System.Windows.MessageBox.Show($"Error importing fixture: A fixture named '{name}' already exists.");
+                    return;
+                }
 
-                Fixtures.Add(new Fixture(name!));
-
+                // --- Copy to local folder ---
+                File.Copy(jsonPath, targetFile, overwrite: false);
+                Fixtures.Add(new Fixture(name));
                 System.Windows.MessageBox.Show($"Successfully imported fixture '{name}'.");
             }
             catch (JsonException)
             {
                 System.Windows.MessageBox.Show("Error parsing JSON. Ensure the file is valid.");
+            }
+            catch (IOException ioEx)
+            {
+                System.Windows.MessageBox.Show("File error: " + ioEx.Message);
             }
             catch (Exception ex)
             {
@@ -168,6 +167,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        // ------------------------------------------------------------
+        // EXPORT
+        // ------------------------------------------------------------
         private bool CanExportFixture() => SelectedFixture != null;
 
         private void ExportFixture()
@@ -184,16 +186,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             try
             {
-                // Load JSON
                 string jsonContent = File.ReadAllText(sourcePath);
                 JsonNode? root = JsonNode.Parse(jsonContent);
+
                 if (root == null)
                 {
                     System.Windows.MessageBox.Show("Invalid JSON file.");
                     return;
                 }
 
-                // Open pop-up to get new fixture name
                 var exportWindow = new ExportFixtureWindow(SelectedFixture.Name)
                 {
                     Owner = System.Windows.Application.Current.MainWindow
@@ -201,12 +202,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 if (exportWindow.ShowDialog() == true)
                 {
-                    string newName = exportWindow.FixtureName;
+                    string newName = exportWindow.FixtureName.Trim();
 
-                    // Update JSON "name" property
+                    if (string.IsNullOrWhiteSpace(newName))
+                    {
+                        System.Windows.MessageBox.Show("Fixture name cannot be empty.");
+                        return;
+                    }
+
                     root["name"] = newName;
 
-                    // Save file dialog
                     var saveDialog = new SaveFileDialog
                     {
                         Title = "Save exported fixture",
@@ -217,7 +222,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     if (saveDialog.ShowDialog() == true)
                     {
                         File.WriteAllText(saveDialog.FileName, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
-                        System.Windows.MessageBox.Show($"Fixture exported successfully as '{newName}'!");
+                        System.Windows.MessageBox.Show($"Fixture exported successfully as '{newName}'.");
                     }
                 }
             }
@@ -227,6 +232,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        // ------------------------------------------------------------
+        // OPEN
+        // ------------------------------------------------------------
         private void OpenFixture()
         {
             if (SelectedFixture == null)
@@ -251,7 +259,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         // ------------------------------------------------------------
-        // Fixture management
+        // MANAGEMENT
         // ------------------------------------------------------------
         public void ReloadFixturesFromFiles()
         {
@@ -266,19 +274,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        private bool FixturesExists(string name)
-        {
-            foreach (var f in Fixtures)
-            {
-
-                if (f.Name == name)
-                    return true;
-            }
-            return false;
-        }
+        private bool FixturesExists(string name) =>
+            Fixtures.Any(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         // ------------------------------------------------------------
-        // File system watcher
+        // WATCHER
         // ------------------------------------------------------------
         private void StartWatchingDataFolder()
         {
@@ -288,20 +288,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime
             };
-            _watcher.Created += OnFileCreated;
-            _watcher.EnableRaisingEvents = true;
-        }
 
-        private void OnFileCreated(object sender, FileSystemEventArgs e)
-        {
-            Thread.Sleep(100);
-            string fileName = Path.GetFileNameWithoutExtension(e.Name);
-
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            _watcher.Created += async (s, e) =>
             {
-                if (!FixturesExists(fileName))
-                    Fixtures.Add(new Fixture(fileName));
-            });
+                await Task.Delay(200); // Allow file to finish writing
+                string fileName = Path.GetFileNameWithoutExtension(e.Name);
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (!FixturesExists(fileName))
+                        Fixtures.Add(new Fixture(fileName));
+                });
+            };
+
+            _watcher.EnableRaisingEvents = true;
         }
 
         // ------------------------------------------------------------
