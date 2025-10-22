@@ -192,10 +192,14 @@ namespace InterdisciplinairProject.ViewModels
 
         private void SaveShowToPath(string path)
         {
-            var showObject = new
+            // Zorg dat _show up-to-date is
+            _show.Name = CurrentShowName ?? "Unnamed Show";
+            _show.Scenes = Scenes.ToList();
+
+            // Maak een wrapper zodat de JSON "show": {...} bevat
+            var wrapper = new
             {
-                name = CurrentShowName ?? string.Empty,
-                scenes = Scenes.ToList()
+                show = _show
             };
 
             var options = new JsonSerializerOptions
@@ -203,8 +207,8 @@ namespace InterdisciplinairProject.ViewModels
                 WriteIndented = true,
             };
 
-            string json = JsonSerializer.Serialize(showObject, options);
-            File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+            string json = JsonSerializer.Serialize(wrapper, options);
+            File.WriteAllText(path, json, Encoding.UTF8);
         }
     }
 }
