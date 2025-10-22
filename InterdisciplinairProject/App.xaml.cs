@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 
-namespace InterdiscplinairProject;
+namespace InterdisciplinairProject;
 
 /// <summary>
 /// Interaction logic for <see cref="App.xaml"/>.
