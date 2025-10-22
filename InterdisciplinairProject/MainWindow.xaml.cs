@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using InterdisciplinairProject.ViewModels;
+using InterdisciplinairProject.Views;
 
 namespace InterdiscplinairProject;
 
@@ -42,5 +43,34 @@ public partial class MainWindow : Window
         Debug.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
         Console.WriteLine("[DEBUG] MainWindow DataContext set to MainViewModel");
     }
+    private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (DataContext is MainViewModel vm) { 
+            if(vm.CurrentView is ShowbuilderView)
+            {
 
+                MessageBoxResult result = MessageBox.Show(
+                    "Do you want to save the changes?",
+                    "Confirm",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question
+                );
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    vm.SaveCloseForShow();
+
+                }
+                else if (result == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+    }
 }

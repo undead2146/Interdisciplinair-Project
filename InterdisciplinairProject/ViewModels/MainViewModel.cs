@@ -22,6 +22,8 @@ namespace InterdisciplinairProject.ViewModels;
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
+    private readonly ShowbuilderViewModel _showbuilderViewModel;
+
     [ObservableProperty]
     private string title = "InterdisciplinairProject - DMX Lighting Control";
 
@@ -37,6 +39,7 @@ public partial class MainViewModel : ObservableObject
 
         // Initialize ViewModel, e.g., load services from DI if injected
         OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
+        _showbuilderViewModel = new ShowbuilderViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
     }
 
@@ -60,7 +63,12 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenShowBuilder()
     {
-        CurrentView = new ShowbuilderView();
+        CurrentView = new ShowbuilderView(_showbuilderViewModel);
         Title = "InterdisciplinairProject - Showbuilder";
+    }
+
+    public void SaveCloseForShow()
+    {
+        _showbuilderViewModel.SaveCommand.Execute(currentView);
     }
 }

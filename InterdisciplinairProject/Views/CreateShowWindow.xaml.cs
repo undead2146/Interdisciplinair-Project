@@ -1,5 +1,4 @@
-﻿using InterdisciplinairProject.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,20 +11,22 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using InterdisciplinairProject.ViewModels;
 
 namespace InterdisciplinairProject.Views
 {
     /// <summary>
-    /// Interaction logic for ShowbuilderView.xaml
+    /// Interaction logic for CreateShowWindow.xaml
     /// </summary>
-    public partial class ShowbuilderView : UserControl
+    public partial class CreateShowWindow : Window
     {
-        public ShowbuilderView(ShowbuilderViewModel showBuilderViewModel)
+        public CreateShowWindow()
         {
             InitializeComponent();
 
-            DataContext = showBuilderViewModel;
+            var viewModel = new CreateShowViewModel();
+            viewModel.SetWindow(this);
+            DataContext = viewModel;
         }
-
     }
 }
