@@ -1,0 +1,44 @@
+﻿<Window x:Class="InterdisciplinairProject.Views.CreateShowWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nieuwe Show" 
+        Height="180" 
+        Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Show Naam:" 
+                   FontSize="14" 
+                   FontWeight="SemiBold"
+                   Grid.Row="0"
+                   Margin="0,0,0,10"/>
+
+        <TextBox Grid.Row="1"
+                 Text="{Binding ShowName, UpdateSourceTrigger=PropertyChanged}"
+                 FontSize="14"
+                 Padding="5"
+                 Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right">
+            <Button Content="Annuleren" 
+                    Width="100" 
+                    Height="30"
+                    Margin="0,0,10,0"
+                    Command="{Binding CancelCommand}"/>
+            <Button Content="OK" 
+                    Width="100" 
+                    Height="30"
+                    IsDefault="True"
+                    Command="{Binding OKCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>
