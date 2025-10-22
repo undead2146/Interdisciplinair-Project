@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using InterdisciplinairProject.Core.Models;
 
 #pragma warning disable SA1600
 
-namespace Show.Model;
+namespace InterdisciplinairProject.Core.Models;
 
 public class Scene
 {
