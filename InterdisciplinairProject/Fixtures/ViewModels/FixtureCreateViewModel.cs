@@ -16,12 +16,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly bool _isEditing;
         private readonly string? _originalFileName;
 
+        [ObservableProperty]
+        private string fixtureName = string.Empty;
+
         public event EventHandler? BackRequested;
 
         public event EventHandler? FixtureSaved;
-
-        [ObservableProperty]
-        private string fixtureName = string.Empty;
 
         public ObservableCollection<ChannelViewModel> Channels { get; } = new();
 
@@ -31,7 +31,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand CancelCommand { get; }
 
-        public FixtureCreateViewModel(FixtureContentViewModel? existing = null) 
+        public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _dataDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -77,8 +77,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             messageBoxText: "Are you sure you want to cancel making this fixture?",
             caption: "Confirm Cancel",
             button: MessageBoxButton.YesNo,
-            icon: MessageBoxImage.Warning
-);
+            icon: MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -97,7 +96,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // Maak een veilige bestandsnaam
             string safeName = string.Concat(FixtureName.Split(Path.GetInvalidFileNameChars()));
             string filePath = Path.Combine(_dataDir, safeName + ".json");
-
 
             // fout checks
             if (!_isEditing && File.Exists(filePath))
@@ -119,14 +117,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     MessageBox.Show(
                         "Each channel must have a name.",
-                        "Missing Channel Name", MessageBoxButton.OK);
+                        "Missing Channel Name",
+                        MessageBoxButton.OK);
                     return;
                 }
 
                 if (string.IsNullOrEmpty(channelVm.SelectedType))
                 {
-                    MessageBox.Show($"Please select a type for channel '{channelVm.Name}'.",
-                        "Missing Channel Type", MessageBoxButton.OK);
+                    MessageBox.Show(
+                        $"Please select a type for channel '{channelVm.Name}'.",
+                        "Missing Channel Type",
+                        MessageBoxButton.OK);
                     return;
                 }
             }
@@ -140,7 +141,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     ["Name"] = ch.Name,
                     ["Type"] = ch.SelectedType,
-                    ["value"] = ch.Parameter
+                    ["value"] = ch.Parameter,
                 };
                 channelsArray.Add(channelObj);
             }
@@ -148,7 +149,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             var root = new JsonObject
             {
                 ["name"] = FixtureName,
-                ["channels"] = channelsArray
+                ["channels"] = channelsArray,
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };

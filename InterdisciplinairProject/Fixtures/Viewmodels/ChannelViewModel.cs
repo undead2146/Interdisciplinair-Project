@@ -4,8 +4,6 @@ using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
-
-
     public partial class ChannelViewModel : ObservableObject
     {
         // De eigenschap die de UI vertelt om te schakelen tussen TextBlock en TextBox
@@ -17,11 +15,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private bool isExpanded;
 
         private Channel _model;
+
         public string Name
         {
             get => _model.Name;
             set => SetProperty(_model.Name, value, _model, (m, v) => m.Name = v);
         }
+
         public string Type => _model.Type;
 
         // Lijst van beschikbare kanaaltypes voor de dropdown
@@ -36,7 +36,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             "Rood",
             "Groen",
             "Blauw",
-            "Wit"
+            "Wit",
         };
 
         // Geselecteerd type in de dropdown

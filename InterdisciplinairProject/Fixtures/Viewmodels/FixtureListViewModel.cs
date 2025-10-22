@@ -13,18 +13,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public class FixtureListViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Fixture> Fixtures { get; } = new();
-
-        public ICommand ImportFixtureCommand { get; }
-        public ICommand ExportFixtureCommand { get; }
-        public ICommand OpenFixtureCommand { get; }
-
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
 
         public event EventHandler<string>? FixtureSelected;
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<Fixture> Fixtures { get; } = new();
+
         private Fixture? _selectedFixture;
+
         public Fixture? SelectedFixture
         {
             get => _selectedFixture;
@@ -39,6 +38,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        public ICommand ImportFixtureCommand { get; }
+
+        public ICommand ExportFixtureCommand { get; }
+
+        public ICommand OpenFixtureCommand { get; }
+
         public FixtureListViewModel()
         {
             ImportFixtureCommand = new RelayCommand(ImportFixture);
@@ -48,14 +53,32 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _fixturesFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
-                "fixtures"
-            );
+                "fixtures");
 
             Directory.CreateDirectory(_fixturesFolder);
 
             ReloadFixturesFromFiles();
             StartWatchingDataFolder();
         }
+
+        public void ReloadFixturesFromFiles()
+        {
+            Fixtures.Clear();
+            if (!Directory.Exists(_fixturesFolder)) return;
+
+            foreach (var file in Directory.GetFiles(_fixturesFolder, "*.json"))
+            {
+                string fileName = Path.GetFileNameWithoutExtension(file);
+                if (!FixturesExists(fileName))
+                    Fixtures.Add(new Fixture(fileName));
+            }
+        }
+
+        // ------------------------------------------------------------
+        // INotifyPropertyChanged
+        // ------------------------------------------------------------
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         // ------------------------------------------------------------
         // IMPORT
@@ -65,7 +88,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             var dialog = new OpenFileDialog
             {
                 Title = "Select a Fixture JSON file",
-                Filter = "JSON files (*.json)|*.json"
+                Filter = "JSON files (*.json)|*.json",
             };
 
             if (dialog.ShowDialog() != true)
@@ -87,7 +110,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // --- Validation ---
                 var allowedTypes = new HashSet<string>
                 {
-                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit"
+                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
                 };
 
                 var missingFields = new List<string>();
@@ -197,7 +220,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 var exportWindow = new ExportFixtureWindow(SelectedFixture.Name)
                 {
-                    Owner = System.Windows.Application.Current.MainWindow
+                    Owner = System.Windows.Application.Current.MainWindow,
                 };
 
                 if (exportWindow.ShowDialog() == true)
@@ -216,7 +239,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     {
                         Title = "Save exported fixture",
                         Filter = "JSON files (*.json)|*.json",
-                        FileName = newName + ".json"
+                        FileName = newName + ".json",
                     };
 
                     if (saveDialog.ShowDialog() == true)
@@ -261,18 +284,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         // MANAGEMENT
         // ------------------------------------------------------------
-        public void ReloadFixturesFromFiles()
-        {
-            Fixtures.Clear();
-            if (!Directory.Exists(_fixturesFolder)) return;
 
-            foreach (var file in Directory.GetFiles(_fixturesFolder, "*.json"))
-            {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                if (!FixturesExists(fileName))
-                    Fixtures.Add(new Fixture(fileName));
-            }
-        }
 
         private bool FixturesExists(string name) =>
             Fixtures.Any(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
@@ -286,7 +298,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             _watcher = new FileSystemWatcher(_fixturesFolder, "*.json")
             {
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
             };
 
             _watcher.Created += async (s, e) =>
@@ -303,12 +315,5 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             _watcher.EnableRaisingEvents = true;
         }
-
-        // ------------------------------------------------------------
-        // INotifyPropertyChanged
-        // ------------------------------------------------------------
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

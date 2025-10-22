@@ -12,21 +12,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class MainWindowFixturesViewModel : ObservableObject
     {
-        public ICommand CreateFixtureCommand { get; }
-        public ICommand DeleteCommand { get; }
-        public ICommand ImportFixtureCommand { get; }
-        public ICommand ExportFixtureCommand { get; }
-
-        public event EventHandler? DeleteRequested;
-
-        [ObservableProperty]
-        private object currentViewModel;
-
         private readonly FixtureListViewModel fixtureListVm;
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
         private Fixture? _selectedFixture;
+
+        [ObservableProperty]
+        private object currentViewModel;
+
+        public event EventHandler? DeleteRequested;
+
         public Fixture? SelectedFixture
         {
             get => _selectedFixture;
@@ -40,6 +36,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
         }
+
+        public ICommand CreateFixtureCommand { get; }
+
+        public ICommand DeleteCommand { get; }
+
+        public ICommand ImportFixtureCommand { get; }
+
+        public ICommand ExportFixtureCommand { get; }
 
         public MainWindowFixturesViewModel()
         {
@@ -62,8 +66,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _fixturesFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
-                "fixtures"
-            );
+                "fixtures");
 
             Directory.CreateDirectory(_fixturesFolder);
 
@@ -146,14 +149,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             string downloadsFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Downloads"
-            );
+                "Downloads");
 
             var dialog = new OpenFileDialog
             {
                 Title = "Select a Fixture JSON file",
                 Filter = "JSON files (*.json)|*.json",
-                InitialDirectory = downloadsFolder
+                InitialDirectory = downloadsFolder,
             };
 
             if (dialog.ShowDialog() != true)
@@ -175,7 +177,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // Validate essential fields
                 var allowedTypes = new HashSet<string>
                 {
-                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit"
+                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
                 };
 
                 var missingFields = new List<string>();
@@ -283,7 +285,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // Ask user for new fixture name
                 var exportWindow = new ExportFixtureWindow(SelectedFixture.Name)
                 {
-                    Owner = System.Windows.Application.Current.MainWindow
+                    Owner = System.Windows.Application.Current.MainWindow,
                 };
 
                 if (exportWindow.ShowDialog() == true)
