@@ -56,7 +56,7 @@ public partial class MainViewModel : ObservableObject
         Debug.WriteLine("[DEBUG] OpenFixtureSettings() called - Fixture Settings button clicked");
         var fixtureSettingsView = new InterdisciplinairProject.Views.FixtureSettingsView();
         Debug.WriteLine("[DEBUG] FixtureSettingsView instance created");
-        fixtureSettingsView.Show();
+        //fixtureSettingsView.Show();
         Debug.WriteLine("[DEBUG] FixtureSettingsView.Show() called - window should be visible now");
     }
 
