@@ -3,15 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              xmlns:local="clr-namespace:InterdisciplinairProject.Views" xmlns:viewmodels="clr-namespace:InterdisciplinairProject.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ShowbuilderViewModel}"
              mc:Ignorable="d"
              Width="auto" Height="auto">
 
     <UserControl.Resources>
-        <local:PercentageHeightConverter x:Key="PercentageHeightConverter"/>
-        <local:GreaterThanConverter x:Key="GreaterThanConverter"/>
-        <local:PercentageStarConverter x:Key="PercentageStarConverter"/>
-        <local:InversePercentageConverter x:Key="InversePercentageConverter"/>
+        <converters:PercentageHeightConverter x:Key="PercentageHeightConverter"/>
+        <converters:GreaterThanConverter x:Key="GreaterThanConverter"/>
+        <converters:PercentageStarConverter x:Key="PercentageStarConverter"/>
+        <converters:InversePercentageConverter x:Key="InversePercentageConverter"/>
     </UserControl.Resources>
 
     <UserControl.DataContext>
@@ -31,7 +32,7 @@
         
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
             <!-- top indicator button with toggle functionality (red/green) -->
-            <ToggleButton Width="50" Height="50" Margin="0,4" IsChecked="{Binding IsActive, Mode=TwoWay}">
+            <ToggleButton Width="50" Height="50" Margin="0,4">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Template">
