@@ -68,9 +68,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void SaveFixture() 
         {
-            // files
-            string safeName = string.Concat(FixtureName.Split(System.IO.Path.GetInvalidFileNameChars()));
-            string filePath = System.IO.Path.Combine(_dataDir, safeName + ".json");
+            string baseDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "InterdisciplinairProject",
+                "fixtures"
+            );
+
+            // Zorg dat de map bestaat
+            Directory.CreateDirectory(baseDir);
+
+            // Maak een veilige bestandsnaam
+            string safeName = string.Concat(FixtureName.Split(Path.GetInvalidFileNameChars()));
+            string filePath = Path.Combine(baseDir, safeName + ".json");
 
 
             // fout checks

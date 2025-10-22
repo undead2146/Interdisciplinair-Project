@@ -19,7 +19,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand ExportFixtureCommand { get; }
         public ICommand OpenFixtureCommand { get; }
 
-        private readonly string _dataFolder;
+        private readonly string _fixturesFolder;
         private FileSystemWatcher _watcher;
 
         public event EventHandler<string>? FixtureSelected;
@@ -44,9 +44,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
             OpenFixtureCommand = new RelayCommand(OpenFixture);
 
-            // Base directory: bin\Debug\net8.0-windows
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            _dataFolder = Path.Combine(baseDir, "data");
+            _fixturesFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "InterdisciplinairProject",
+                "fixtures"
+            );
+
+            Directory.CreateDirectory(_fixturesFolder);
 
             ReloadFixturesFromFiles();
             StartWatchingDataFolder();
@@ -63,7 +67,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 Title = "Select a Fixture JSON file",
                 Filter = "JSON files (*.json)|*.json",
-                InitialDirectory = _dataFolder
+                InitialDirectory = _fixturesFolder
             };
 
             if (dialog.ShowDialog() != true)
@@ -144,9 +148,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
 
                 // Validation passed — copy file into data folder
-                string targetFile = Path.Combine(_dataFolder, Path.GetFileName(jsonPath));
-                if (!Directory.Exists(_dataFolder))
-                    Directory.CreateDirectory(_dataFolder);
+                string targetFile = Path.Combine(_fixturesFolder, Path.GetFileName(jsonPath));
+                if (!Directory.Exists(_fixturesFolder))
+                    Directory.CreateDirectory(_fixturesFolder);
 
                 File.Copy(jsonPath, targetFile, overwrite: true);
 
@@ -171,7 +175,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (SelectedFixture == null)
                 return;
 
-            string sourcePath = Path.Combine(_dataFolder, SelectedFixture.Name + ".json");
+            string sourcePath = Path.Combine(_fixturesFolder, SelectedFixture.Name + ".json");
             if (!File.Exists(sourcePath))
             {
                 System.Windows.MessageBox.Show("Fixture file not found: " + sourcePath);
@@ -228,7 +232,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (SelectedFixture == null)
                 return;
 
-            string filePath = Path.Combine(_dataFolder, SelectedFixture.Name + ".json");
+            string filePath = Path.Combine(_fixturesFolder, SelectedFixture.Name + ".json");
             if (!File.Exists(filePath))
             {
                 System.Windows.MessageBox.Show("Fixture JSON-bestand niet gevonden.");
@@ -252,9 +256,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public void ReloadFixturesFromFiles()
         {
             Fixtures.Clear();
-            if (!Directory.Exists(_dataFolder)) return;
+            if (!Directory.Exists(_fixturesFolder)) return;
 
-            foreach (var file in Directory.GetFiles(_dataFolder, "*.json"))
+            foreach (var file in Directory.GetFiles(_fixturesFolder, "*.json"))
             {
                 string fileName = Path.GetFileNameWithoutExtension(file);
                 if (!FixturesExists(fileName))
@@ -278,9 +282,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         private void StartWatchingDataFolder()
         {
-            if (!Directory.Exists(_dataFolder)) return;
+            if (!Directory.Exists(_fixturesFolder)) return;
 
-            _watcher = new FileSystemWatcher(_dataFolder, "*.json")
+            _watcher = new FileSystemWatcher(_fixturesFolder, "*.json")
             {
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime
             };
