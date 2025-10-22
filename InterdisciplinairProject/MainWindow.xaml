@@ -6,49 +6,19 @@
         xmlns:local="clr-namespace:InterdiscplinairProject"
         mc:Ignorable="d"
         Title="{Binding Title}"
+        WindowState="Maximized"
         Height="450" Width="800">
 
     <DockPanel>
         <!-- Menu -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_Fixture"/>
-            <MenuItem Header="_Scene"/>
-            <MenuItem Header="_Show"/>
+            <MenuItem Header="_Scene" Command="{Binding OpenSceneBuilderCommand}"/>
+            <MenuItem Header="_Show" Command="{Binding OpenShowBuilderCommand}"/>
         </Menu>
-        <Grid>
-        
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <!-- Title Bar with Navigation for scene settings (Currently only Fixture Settings) -->
-        <Border Grid.Row="0" Background="#F5F5F5"  BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="20,15">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{Binding Title}" 
-                          FontSize="16" 
-                          FontWeight="Bold" 
-                          VerticalAlignment="Center"
-                            Foreground="#333333"/>
-                <Button Content="Fixture Settings" 
-                        Command="{Binding OpenFixtureSettingsCommand}"
-                        Margin="20,0,0,0" 
-                        Padding="15,8"
-                        Background="White"
-                        BorderBrush="#CCCCCC"
-                        BorderThickness="1"
-                        Cursor="Hand"/>
-            </StackPanel>
-        </Border>
-        
-        <!-- Main Content Area -->
-        <Grid Grid.Row="1" Background="White">
-            <TextBlock Text="Welcome to DMX Lighting Control" 
-                      HorizontalAlignment="Center" 
-                      VerticalAlignment="Center" 
-                      FontSize="18" 
-                      Foreground="Gray"/>
-        </Grid>
-        </Grid>
+        <!-- Placeholder for imported view -->
+        <ContentControl Name="MainWindowControl" Content="{Binding CurrentView}" Grid.Row="1"/>
+
     </DockPanel>
 </Window>
