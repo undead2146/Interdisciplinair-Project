@@ -78,7 +78,28 @@ public partial class ScenebuilderViewModel : ObservableObject
             MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+    // <summary>
+    /// Deletes a scene.
+    /// </summary>
+    /// <param name="scene">The scene to delete.</param>
+    [RelayCommand]
+    private void DeleteScene(Scene scene)
+    {
+        try
+        {
+            if (scene == null)
+            {
+                return;
+            }
 
+            Scenes.Remove(scene);
+            SaveScenes();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij verwijderen van scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
     private void LoadScenes()
     {
         try
