@@ -20,11 +20,11 @@ namespace InterdisciplinairProject.Views
     /// </summary>
     public partial class ShowbuilderView : UserControl
     {
-        public ShowbuilderView()
+        public ShowbuilderView(ShowbuilderViewModel showBuilderViewModel)
         {
             InitializeComponent();
 
-            DataContext = new ShowbuilderViewModel();
+            DataContext = showBuilderViewModel;
         }
 
     }

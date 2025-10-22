@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using InterdisciplinairProject.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace InterdiscplinairProject;
 
@@ -17,4 +19,32 @@ namespace InterdiscplinairProject;
 /// </summary>
 public partial class App : Application
 {
+    public static IServiceProvider Services { get; private set; }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        var services = new ServiceCollection();
+
+        // 🔹 Hier registreer je al je services en viewmodels
+        ConfigureServices(services);
+
+        Services = services.BuildServiceProvider();
+
+        // Start de hoofdwindow via DI
+        var mainWindow = Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+    }
+
+    private void ConfigureServices(ServiceCollection services)
+    {
+        // 🧠 ViewModels
+        services.AddSingleton<MainViewModel>();     // singleton ViewModel
+        services.AddSingleton<ShowbuilderViewModel>();     // singleton ViewModel
+
+
+        // 🪟 Views
+        services.AddTransient<MainWindow>();
+    }
 }

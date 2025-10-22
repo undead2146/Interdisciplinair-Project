@@ -58,7 +58,7 @@ public partial class MainWindow : Window
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    Save();
+                    vm.SaveCloseForShow();
 
                 }
                 else if (result == MessageBoxResult.Cancel)
@@ -73,9 +73,4 @@ public partial class MainWindow : Window
         }
 
     }
-    private void Save()
-    {
-        MessageBox.Show("saved");
-    }
-
 }

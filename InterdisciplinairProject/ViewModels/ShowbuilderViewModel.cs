@@ -16,6 +16,7 @@ namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
+
         private Shows _show = new Shows();
         private string? _currentShowPath;
 
