@@ -106,7 +106,6 @@
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </ListBox>
-            </ScrollViewer>
 
             <GridSplitter Grid.Column="0"
                           Grid.RowSpan="2"
