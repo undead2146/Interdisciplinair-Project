@@ -1,83 +1,125 @@
 ﻿<UserControl x:Class="InterdisciplinairProject.Views.ShowbuilderView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InterdisciplinairProject.Views"
-        xmlns:views="clr-namespace:InterdisciplinairProject.Views"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors" 
-        xmlns:viewmodels="clr-namespace:InterdisciplinairProject.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:ShowbuilderViewModel}"
-            mc:Ignorable="d"
-        Height="auto" Width="auto"
-        Background="White">
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:InterdisciplinairProject.Views"
+             xmlns:views="clr-namespace:InterdisciplinairProject.Views"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:viewmodels="clr-namespace:InterdisciplinairProject.ViewModels"
+             d:DataContext="{d:DesignInstance Type=viewmodels:ShowbuilderViewModel}"
+             mc:Ignorable="d"
+             Height="auto" Width="auto"
+             Background="White">
+
+    <UserControl.Resources>
+        <!-- ToolBar Tray styling -->
+        <SolidColorBrush x:Key="ToolBarTrayBackground" Color="White"/>
+        <Style x:Key="ToolBarTrayStyle1" TargetType="{x:Type ToolBarTray}">
+            <Setter Property="Background" Value="{StaticResource ToolBarTrayBackground}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Source={x:Static SystemParameters.HighContrast}}" Value="true">
+                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ToolBar style without overflow or gripper -->
+        <Style x:Key="ToolBarStyleClean" TargetType="{x:Type ToolBar}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToolBar}">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Padding="{TemplateBinding Padding}">
+                            <ToolBarPanel IsItemsHost="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <DockPanel>
-        <ToolBarTray DockPanel.Dock="Top">
-            <ToolBar>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                    <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
-                    <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,15,0" VerticalAlignment="Center" Height="21"/>
+        <!-- Clean toolbar -->
+        <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource ToolBarTrayStyle1}" IsLocked="True">
+            <ToolBar Style="{StaticResource ToolBarStyleClean}">
+                <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
+                <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,15,0" VerticalAlignment="Center" Height="21"/>
 
-                    <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0" 
+                <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
-                    <Button Content="Import Show" Command="{Binding OpenShowCommand}" Margin="2,0"
+                <Button Content="Import Show" Command="{Binding OpenShowCommand}" Margin="2,0"
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
-                    <Button Content="Save" Command="{Binding SaveCommand}" Margin="2,0" 
+                <Button Content="Save" Command="{Binding SaveCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
-                    <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="2,0" 
+                <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
-                    <Button Content="Create Show" Command="{Binding CreateShowCommand}" Margin="2,0" 
+                <Button Content="Create Show" Command="{Binding CreateShowCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
-                </StackPanel>
             </ToolBar>
         </ToolBarTray>
 
+        <!-- Main grid layout -->
         <Grid Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
 
-            <ListBox x:Name="sceneListView"
-                     Margin="0,10,5,0"
-                     Grid.Column="0"
-                     ItemsSource="{Binding Scenes}"
-                     BorderBrush="#CCC"
-                     BorderThickness="1"
-                     Background="#FAFAFA"
-                     SelectionMode="Single"
-                     HorizontalContentAlignment="Center">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
+            <!-- Scenes list -->
+            <ScrollViewer Grid.Column="0"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Margin="0,10,5,0">
+                <ListBox x:Name="sceneListView"
+                         ItemsSource="{Binding Scenes}"
+                         BorderBrush="#CCC"
+                         BorderThickness="1"
+                         Background="#FAFAFA"
+                         SelectionMode="Single"
+                         HorizontalContentAlignment="Center">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
 
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <views:SceneControl x:Name="scenecontrol" Margin="0.5"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <views:SceneControl x:Name="scenecontrol" Margin="0.5"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}" CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}"
+                                                   CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+            </ScrollViewer>
 
             <GridSplitter Grid.Column="0"
                           Width="5"
                           Background="Gray"
-                          ShowsPreview="True" Margin="0,10,0,0" />
+                          ShowsPreview="True"
+                          Margin="0,10,0,0" />
 
+            <!-- Fixtures list -->
             <ListView x:Name="fixtureListView"
                       Grid.Column="1"
                       Margin="10,10,10,10"
                       BorderBrush="#DDD"
                       BorderThickness="1"
                       Background="#FAFAFA"
-                      ItemsSource="{Binding SelectedScene.Fixtures}">
+                      ItemsSource="{Binding SelectedScene.Fixtures}"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Fixture id" Width="200" DisplayMemberBinding="{Binding Id}" />
