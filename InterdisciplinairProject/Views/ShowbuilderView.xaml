@@ -50,6 +50,7 @@
         <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource ToolBarTrayStyle1}" IsLocked="True">
             <ToolBar Style="{StaticResource ToolBarStyleClean}">
                 <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
+   
                 <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,15,0" VerticalAlignment="Center" Height="21"/>
 
                 <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0" 
@@ -62,6 +63,7 @@
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
                 <Button Content="Create Show" Command="{Binding CreateShowCommand}" Margin="2,0" 
                     Background="#E0E0E0" BorderBrush="#B0B0B0" Padding="5,2"/>
+                <Label Content="{Binding Message}" />
             </ToolBar>
         </ToolBarTray>
 

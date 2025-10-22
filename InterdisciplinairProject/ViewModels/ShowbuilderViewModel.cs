@@ -31,6 +31,9 @@ namespace InterdisciplinairProject.ViewModels
         [ObservableProperty]
         private string? currentShowName;
 
+        [ObservableProperty]
+        private string? message;
+
         // ============================================================
         // CREATE SHOW
         // ============================================================
@@ -56,8 +59,7 @@ namespace InterdisciplinairProject.ViewModels
 
                 _currentShowPath = null;
 
-                MessageBox.Show($"Nieuwe show '{vm.ShowName}' aangemaakt!",
-                    "Nieuwe Show", MessageBoxButton.OK, MessageBoxImage.Information);
+                Message = $"Nieuwe show '{vm.ShowName}' aangemaakt!";
             }
         }
 
@@ -84,13 +86,11 @@ namespace InterdisciplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         Scenes.Add(scene);
-                        MessageBox.Show($"Scene '{scene.Name}' imported successfully!",
-                            "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                        Message = $"Scene '{scene.Name}' imported successfully!";
                     }
                     else
                     {
-                        MessageBox.Show("This scene has already been imported.",
-                            "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        Message = "This scene has already been imported.";
                     }
                 }
             }
@@ -135,7 +135,7 @@ namespace InterdisciplinairProject.ViewModels
                 {
                     string path = saveFileDialog.FileName;
                     SaveShowToPath(path);
-                    _currentShowPath = path;
+                    _currentShowPath = path;      
                     MessageBox.Show($"Show saved to '{path}'",
                         "Save As", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -193,16 +193,14 @@ namespace InterdisciplinairProject.ViewModels
                     var doc = JsonDocument.Parse(jsonString);
                     if (!doc.RootElement.TryGetProperty("show", out var showElement))
                     {
-                        MessageBox.Show("Het geselecteerde bestand bevat geen geldige 'show'-structuur.",
-                            "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Message = "Het geselecteerde bestand bevat geen geldige 'show'-structuur.";
                         return;
                     }
 
                     var loadedShow = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
                     if (loadedShow == null)
                     {
-                        MessageBox.Show("Kon show niet deserialiseren. Bestand mogelijk corrupt.",
-                            "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                        Message = "Kon show niet deserialiseren. Bestand mogelijk corrupt.";
                         return;
                     }
 
@@ -219,19 +217,16 @@ namespace InterdisciplinairProject.ViewModels
                             Scenes.Add(scene);
                     }
 
-                    MessageBox.Show($"Show '{_show.Name}' succesvol geopend!",
-                        "Show geladen", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Message = $"Show '{_show.Name}' succesvol geopend!";
                 }
             }
             catch (JsonException)
             {
-                MessageBox.Show("Het geselecteerde bestand bevat ongeldige JSON.",
-                    "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                Message = "Het geselecteerde bestand bevat ongeldige JSON.";
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Er is een fout opgetreden bij het openen van de show:\n{ex.Message}",
-                    "Fout bij laden", MessageBoxButton.OK, MessageBoxImage.Error);
+                Message = $"Er is een fout opgetreden bij het openen van de show:\n{ex.Message}";
             }
         }
 
