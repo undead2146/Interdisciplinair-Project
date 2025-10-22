@@ -94,6 +94,8 @@ namespace InterdisciplinairProject.ViewModels
         {
             SelectedScene = selectedScene;
         }
+
+        [RelayCommand]
         private void SaveAs()
         {
             try
