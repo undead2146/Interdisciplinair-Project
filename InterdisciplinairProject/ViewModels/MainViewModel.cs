@@ -4,13 +4,27 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace InterdiscplinairProject.ViewModels
+namespace InterdisciplinairProject.ViewModels
 {
+/// <summary>
+/// Main ViewModel for the InterdisciplinairProject application.
+/// <remarks>
+/// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
+/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
+/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
+/// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
+/// </remarks>
+/// <seealso cref="ObservableObject" />
+/// <seealso cref="MainWindow" />
+/// </summary>
     public partial class MainViewModel : ObservableObject
     {
         [ObservableProperty]
         private string title = "InterdisciplinairProject - DMX Lighting Control";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+    /// </summary>
         [ObservableProperty]
         private object? currentView;
 
@@ -22,13 +36,14 @@ namespace InterdiscplinairProject.ViewModels
         {
             Debug.WriteLine("[DEBUG] MainViewModel ctor");
             OpenFixturesCommand = new RelayCommand(OpenFixtures);
+        // Initialize ViewModel, e.g., load services from DI if injected
             OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
             OpenSceneCommand = new RelayCommand(OpenScene);
 
             // Default landing view
             CurrentView = new TextBlock
             {
-                Text = "Welcome — choose a module above",
+                Text = "Welcome ï¿½ choose a module above",
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
                 FontSize = 18
@@ -43,13 +58,13 @@ namespace InterdiscplinairProject.ViewModels
 
         private void OpenFixtureSettings()
         {
-            // Must be a UserControl now (we’ll convert the view below)
+            // Must be a UserControl now (weï¿½ll convert the view below)
             CurrentView = new InterdisciplinairProject.Views.FixtureSettingsView();
         }
 
         private void OpenScene()
         {
-            // Placeholder — you can replace with your real Scene view later
+            // Placeholder ï¿½ you can replace with your real Scene view later
             CurrentView = new InterdisciplinairProject.Views.SceneView();
         }
     }
