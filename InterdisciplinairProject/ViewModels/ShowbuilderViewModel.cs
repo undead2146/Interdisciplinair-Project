@@ -85,6 +85,8 @@ namespace InterdisciplinairProject.ViewModels
                     Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
+                        // ensure imported scene slider starts at 0
+                        scene.Dimmer = 0;
                         Scenes.Add(scene);
                         Message = $"Scene '{scene.Name}' imported successfully!";
                     }
@@ -214,7 +216,11 @@ namespace InterdisciplinairProject.ViewModels
                     if (_show.Scenes != null)
                     {
                         foreach (var scene in _show.Scenes)
+                        {
+                            // when opening/importing a show, reset dimmer to 0 so sliders start off
+                            scene.Dimmer = 0;
                             Scenes.Add(scene);
+                        }
                     }
 
                     Message = $"Show '{_show.Name}' succesvol geopend!";

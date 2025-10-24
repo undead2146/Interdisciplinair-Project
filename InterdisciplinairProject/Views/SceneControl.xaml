@@ -28,7 +28,7 @@
         
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
             <!-- top indicator button with toggle functionality (red/green) -->
-            <ToggleButton Width="50" Height="50" Margin="0,4">
+            <ToggleButton x:Name="PART_TopToggle" Width="50" Height="50" Margin="0,4" IsChecked="{Binding IsActive, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Template">
@@ -74,6 +74,7 @@
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter TargetName="ButtonEllipse" Property="Opacity" Value="0.8"/>
                                         </Trigger>
+                                        <!-- when manually toggled off, visual remains red via IsChecked False -->
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -88,10 +89,10 @@
                        FontSize="16"
                        Foreground="#2C3E50"
                        HorizontalAlignment="Center" 
-                       Margin="0,8,0,4" />
+                       Margin="0,8,0,18" />
 
             <!-- vertical dimmer slider with modern design -->
-            <Border x:Name="SliderContainer" Width="60" Height="240" CornerRadius="4" Margin="0,8" Background="#F5F5F5">
+            <Border x:Name="SliderContainer" Width="60" Height="240" CornerRadius="4" Margin="0,8" Background="Transparent">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="4" ShadowDepth="2" Direction="270"/>
                 </Border.Effect>
@@ -103,7 +104,7 @@
                         </Border.Effect>
                         
                         <!-- Yellow fill that grows from bottom inside the container -->
-                        <Border VerticalAlignment="Bottom" CornerRadius="0">
+                        <Border x:Name="PART_Fill" VerticalAlignment="Bottom" CornerRadius="0">
                             <Border.Height>
                                 <MultiBinding Converter="{StaticResource PercentageHeightConverter}">
                                     <Binding ElementName="PART_DimmerSlider" Path="Value"/>
@@ -111,7 +112,7 @@
                                 </MultiBinding>
                             </Border.Height>
                             <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <LinearGradientBrush x:Name="PART_FillGradient" StartPoint="0,0" EndPoint="0,1">
                                     <GradientStop Color="#FFE082" Offset="0"/>
                                     <GradientStop Color="#FFD54F" Offset="0.5"/>
                                     <GradientStop Color="#FFC107" Offset="1"/>
@@ -120,15 +121,15 @@
                         </Border>
                     </Border>
                     
-                    <Slider Name="PART_DimmerSlider" 
-                            Orientation="Vertical" 
-                            Minimum="0" 
-                            Maximum="100" 
-                            Value="{Binding Dimmer, Mode=TwoWay}" 
-                            HorizontalAlignment="Center" 
-                            VerticalAlignment="Stretch"
-                            Margin="0"
-                            Background="Transparent">
+            <Slider Name="PART_DimmerSlider" 
+                Orientation="Vertical" 
+                Minimum="0" 
+                Maximum="100" 
+                Value="{Binding ViewModel.Dimmer, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Stretch"
+                Margin="0"
+                Background="Transparent">
                         <Slider.Style>
                             <Style TargetType="Slider">
                                 <Setter Property="Template">
@@ -181,6 +182,7 @@
                                                             <Thumb.Template>
                                                                 <ControlTemplate TargetType="Thumb">
                                                                     <Grid>
+                                                                        <!-- Thumb background rectangle -->
                                                                         <Rectangle Width="52" Height="25" RadiusX="4" RadiusY="4" Stroke="White" StrokeThickness="2">
                                                                             <Rectangle.Fill>
                                                                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
@@ -193,6 +195,15 @@
                                                                                 <DropShadowEffect Color="#1565C0" Opacity="0.6" BlurRadius="8" ShadowDepth="2"/>
                                                                             </Rectangle.Effect>
                                                                         </Rectangle>
+
+                                                                        <!-- Percentage label bound to Slider.Value -->
+                                                                        <Border Background="#66000000" CornerRadius="3" Padding="2" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-22,0,0">
+                                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center">
+                                                                                <TextBlock.Text>
+                                                                                    <Binding Path="Value" RelativeSource="{RelativeSource AncestorType=Slider}" StringFormat="{}{0:0}%"/>
+                                                                                </TextBlock.Text>
+                                                                            </TextBlock>
+                                                                        </Border>
                                                                     </Grid>
                                                                 </ControlTemplate>
                                                             </Thumb.Template>
