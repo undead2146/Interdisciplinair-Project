@@ -113,25 +113,82 @@
                           Width="5"
                           Background="Gray"
                           ShowsPreview="True" Margin="0,0,0,0" />
-
-            <!-- Fixtures list -->
-            <ListView x:Name="fixtureListView"
-                      Grid.Column="1"
-                      Grid.RowSpan="2"
-                      Margin="0"
-                      BorderBrush="#DDD"
-                      BorderThickness="1"
-                      Background="#FAFAFA"
-                      ItemsSource="{Binding SelectedScene.Fixtures}"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Fixture id" Width="200" DisplayMemberBinding="{Binding Id}" />
-                        <GridViewColumn Header="Instance id" Width="150" DisplayMemberBinding="{Binding InstanceId}" />
-                        <GridViewColumn Header="Name" Width="100" DisplayMemberBinding="{Binding Name}" />
-                    </GridView>
-                </ListView.View>
-            </ListView>
+            <!-- Fixtures as visual cards -->
+            <ListBox x:Name="fixtureListView"
+                 Grid.Column="1"
+                 Grid.RowSpan="2"
+                 Margin="5"
+                 BorderBrush="#DDD"
+                 BorderThickness="1"
+                 Background="WhiteSmoke"
+                 ItemsSource="{Binding SelectedScene.Fixtures}"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="8"
+                    BorderBrush="#B0B0B0"
+                    BorderThickness="1"
+                    Margin="5"
+                    Padding="10"
+                    Background="White"
+                    SnapsToDevicePixels="True">
+                            <StackPanel>
+                                <!-- Fixture title -->
+                                <TextBlock Text="{Binding Name}"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8" />
+                                <!-- Fixture ID -->
+                                <StackPanel Margin="0,0,0,4">
+                                    <TextBlock Text="Fixture ID:" FontWeight="SemiBold" Foreground="#666"/>
+                                    <TextBlock Text="{Binding Id}" />
+                                </StackPanel>
+                                <!-- Instance ID -->
+                                <StackPanel Margin="0,0,0,10">
+                                    <TextBlock Text="Instance ID:" FontWeight="SemiBold" Foreground="#666"/>
+                                    <TextBlock Text="{Binding InstanceId}" />
+                                </StackPanel>
+                                <!-- Channels -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <!-- Dimmer -->
+                                    <StackPanel Margin="0,0,10,0">
+                                        <TextBlock Text="Dimmer"
+                                       Foreground="#666"
+                                       FontSize="12"/>
+                                        <TextBlock Text="{Binding Channels.Dimmer}"
+                                       FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <!-- Red -->
+                                    <StackPanel Margin="0,0,10,0">
+                                        <TextBlock Text="R"
+                                       Foreground="Red"
+                                       FontSize="12"/>
+                                        <TextBlock Text="{Binding Channels.Red}"
+                                       FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <!-- Green -->
+                                    <StackPanel Margin="0,0,10,0">
+                                        <TextBlock Text="G"
+                                       Foreground="Green"
+                                       FontSize="12"/>
+                                        <TextBlock Text="{Binding Channels.Green}"
+                                       FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <!-- Blue -->
+                                    <StackPanel>
+                                        <TextBlock Text="B"
+                                       Foreground="Blue"
+                                       FontSize="12"/>
+                                        <TextBlock Text="{Binding Channels.Blue}"
+                                       FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
     </DockPanel>
 </UserControl>
