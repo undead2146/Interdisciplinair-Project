@@ -1,0 +1,29 @@
+﻿<Window x:Class="InterdisciplinairProject.Fixtures.Views.RegisterManufacturerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Nieuwe Fabrikant Registreren" 
+        Height="150" 
+        Width="350" 
+        WindowStartupLocation="CenterScreen" 
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <StackPanel Margin="15">
+        <TextBlock Text="Voer de naam van de nieuwe fabrikant in:" Margin="0,0,0,8"/>
+        <TextBox x:Name="NameTextBox" 
+                 Margin="0,0,0,15"
+                 KeyDown="NameTextBox_KeyDown"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Registreren" 
+                    Click="Register_Click" 
+                    Width="100" 
+                    Margin="0,0,8,0"
+                    IsDefault="True"/>
+            <Button Content="Annuleren" 
+                    IsCancel="True" 
+                    Width="100"/>
+        </StackPanel>
+    </StackPanel>
+</Window>

@@ -1,60 +1,87 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
+using System.Linq;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class ChannelViewModel : ObservableObject
     {
-        // De eigenschap die de UI vertelt om te schakelen tussen TextBlock en TextBox
+
+        // --- INTERACTIE EIGENSCHAPPEN (Gebruikt door FixtureCreateView.xaml.cs) ---
         [ObservableProperty]
         private bool isEditing;
 
-        // De eigenschap die bepaalt of het kanaal is uitgeklapt (voor de dropdown)
         [ObservableProperty]
         private bool isExpanded;
 
+        // --- MODEL & WRAPPERS ---
         private Channel _model;
 
+        // Wrapper voor Model.Name
         public string Name
         {
             get => _model.Name;
             set => SetProperty(_model.Name, value, _model, (m, v) => m.Name = v);
         }
 
-        public string Type => _model.Type;
+        // Wrapper voor Model.Value (De Parameter is de string die wordt opgeslagen in JSON)
+        public string? Parameter
+        {
+            get => _model.Value;
+            set => SetProperty(_model.Value, value, _model, (m, v) => m.Value = v);
+        }
 
-        // Lijst van beschikbare kanaaltypes voor de dropdown
+        // --- TYPE SELECTIE & WAARDE EIGENSCHAPPEN ---
+
         [ObservableProperty]
         private ObservableCollection<string> availableTypes = new()
         {
-            "Lamp",
-            "Ster",
-            "Klok",
-            "Tilt",
-            "Ventilator",
-            "Rood",
-            "Groen",
-            "Blauw",
-            "Wit",
+            "Lamp", "Ster", "Klok", "Tilt", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
         };
 
-        // Geselecteerd type in de dropdown
         [ObservableProperty]
-        private string selectedType;
+        private string selectedType; // Bindt aan de ComboBox
 
-        // NEW: slider value for Rood/Groen/Blauw/Wit (0-255)
         [ObservableProperty]
-        private int level = 0;
+        private int level = 0; // Bindt aan de Slider (0-255)
 
-        // NEW: free text parameter for Lamp/Ster/Klok/Ventilator
-        [ObservableProperty]
-        private string? parameter;
-
+        // --- CONSTRUCTOR ---
         public ChannelViewModel(Channel model)
         {
             _model = model;
-            selectedType = _model.Type; // initializeer de selectie met het huidige modeltype
+            selectedType = _model.Type;
+
+            // Initialisatie van Level op basis van modelwaarde
+            if (int.TryParse(_model.Value, out int currentLevel))
+            {
+                Level = currentLevel;
+            }
+        }
+
+        // --- MVVM SYNCHRONISATIE METHODEN ---
+
+        // Wordt automatisch aangeroepen wanneer SelectedType wijzigt
+        partial void OnSelectedTypeChanged(string value)
+        {
+            _model.Type = value;
+            Level = 0; // Reset level bij typeverandering
+
+            // Forceer Level om de Parameter/Value te schrijven als het een 'level' type is
+            if (new[] { "Rood", "Groen", "Blauw", "Wit" }.Contains(value))
+            {
+                OnLevelChanged(Level);
+            }
+        }
+
+        // Wordt automatisch aangeroepen wanneer Level wijzigt
+        partial void OnLevelChanged(int value)
+        {
+            // Cruciale fix: zet de int Level om naar string voor opslag in _model.Value
+            _model.Value = value.ToString();
+
+            // Notificatie om UI elementen die aan Parameter zijn gebonden, bij te werken (bijv. TextBox)
+            OnPropertyChanged(nameof(Parameter));
         }
     }
 }

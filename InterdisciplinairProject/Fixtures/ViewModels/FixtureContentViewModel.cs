@@ -4,14 +4,16 @@ using InterdisciplinairProject.Fixtures.Models;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows.Input;
+using System; // Toegevoegd voor EventHandler
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureContentViewModel : ObservableObject
     {
         private string? _name;
+        private string? _manufacturer; // NIEUW: Backing field voor de Fabrikant property
 
-        public event EventHandler? DeleteRequested;
+        public event EventHandler? DeleteRequested;
 
         public event EventHandler? BackRequested;
 
@@ -21,6 +23,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             get => _name;
             set => SetProperty(ref _name, value);
+        }
+
+        // NIEUW: Publieke property voor Fabrikant (US 2, 3, 8)
+        public string? Manufacturer
+        {
+            get => _manufacturer;
+            set => SetProperty(ref _manufacturer, value);
         }
 
         public ObservableCollection<Channel> Channels { get; set; } = new();
@@ -51,6 +60,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (parsed != null)
             {
                 Name = parsed.Name ?? string.Empty;
+
+                // NIEUW: Laad de fabrikant uit het geparsete model
+                Manufacturer = parsed.Manufacturer ?? "Custom";
+
                 Channels.Clear();
                 if (parsed.Channels != null)
                 {
