@@ -108,6 +108,8 @@
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
+
+                                        
                                 </Grid>
 
                                 <Border x:Name="OptionsPanel" 
@@ -136,8 +138,19 @@
                                             <TextBlock Text="Input value" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <TextBox x:Name="inputValue" Text="{Binding Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
                                         </StackPanel>
+
+                                        
                                     </StackPanel>
                                 </Border>
+                                <!-- NEW: Delete button shown only while editing -->
+                                <Button x:Name="DeleteButton"
+                                            Grid.Column="1"
+                                            Content="Delete"
+                                            Padding="6,2"
+                                            Margin="0,10,0,10"
+                                            Visibility="Collapsed"
+                                            Command="{Binding DataContext.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding .}"/>
                             </StackPanel>
                         </Border>
 
@@ -146,10 +159,13 @@
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                                
+
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                 <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="DeleteButton" Property="Visibility" Value="Visible" />
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding SelectedType}" Value="Rood">

@@ -47,6 +47,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand CancelCommand { get; }
         public ICommand RegisterManufacturerCommand { get; }
 
+
+
         // --- CONSTRUCTOR ---
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
@@ -238,6 +240,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 Value = "0"
             };
             Channels.Add(new ChannelViewModel(newModel));
+            (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged(); //allows first channel to be deleted after addition or deletetion
         }
 
         private bool CanDeleteChannel(ChannelViewModel? channel)
@@ -250,6 +253,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (channel != null)
             {
                 Channels.Remove(channel);
+                (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged(); //allows first channel to be deleted after addition or deletetion
             }
         }
 
