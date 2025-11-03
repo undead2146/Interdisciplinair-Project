@@ -265,7 +265,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (SelectedFixture == null)
                 return;
 
-            string sourcePath = Path.Combine(_fixturesFolder, SelectedFixture.Name + ".json");
+            string sourcePath = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
             if (!File.Exists(sourcePath))
             {
                 System.Windows.MessageBox.Show("Fixture file not found: " + sourcePath);

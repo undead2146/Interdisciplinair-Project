@@ -16,7 +16,7 @@
                  Margin="0,0,0,15"
                  KeyDown="NameTextBox_KeyDown"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Register" 
+            <Button Content="Add" 
                     Click="Register_Click" 
                     Width="100" 
                     Margin="0,0,8,0"
