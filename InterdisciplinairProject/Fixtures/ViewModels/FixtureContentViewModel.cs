@@ -12,8 +12,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
     {
         private string? _name;
         private string? _manufacturer; // NIEUW: Backing field voor de Fabrikant property
+        private string? _imagePath;
 
-        public event EventHandler? DeleteRequested;
+        public event EventHandler? DeleteRequested;
 
         public event EventHandler? BackRequested;
 
@@ -30,6 +31,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             get => _manufacturer;
             set => SetProperty(ref _manufacturer, value);
+        }
+
+        public string? ImagePath
+        {
+            get => _imagePath;
+            set => SetProperty(ref _imagePath, value);
         }
 
         public ObservableCollection<Channel> Channels { get; set; } = new();

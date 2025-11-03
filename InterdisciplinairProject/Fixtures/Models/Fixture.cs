@@ -26,6 +26,9 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("channels")]
         public ObservableCollection<Channel> Channels { get; set; } = new ObservableCollection<Channel>();
 
+        [JsonPropertyName("imagePath")]
+        public string ImagePath { get; set; } = string.Empty;
+
         public Fixture(string name)
         {
             Name = name;

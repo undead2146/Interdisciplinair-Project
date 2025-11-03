@@ -52,6 +52,17 @@
                         Background="#FF9800"
                         Foreground="White"
                         FontWeight="Bold"/>
+                
+                <Button Grid.Column="3" 
+                Content="Add Image" 
+                Command="{Binding AddImageCommand}"
+                VerticalAlignment="Center"
+                Padding="5,3"
+                Margin="45,0,178,0"
+                Background="#77DD11"
+                Foreground="White"
+                FontWeight="Bold"/>
+                
             </Grid>
 
             <Button 
