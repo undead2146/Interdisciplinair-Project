@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views; // Voor RegisterManufacturerWindow
-using InterdisciplinairProject.Fixtures.Services; // Voor ManufacturerService
+using InterdisciplinairProject.Fixtures.Views;
+using InterdisciplinairProject.Fixtures.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +29,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string fixtureName = "New Fixture";
 
+        // ✅ AANPASSING: Gebruik ObservableCollection voor directe UI updates
+        // Hoewel ik het als List<string> houd om zo min mogelijk de bestaande code te verstoren
         [ObservableProperty]
         private List<string> _availableManufacturers = new();
 
@@ -54,17 +56,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             _manufacturerService = new ManufacturerService();
 
-            // 💡 CRUCIALE AANPASSING VOOR PAD:
-            // Slaat op in [Uitvoeringsmap]\data
+            // Slaat op in [LocalAppData]\InterdisciplinairProject\Fixtures
             _dataDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
                 "Fixtures");
 
+            // Zorgt ervoor dat de "Unknown" map ALTIJD bestaat bij het opstarten.
+            string unknownDir = Path.Combine(_dataDir, "Unknown");
+            if (!Directory.Exists(unknownDir))
+            {
+                Directory.CreateDirectory(unknownDir);
+            }
+
 
             LoadManufacturers(); // Laadt de fabrikanten
 
-            // Initialiseer commando's in de constructor (Oplossing CS0236)
+            // Initialiseer commando's
             AddChannelCommand = new RelayCommand(AddChannel);
             DeleteChannelCommand = new RelayCommand<ChannelViewModel>(DeleteChannel, CanDeleteChannel);
             SaveCommand = new RelayCommand(SaveFixture);
@@ -76,9 +84,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 _isEditing = true;
                 FixtureName = existing.Name ?? string.Empty;
 
-                SelectedManufacturer = existing.Manufacturer ?? "None";
+                SelectedManufacturer = existing.Manufacturer ?? "Unknown";
 
-                _originalManufacturer = existing.Manufacturer ?? "None";
+                _originalManufacturer = existing.Manufacturer ?? "Unknown";
                 _originalFixtureName = existing.Name ?? string.Empty;
 
                 Channels.Clear();
@@ -90,7 +98,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             else
             {
                 _isEditing = false;
-                SelectedManufacturer = AvailableManufacturers.FirstOrDefault() ?? "None";
+                // De geselecteerde fabrikant is de eerste in de lijst, wat nu "Unknown" is.
+                SelectedManufacturer = AvailableManufacturers.FirstOrDefault();
                 AddChannel();
             }
         }
@@ -98,19 +107,32 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // --- FABRIKANT METHODEN ---
         private void LoadManufacturers()
         {
-            // De dropdown toont alle geregistreerde fabrikanten
-            AvailableManufacturers = _manufacturerService.GetManufacturers();
+            // ✅ AANPASSING: Wis eerst de bestaande lijst om duplicaten te voorkomen
+            // Dit is belangrijk als de Service of een andere methode deze lijst elders beïnvloedt.
+            // Dit wordt nu gedaan door de hele lijst opnieuw toe te wijzen na sortering.
 
-            // 💡 AANPASSING 1/2: "Default" vervangen door "Unknown"
-            if (!AvailableManufacturers.Any(m => m.Equals("None", StringComparison.OrdinalIgnoreCase)))
-            {
-                AvailableManufacturers.Insert(0, "Unknown");
-            }
+            // 1. Leest de namen van fysiek bestaande mappen.
+            var directoryInfo = new DirectoryInfo(_dataDir);
+            var currentManufacturers = directoryInfo.GetDirectories()
+                                                    .Select(d => d.Name)
+                                                    .ToList();
+
+            // 2. Verwijder de mapnaam "Unknown" uit de lijst als deze via de mapnamen is gelezen.
+            currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
+
+            // 3. Sorteer de overige fabrikanten alfabetisch.
+            var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
+
+            // 4. Maak een nieuwe lijst: Begin met "Unknown" en voeg de rest toe.
+            var finalManufacturerList = new List<string> { "Unknown" };
+            finalManufacturerList.AddRange(sortedOtherManufacturers);
+
+            // 5. Wijs de nieuwe, unieke en gesorteerde lijst toe aan de Observable Property.
+            AvailableManufacturers = finalManufacturerList;
         }
 
         private void ExecuteRegisterManufacturer()
         {
-            // US: Er is een knop "Nieuwe fabrikant registreren" aanwezig
             var registerWindow = new RegisterManufacturerWindow();
             if (Application.Current.MainWindow != null)
             {
@@ -122,23 +144,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string newManufacturerName = registerWindow.ManufacturerName;
                 if (_manufacturerService.RegisterManufacturer(newManufacturerName))
                 {
-                    // US: De dropdown wordt automatisch bijgewerkt
-                    LoadManufacturers();
-                    SelectedManufacturer = newManufacturerName;
-
-                    // US: Als een nieuwe fabrikant wordt aangemaakt -> folder voor deze fabrikant wordt aangemaakt
-                    // De map wordt direct onder de _dataDir (data) gemaakt.
+                    // Map aanmaken voor de nieuwe fabrikant
                     string manufacturerDir = Path.Combine(_dataDir, SanitizeFileName(newManufacturerName));
                     if (!Directory.Exists(manufacturerDir))
                     {
                         Directory.CreateDirectory(manufacturerDir);
                     }
 
+                    // De dropdown wordt automatisch bijgewerkt NA aanmaken map (via LoadManufacturers).
+                    LoadManufacturers();
+                    SelectedManufacturer = newManufacturerName;
+
+
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    // US: Fabrikantnaam mag niet leeg zijn en mag niet al bestaan
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -155,20 +176,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
 
             // --- PAD PREPARATIE ---
-            // 💡 AANPASSING 2/2: Standaardwaarde voor fabrikant bij opslaan is nu "Unknown"
             string manufacturer = SelectedManufacturer ?? "Unknown";
             string safeManufacturerName = SanitizeFileName(manufacturer);
             string safeFixtureName = SanitizeFileName(FixtureName);
 
-            // US: Als de map voor de fabrikant nog niet bestaat, wordt deze automatisch aangemaakt
-            // manufacturerDir is nu [ProjectDir]\data\[fabrikantnaam]
+            // Als de map voor de fabrikant nog niet bestaat, wordt deze aangemaakt
             string manufacturerDir = Path.Combine(_dataDir, safeManufacturerName);
             if (!Directory.Exists(manufacturerDir))
             {
                 Directory.CreateDirectory(manufacturerDir);
             }
 
-            // US: Bij het opslaan van een fixture wordt het bestand opgeslagen in data/fabrikant.
             string newFilePath = Path.Combine(manufacturerDir, $"{safeFixtureName}.json");
 
             // Dubbele Bestandsnaam Check
@@ -204,14 +222,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // --- OPSLAG ---
             try
             {
-
-                // OUDE BESTAND VERWIJDEREN (bij hernoemen/verplaatsen)
+                // OUDE BESTAND VERWIEDEREN (bij hernoemen/verplaatsen)
                 if (_isEditing && (_originalFixtureName != FixtureName || _originalManufacturer != manufacturer))
                 {
                     string safeOriginalManufacturerName = SanitizeFileName(_originalManufacturer!);
                     string safeOriginalFixtureName = SanitizeFileName(_originalFixtureName!);
 
-                    // Old path is nu ook aangepast naar [ProjectDir]\data/[fabrikantnaam]/[fixturenaam].json
                     string oldFilePath = Path.Combine(
                         _dataDir,
                         safeOriginalManufacturerName,
@@ -226,6 +242,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // NIEUW BESTAND OPSLAAN
                 File.WriteAllText(newFilePath, json);
                 MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Laad de fabrikanten opnieuw om de lijst bij te werken (indien een nieuwe map is gemaakt).
+                LoadManufacturers();
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
                 BackRequested?.Invoke(this, EventArgs.Empty);
@@ -246,7 +265,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 Value = "0"
             };
             Channels.Add(new ChannelViewModel(newModel));
-            (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged(); //allows first channel to be deleted after addition or deletetion
+            (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
         }
 
         private bool CanDeleteChannel(ChannelViewModel? channel)
@@ -259,7 +278,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (channel != null)
             {
                 Channels.Remove(channel);
-                (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged(); //allows first channel to be deleted after addition or deletetion
+                (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
             }
         }
 
@@ -279,7 +298,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private string SanitizeFileName(string name)
         {
-            // US: Ongeldige tekens in de fixture- of fabrikantnaam worden verwijderd of vervangen
+            // Ongeldige tekens in de fixture- of fabrikantnaam worden verwijderd of vervangen
             string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
             string invalidRegex = string.Format(@"[{0}]", invalidChars);
             return Regex.Replace(name, invalidRegex, "_");
