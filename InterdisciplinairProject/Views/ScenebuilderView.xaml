@@ -6,89 +6,128 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="12"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <!-- Prominent button -->
-        <Button x:Name="NewSceneButton"
-                Grid.Row="0"
-                Content="Nieuwe Scene"
-                FontSize="16"
-                Padding="12,8"
-                HorizontalAlignment="Left"
-                Width="180"
-                Command="{Binding NewSceneCommand}"
-                Background="#FF2D6CDF"
-                Foreground="White"
-                BorderThickness="0"/>
+        <!-- Linker kolom met scene lijst -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- Spacer -->
-        <Border Grid.Row="1"/>
+            <!-- Prominent button -->
+            <Button x:Name="NewSceneButton"
+                    Grid.Row="0"
+                    Content="Nieuwe Scene"
+                    FontSize="16"
+                    Padding="12,8"
+                    HorizontalAlignment="Left"
+                    Width="180"
+                    Command="{Binding NewSceneCommand}"
+                    Background="#FF2D6CDF"
+                    Foreground="White"
+                    BorderThickness="0"/>
 
-        <!-- Overview list (aligned with button) -->
-        <Border Grid.Row="2" 
-                Background="#FFF" 
-                CornerRadius="4" 
-                BorderBrush="#FFE0E0E0" 
-                BorderThickness="1"
-                HorizontalAlignment="Left"
-                Width="{Binding ElementName=NewSceneButton, Path=Width}">
-            <DockPanel Margin="8">
-                <TextBlock DockPanel.Dock="Top" 
-                         Text="Overzicht scenes" 
-                         FontWeight="Bold" 
-                         Margin="0,0,0,8"/>
-                <ListBox ItemsSource="{Binding Scenes}"
-                        BorderThickness="0"
-                         HorizontalContentAlignment="Stretch">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+            <!-- Spacer -->
+            <Border Grid.Row="1"/>
 
-                                <TextBlock Text="{Binding Name}" 
-                                     TextWrapping="Wrap"
-                                     Padding="6"/>
-                                <!-- Delete knop met rood kruis -->
-                                <Button Grid.Column="1"
-                                        Command="{Binding DataContext.DeleteSceneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Padding="8"
-                                        Margin="4,0,0,0"
-                                        Cursor="Hand"
-                                        ToolTip="Scene verwijderen"
-                                        HorizontalAlignment="Right">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#FFFFE0E0"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                    <TextBlock Text="X" 
-                                             FontSize="12" 
-                                             FontWeight="Bold"
-                                             Foreground="#FFD32F2F"
-                                             VerticalAlignment="Center"
-                                             HorizontalAlignment="Center"/>
-                                </Button>
-                            </Grid>
+            <!-- Overview list (aligned with button) -->
+            <Border Grid.Row="2" 
+                    Background="#FFF" 
+                    CornerRadius="4" 
+                    BorderBrush="#FFE0E0E0" 
+                    BorderThickness="1"
+                    HorizontalAlignment="Left"
+                    Width="{Binding ElementName=NewSceneButton, Path=Width}">
+                <DockPanel Margin="8">
+                    <TextBlock DockPanel.Dock="Top" 
+                             Text="Overzicht scenes" 
+                             FontWeight="Bold" 
+                             Margin="0,0,0,8"/>
+                    <ListBox ItemsSource="{Binding Scenes}"
+                             BorderThickness="0"
+                             HorizontalContentAlignment="Stretch"
+                             SelectedItem="{Binding SelectedScene, Mode=TwoWay}"
+                             MouseDoubleClick="ListBox_MouseDoubleClick">
 
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </DockPanel>
-        </Border>
+                        <!-- Schakel selectie visueel uit -->
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <!-- Hover effect -->
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FFF0F0F0"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding Name}" 
+                                         TextWrapping="Wrap"
+                                         Padding="6"/>
+                                    <!-- Delete knop met rood kruis -->
+                                    <Button Grid.Column="1"
+                                            Command="{Binding DataContext.DeleteSceneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="8"
+                                            Margin="4,0,0,0"
+                                            Cursor="Hand"
+                                            ToolTip="Scene verwijderen"
+                                            HorizontalAlignment="Right">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FFFFE0E0"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <TextBlock Text="X" 
+                                                 FontSize="12" 
+                                                 FontWeight="Bold"
+                                                 Foreground="#FFD32F2F"
+                                                 VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- Rechter kolom: hier wordt de SceneEditorView geladen -->
+        <ContentControl Grid.Column="2" 
+                       Content="{Binding CurrentView}"/>
     </Grid>
 </UserControl>

@@ -17,11 +17,11 @@ namespace InterdisciplinairProject.Views
         {
             Debug.WriteLine("[DEBUG] FixtureSettingsView constructor called");
             InitializeComponent();
-            DataContext = new FixtureSettingsViewModel();
-            Debug.WriteLine("[DEBUG] FixtureSettingsView DataContext set to FixtureSettingsViewModel");
             Debug.WriteLine("[DEBUG] FixtureSettingsView initialization complete");
         }
 
+        // Called when the "Save" button in the XAML is clicked.
+        // Replace the body with actual save logic or invoke a ViewModel command.
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[DEBUG] Save button clicked");
@@ -29,10 +29,11 @@ namespace InterdisciplinairProject.Views
             // TODO: Implement save functionality
         }
 
+        // Called when the "Cancel" button in the XAML is clicked.
+        // Replace the body with cancel/reset/navigation logic as appropriate.
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("[DEBUG] Cancel button clicked");
-            
         }
     }
 }
