@@ -57,8 +57,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // 💡 CRUCIALE AANPASSING VOOR PAD:
             // Slaat op in [Uitvoeringsmap]\data
             _dataDir = Path.Combine(
-                Environment.CurrentDirectory,
-                "data");
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "InterdisciplinairProject",
+                "Fixtures");
+
 
             LoadManufacturers(); // Laadt de fabrikanten
 
@@ -199,6 +201,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // --- OPSLAG ---
             try
             {
+
                 // OUDE BESTAND VERWIJDEREN (bij hernoemen/verplaatsen)
                 if (_isEditing && (_originalFixtureName != FixtureName || _originalManufacturer != manufacturer))
                 {

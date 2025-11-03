@@ -66,7 +66,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _fixturesFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
-                "fixtures");
+                "Fixtures");
 
             Directory.CreateDirectory(_fixturesFolder);
 
@@ -80,7 +80,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var detailVm = new FixtureContentViewModel(json);
             detailVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
-            detailVm.DeleteRequested += (_, __) => OnFixtureDelete(detailVm.Name);
+            detailVm.DeleteRequested += (_, __) => OnFixtureDelete(detailVm.Name, detailVm.Manufacturer);
             detailVm.EditRequested += (_, contentVm) =>
             {
                 var editVm = new FixtureCreateViewModel(contentVm);
@@ -110,9 +110,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             CurrentViewModel = createVm;
         }
 
-        private void OnFixtureDelete(string fixtureName)
+        private void OnFixtureDelete(string fixtureName, string manufacturerName)
         {
-            string filePath = Path.Combine(_fixturesFolder, fixtureName + ".json");
+            string filePath = Path.Combine(_fixturesFolder,manufacturerName, fixtureName + ".json");
 
             if (!File.Exists(filePath))
             {

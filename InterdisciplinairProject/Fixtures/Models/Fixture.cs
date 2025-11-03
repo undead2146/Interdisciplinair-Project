@@ -11,12 +11,17 @@ namespace InterdisciplinairProject.Fixtures.Models
     public class Fixture
     {
         // De 'Name' property, ik ga ervan uit dat deze niet direct geserialiseerd wordt.
-        [JsonIgnore]
-        public string Name { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
 
         // NIEUW: De property voor de fabrikant (US 2, 3, 8)
         // Deze is cruciaal voor het bewerken en opslaan van de fabrikantnaam.
-        public string? Manufacturer { get; set; }
+
+        [JsonPropertyName("manufacturer")]
+        public string Manufacturer { get; set; } = string.Empty;
+
 
         [JsonPropertyName("channels")]
         public ObservableCollection<Channel> Channels { get; set; } = new ObservableCollection<Channel>();
