@@ -186,9 +186,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string? manufacturer = root["manufacturer"]?.ToString();
 
                 if (string.IsNullOrWhiteSpace(name))
+                {
                     missingFields.Add("'name'");
-                if (string.IsNullOrWhiteSpace(manufacturer))
-                    missingFields.Add("'manufacturer'");
+                }
+
+                if (string.IsNullOrWhiteSpace(manufacturer)) 
+                {
+                    manufacturer = "Unknown";
+                    root["manufacturer"] = manufacturer;
+                }
 
                 JsonArray? channels = root["channels"] as JsonArray;
                 if (channels == null || channels.Count == 0)
@@ -237,7 +243,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
 
                 // Save fixture into local fixtures folder
-                string targetPath = Path.Combine(_fixturesFolder, fixtureName + ".json");
+                string manufactorFolder = Path.Combine(_fixturesFolder, manufacturer);
+                Directory.CreateDirectory(manufactorFolder);
+                string targetPath = Path.Combine(manufactorFolder, fixtureName + ".json");
                 root["name"] = fixtureName;
 
                 File.WriteAllText(targetPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));

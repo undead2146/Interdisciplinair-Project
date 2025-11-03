@@ -167,9 +167,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string? manufacturer = root["manufacturer"]?.ToString();
 
                 if (string.IsNullOrWhiteSpace(name))
+                {
                     missingFields.Add("'name'");
+                }
+
                 if (string.IsNullOrWhiteSpace(manufacturer))
-                    missingFields.Add("'manufacturer'");
+                {
+                    manufacturer = "Unknown";
+                    root["manufacturer"] = manufacturer;
+                }
 
                 JsonArray? channels = root["channels"] as JsonArray;
                 if (channels == null || channels.Count == 0)
