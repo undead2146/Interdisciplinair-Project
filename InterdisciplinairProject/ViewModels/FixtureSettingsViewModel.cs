@@ -18,6 +18,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// <summary>
     /// Initializes a new instance of the <see cref="FixtureSettingsViewModel"/> class.
     /// </summary>
+    /// <param name="hardwareConnection">The hardware connection service.</param>
     public FixtureSettingsViewModel(IHardwareConnection hardwareConnection)
     {
         _hardwareConnection = hardwareConnection;
@@ -66,6 +67,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// <summary>
     /// Gets the current channel values from the fixture.
     /// </summary>
+    /// <returns>A dictionary of channel names and their values.</returns>
     public Dictionary<string, byte?> GetCurrentChannelValues()
     {
         if (_currentFixture == null)
