@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fixtures\Views\defaultFixturePng.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Fixtures\Views\defaultFixturePng.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
     <PackageReference Include="StyleCop.Analyzers">
