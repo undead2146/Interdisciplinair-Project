@@ -4,24 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Nieuwe Fabrikant Registreren" 
+        Title="Register new manufacturer" 
         Height="150" 
         Width="350" 
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize"
         ShowInTaskbar="False">
     <StackPanel Margin="15">
-        <TextBlock Text="Voer de naam van de nieuwe fabrikant in:" Margin="0,0,0,8"/>
+        <TextBlock Text="Fill in name of the new manufacturer:" Margin="0,0,0,8"/>
         <TextBox x:Name="NameTextBox" 
                  Margin="0,0,0,15"
                  KeyDown="NameTextBox_KeyDown"/>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Registreren" 
+            <Button Content="Register" 
                     Click="Register_Click" 
                     Width="100" 
                     Margin="0,0,8,0"
                     IsDefault="True"/>
-            <Button Content="Annuleren" 
+            <Button Content="Cancel" 
                     IsCancel="True" 
                     Width="100"/>
         </StackPanel>

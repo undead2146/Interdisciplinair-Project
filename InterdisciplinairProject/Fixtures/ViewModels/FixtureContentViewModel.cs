@@ -62,7 +62,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 Name = parsed.Name ?? string.Empty;
 
                 // NIEUW: Laad de fabrikant uit het geparsete model
-                Manufacturer = parsed.Manufacturer ?? "Custom";
+                Manufacturer = parsed.Manufacturer ?? "None";
 
                 Channels.Clear();
                 if (parsed.Channels != null)

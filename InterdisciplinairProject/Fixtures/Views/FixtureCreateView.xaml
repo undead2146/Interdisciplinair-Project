@@ -44,7 +44,7 @@
                           Padding="3"/>
 
                 <Button Grid.Column="2" 
-                        Content="Nieuwe fabrikant registreren" 
+                        Content="Register new manufacturer" 
                         Command="{Binding RegisterManufacturerCommand}"
                         VerticalAlignment="Center"
                         Padding="5,3"

@@ -27,7 +27,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         // --- Observable Properties ---
         [ObservableProperty]
-        private string fixtureName = "Nieuwe Fixture";
+        private string fixtureName = "New Fixture";
 
         [ObservableProperty]
         private List<string> _availableManufacturers = new();
@@ -76,9 +76,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 _isEditing = true;
                 FixtureName = existing.Name ?? string.Empty;
 
-                SelectedManufacturer = existing.Manufacturer ?? "Custom";
+                SelectedManufacturer = existing.Manufacturer ?? "None";
 
-                _originalManufacturer = existing.Manufacturer ?? "Custom";
+                _originalManufacturer = existing.Manufacturer ?? "None";
                 _originalFixtureName = existing.Name ?? string.Empty;
 
                 Channels.Clear();
@@ -90,7 +90,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             else
             {
                 _isEditing = false;
-                SelectedManufacturer = AvailableManufacturers.FirstOrDefault() ?? "Custom";
+                SelectedManufacturer = AvailableManufacturers.FirstOrDefault() ?? "None";
                 AddChannel();
             }
         }
@@ -100,7 +100,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             // De dropdown toont alle geregistreerde fabrikanten
             AvailableManufacturers = _manufacturerService.GetManufacturers();
-            if (!AvailableManufacturers.Any(m => m.Equals("Custom", StringComparison.OrdinalIgnoreCase)))
+            if (!AvailableManufacturers.Any(m => m.Equals("None", StringComparison.OrdinalIgnoreCase)))
             {
                 AvailableManufacturers.Insert(0, "Custom");
             }
@@ -132,12 +132,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         Directory.CreateDirectory(manufacturerDir);
                     }
 
-                    MessageBox.Show($"Fabrikant '{newManufacturerName}' succesvol geregistreerd.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
                     // US: Fabrikantnaam mag niet leeg zijn en mag niet al bestaan
-                    MessageBox.Show($"Fabrikant '{newManufacturerName}' kon niet worden geregistreerd. Naam bestaat al of opslagfout.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -148,7 +148,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // --- VALIDATIE ---
             if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
             {
-                MessageBox.Show("Gelieve alle vereiste velden in te vullen (Naam Fixture, Naam Kanaal, Type Kanaal).", "Validatie Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please fill in the following (Name Fixture, Name channel, Channel type).", "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // Dubbele Bestandsnaam Check
             if (!_isEditing && File.Exists(newFilePath))
             {
-                MessageBox.Show($"Er bestaat al een fixture met de naam '{FixtureName}' in de map van '{manufacturer}'. Gelieve een andere naam te kiezen.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"There already exist a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -222,14 +222,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 // NIEUW BESTAND OPSLAAN
                 File.WriteAllText(newFilePath, json);
-                MessageBox.Show($"Fixture '{FixtureName}' is succesvol opgeslagen in de map van '{manufacturer}'.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
                 BackRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (IOException ioEx)
             {
-                MessageBox.Show($"Fout bij het opslaan van de fixture: {ioEx.Message}", "Opslagfout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error with saving fixture: {ioEx.Message}", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -238,7 +238,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var newModel = new Channel
             {
-                Name = $"Nieuw Kanaal {Channels.Count + 1}",
+                Name = $"New Channel {Channels.Count + 1}",
                 Type = "Lamp",
                 Value = "0"
             };
@@ -263,8 +263,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private void Cancel()
         {
             var result = MessageBox.Show(
-             messageBoxText: "Weet u zeker dat u het aanmaken van deze fixture wilt annuleren?",
-             caption: "Annuleren Bevestigen",
+             messageBoxText: "Are you sure that you want to cancel making this fixture?",
+             caption: "Confirm & exit",
              button: MessageBoxButton.YesNo,
              icon: MessageBoxImage.Warning);
 
