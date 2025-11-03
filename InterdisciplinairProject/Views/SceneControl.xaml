@@ -28,7 +28,7 @@
         
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
             <!-- top indicator button with toggle functionality (red/green) -->
-            <ToggleButton x:Name="PART_TopToggle" Width="50" Height="50" Margin="0,4" IsChecked="{Binding IsActive, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=OneWay}">
+            <ToggleButton x:Name="PART_TopToggle" Width="50" Height="50" Margin="0,4">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Template">
@@ -124,8 +124,7 @@
             <Slider Name="PART_DimmerSlider" 
                 Orientation="Vertical" 
                 Minimum="0" 
-                Maximum="100" 
-                Value="{Binding ViewModel.Dimmer, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" 
+                Maximum="100"
                 HorizontalAlignment="Center" 
                 VerticalAlignment="Stretch"
                 Margin="0"
@@ -200,7 +199,7 @@
                                                                         <Border Background="#66000000" CornerRadius="3" Padding="2" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-22,0,0">
                                                                             <TextBlock Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center">
                                                                                 <TextBlock.Text>
-                                                                                    <Binding Path="Value" RelativeSource="{RelativeSource AncestorType=Slider}" StringFormat="{}{0:0}%"/>
+                                                                                    <Binding Path="Value" StringFormat="{}{0:0}%"/>
                                                                                 </TextBlock.Text>
                                                                             </TextBlock>
                                                                         </Border>
@@ -317,7 +316,9 @@
                 </Button.Style>
             </Button>
             <!-- Delete scene button -->
-            <Button Width="36" Height="28" Margin="0,6,0,0">
+            <Button Width="36" Height="28" Margin="0,6,0,0"
+                    Command="{Binding DataContext.DeleteSceneCommand, RelativeSource={RelativeSource AncestorType=local:ShowbuilderView}}"
+                    CommandParameter="{Binding}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border Background="#FFEBEE" BorderBrush="#F44336" BorderThickness="1" CornerRadius="6">

@@ -262,5 +262,25 @@ namespace InterdisciplinairProject.ViewModels
             string id = number.ToString();
             return id;
         }
+
+        // ============================================================
+        // DELETE SCENE
+        // ============================================================
+        [RelayCommand]
+        private void DeleteScene(Scene? scene)
+        {
+            if (scene == null)
+                return;
+
+            // remove from the UI collection
+            if (Scenes.Contains(scene))
+                Scenes.Remove(scene);
+
+            // keep underlying show in sync if needed
+            if (_show?.Scenes != null && _show.Scenes.Contains(scene))
+                _show.Scenes.Remove(scene);
+
+            Message = $"Scene '{scene.Name}' verwijderd.";
+        }
     }
 }
