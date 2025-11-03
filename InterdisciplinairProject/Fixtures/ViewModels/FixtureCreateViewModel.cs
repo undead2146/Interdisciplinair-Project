@@ -100,9 +100,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             // De dropdown toont alle geregistreerde fabrikanten
             AvailableManufacturers = _manufacturerService.GetManufacturers();
+
+            // 💡 AANPASSING 1/2: "Default" vervangen door "Unknown"
             if (!AvailableManufacturers.Any(m => m.Equals("None", StringComparison.OrdinalIgnoreCase)))
             {
-                AvailableManufacturers.Insert(0, "Custom");
+                AvailableManufacturers.Insert(0, "Unknown");
             }
         }
 
@@ -153,7 +155,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
 
             // --- PAD PREPARATIE ---
-            string manufacturer = SelectedManufacturer ?? "Custom";
+            // 💡 AANPASSING 2/2: Standaardwaarde voor fabrikant bij opslaan is nu "Unknown"
+            string manufacturer = SelectedManufacturer ?? "Unknown";
             string safeManufacturerName = SanitizeFileName(manufacturer);
             string safeFixtureName = SanitizeFileName(FixtureName);
 
@@ -208,7 +211,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     string safeOriginalManufacturerName = SanitizeFileName(_originalManufacturer!);
                     string safeOriginalFixtureName = SanitizeFileName(_originalFixtureName!);
 
-                    // Old path is nu ook aangepast naar [ProjectDir]\data\[fabrikantnaam]\[fixturenaam].json
+                    // Old path is nu ook aangepast naar [ProjectDir]\data/[fabrikantnaam]/[fixturenaam].json
                     string oldFilePath = Path.Combine(
                         _dataDir,
                         safeOriginalManufacturerName,
