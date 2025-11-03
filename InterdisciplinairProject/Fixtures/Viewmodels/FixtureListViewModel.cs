@@ -103,6 +103,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         if (string.IsNullOrEmpty(fixture.Manufacturer))
                             fixture.Manufacturer = "Unknown";
 
+                        if (string.IsNullOrEmpty(fixture.ImagePath))
+                        {
+                            fixture.ImagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
+                        }
+
                         allFixtures.Add(fixture);
                     }
                 }
