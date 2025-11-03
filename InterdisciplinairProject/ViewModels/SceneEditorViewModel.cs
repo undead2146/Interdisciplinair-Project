@@ -99,51 +99,63 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         try
         {
-            // Get all available fixtures from repository
-            var availableFixtures = await _fixtureRepository.GetAllFixturesAsync();
+            Debug.WriteLine("[DEBUG] SceneEditorViewModel: AddFixture called - opening ImportFixturesView");
 
-            if (availableFixtures == null || availableFixtures.Count == 0)
+            // Open the ImportFixturesView window
+            var importView = new ImportFixturesView();
+            var viewModel = importView.ViewModel;
+            
+            // Pass the current scene to the import view model
+            viewModel.CurrentScene = Scene;
+            
+            // Subscribe to the CloseRequested event to know when fixtures were actually added
+            viewModel.CloseRequested += async (s, e) => 
             {
-                MessageBox.Show("Geen fixtures beschikbaar. Voeg eerst fixtures toe aan de fixture library.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // For now, just add the first available fixture
-            // TODO: Show a dialog to let user select which fixture to add
-            var fixtureToAdd = availableFixtures[0];
-
-            // Create a copy of the fixture with a unique instance ID
-            var newFixture = new Fixture
-            {
-                Id = fixtureToAdd.Id,
-                InstanceId = Guid.NewGuid().ToString(),
-                Name = fixtureToAdd.Name,
-                Channels = new Dictionary<string, byte?>(fixtureToAdd.Channels),
+                Debug.WriteLine("[DEBUG] SceneEditorViewModel: CloseRequested event received - refreshing scene");
+                await RefreshSceneFromRepository();
             };
 
-            // Add to scene
-            if (Scene.Fixtures == null)
-            {
-                Scene.Fixtures = new List<Fixture>();
-            }
+            importView.ShowDialog();
 
-            Scene.Fixtures.Add(newFixture);
-
-            // Add to UI collection
-            var sceneFixture = new SceneFixture
-            {
-                Fixture = newFixture,
-                StartChannel = GetNextAvailableChannel(),
-            };
-
-            SceneFixtures.Add(sceneFixture);
-
-            Debug.WriteLine($"[DEBUG] Added fixture '{newFixture.Name}' to scene");
+            Debug.WriteLine("[DEBUG] SceneEditorViewModel: ImportFixturesView closed");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[ERROR] Error adding fixture: {ex.Message}");
-            MessageBox.Show($"Error adding fixture: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Debug.WriteLine($"[ERROR] Error opening import view: {ex.Message}");
+            Debug.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
+            MessageBox.Show($"Error opening fixture import: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the scene data from the repository.
+    /// </summary>
+    private async Task RefreshSceneFromRepository()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Scene.Id))
+            {
+                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Scene has no ID, cannot refresh from repository");
+                return;
+            }
+
+            // Reload the scene from repository to get the updated version
+            var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
+            
+            if (updatedScene != null)
+            {
+                LoadScene(updatedScene);
+                Debug.WriteLine($"[DEBUG] SceneEditorViewModel: Refreshed scene '{updatedScene.Name}' with {updatedScene.Fixtures?.Count ?? 0} fixtures from repository");
+            }
+            else
+            {
+                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Could not reload scene '{Scene.Id}' from repository");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] SceneEditorViewModel: Error refreshing scene from repository: {ex.Message}");
         }
     }
 

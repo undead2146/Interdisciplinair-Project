@@ -43,11 +43,6 @@ public partial class ScenebuilderViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Event fired when a scene is selected for editing.
-    /// </summary>
-    public event Action<Scene>? SceneSelected;
-
-    /// <summary>
     /// Gets the collection of scenes.
     /// </summary>
     public ObservableCollection<Scene> Scenes { get; } = new();
