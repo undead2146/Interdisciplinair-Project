@@ -34,7 +34,7 @@ namespace InterdisciplinairProject.Fixtures.Views
             // Validatie
             if (string.IsNullOrWhiteSpace(name))
             {
-                MessageBox.Show("De fabrikantnaam mag niet leeg zijn.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Manufacturer can't be empty.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
