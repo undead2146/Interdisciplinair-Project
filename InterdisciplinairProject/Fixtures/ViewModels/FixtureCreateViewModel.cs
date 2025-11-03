@@ -55,6 +55,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 "InterdisciplinairProject",
                 "Fixtures");
 
+            string unknownDir = Path.Combine(_dataDir, "Unknown");
+            if (!Directory.Exists(unknownDir))
+                Directory.CreateDirectory(unknownDir);
+
             LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
@@ -68,9 +72,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 _isEditing = true;
                 FixtureName = existing.Name ?? string.Empty;
-                SelectedManufacturer = existing.Manufacturer ?? "None";
-                _originalManufacturer = existing.Manufacturer ?? "None";
+                SelectedManufacturer = existing.Manufacturer ?? "Unknown";
+                _originalManufacturer = existing.Manufacturer ?? "Unknown";
                 _originalFixtureName = existing.Name ?? string.Empty;
+
                 Channels.Clear();
                 foreach (var ch in existing.Channels)
                     Channels.Add(new ChannelViewModel(ch));
@@ -81,16 +86,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             else
             {
                 _isEditing = false;
-                SelectedManufacturer = AvailableManufacturers.FirstOrDefault() ?? "None";
+                SelectedManufacturer = AvailableManufacturers.FirstOrDefault();
                 AddChannel();
             }
         }
 
         private void LoadManufacturers()
         {
-            AvailableManufacturers = _manufacturerService.GetManufacturers();
-            if (!AvailableManufacturers.Any(m => m.Equals("None", StringComparison.OrdinalIgnoreCase)))
-                AvailableManufacturers.Insert(0, "Unknown");
+            var directoryInfo = new DirectoryInfo(_dataDir);
+            var currentManufacturers = directoryInfo.GetDirectories()
+                                                    .Select(d => d.Name)
+                                                    .ToList();
+            currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
+            var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
+            var finalManufacturerList = new List<string> { "Unknown" };
+            finalManufacturerList.AddRange(sortedOtherManufacturers);
+            AvailableManufacturers = finalManufacturerList;
         }
 
         private void ExecuteRegisterManufacturer()
@@ -104,17 +115,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string newManufacturerName = registerWindow.ManufacturerName;
                 if (_manufacturerService.RegisterManufacturer(newManufacturerName))
                 {
-                    LoadManufacturers();
-                    SelectedManufacturer = newManufacturerName;
                     string manufacturerDir = Path.Combine(_dataDir, SanitizeFileName(newManufacturerName));
                     if (!Directory.Exists(manufacturerDir))
                         Directory.CreateDirectory(manufacturerDir);
+
+                    LoadManufacturers();
+                    SelectedManufacturer = newManufacturerName;
 
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -172,7 +184,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     string safeOriginalManufacturerName = SanitizeFileName(_originalManufacturer!);
                     string safeOriginalFixtureName = SanitizeFileName(_originalFixtureName!);
-
                     string oldFilePath = Path.Combine(_dataDir, safeOriginalManufacturerName, $"{safeOriginalFixtureName}.json");
                     if (File.Exists(oldFilePath))
                         File.Delete(oldFilePath);
@@ -180,6 +191,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 File.WriteAllText(newFilePath, json);
                 MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                LoadManufacturers();
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
                 BackRequested?.Invoke(this, EventArgs.Empty);
@@ -270,7 +283,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"unable to copie image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"unable to copy image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
