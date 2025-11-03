@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <Label Content="Fixture Naam:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <Label Content="Fixture name:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
             <TextBox x:Name="FixtureNameTextBox"
                      Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
                      TextWrapping="Wrap"
@@ -35,7 +35,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Column="0" Content="Fabrikant:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                <Label Grid.Column="0" Content="Manufacturer:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
 
                 <ComboBox Grid.Column="1"
                           ItemsSource="{Binding AvailableManufacturers}"
