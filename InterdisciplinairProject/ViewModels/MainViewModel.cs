@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Repositories;
+using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
 using System.IO;
@@ -30,6 +31,8 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private UserControl? currentView;
+
+    
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -75,6 +78,10 @@ public partial class MainViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+        // Initialize ViewModel, e.g., load services from DI if injected
+        OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
+        
+        Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
     }
 
     /// <summary>
@@ -91,6 +98,10 @@ public partial class MainViewModel : ObservableObject
         var fixtureSettingsView = new InterdisciplinairProject.Views.FixtureSettingsView();
         Debug.WriteLine("[DEBUG] FixtureSettingsView instance created");
     }
+
+    [RelayCommand]
+    private void OpenFixtureBuilder() => CurrentView = new MainWindowFixtures();
+
 
     /// <summary>
     /// Opens the show builder view.
