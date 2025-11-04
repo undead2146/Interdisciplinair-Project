@@ -102,8 +102,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         {
                             fixture.ImagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
                         }
+                        else 
+                        {
+                            // Get just the file name ("test.png") from "Images/test.png"
+                            string fileName = Path.GetFileName(fixture.ImagePath);
 
-                        allFixtures.Add(fixture);
+                            string appDataImages = Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                "InterdisciplinairProject",
+                                "Images"
+                            );
+
+                            fixture.ImagePath = Path.Combine(appDataImages, fileName);
+                        }
+
+                            allFixtures.Add(fixture);
                     }
                 }
                 catch (Exception ex)
