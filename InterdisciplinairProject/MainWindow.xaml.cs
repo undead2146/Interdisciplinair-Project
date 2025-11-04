@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows;
-using InterdiscplinairProject.ViewModels;
+using InterdisciplinairProject.ViewModels;
 
 namespace InterdiscplinairProject;
 
