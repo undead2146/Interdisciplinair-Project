@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using System.Windows.Input;
 using InterdisciplinairProject.ViewModels;
 
 namespace InterdisciplinairProject.Views
@@ -8,7 +9,14 @@ namespace InterdisciplinairProject.Views
         public ScenebuilderView()
         {
             InitializeComponent();
-            DataContext = new ScenebuilderViewModel();
+        }
+
+        private async void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is ScenebuilderViewModel viewModel && viewModel.SelectedScene != null)
+            {
+                await viewModel.OpenSceneEditor();
+            }
         }
     }
 }

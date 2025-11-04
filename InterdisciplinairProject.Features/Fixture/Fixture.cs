@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 
-namespace InterdisciplinairProject.Core.Models;
+namespace InterdisciplinairProject.Features.Fixture;
 
 /// <summary>
 /// Represents a lighting fixture with its properties and channels.
@@ -12,8 +14,7 @@ public class Fixture
     /// </summary>
     public Fixture()
     {
-        Id = string.Empty;
-        InstanceId = string.Empty;
+        FixtureId = string.Empty;
         Name = string.Empty;
         Manufacturer = string.Empty;
         Description = string.Empty;
@@ -25,13 +26,7 @@ public class Fixture
     /// Gets or sets the unique identifier of the fixture type.
     /// </summary>
     [JsonPropertyName("fixtureId")]
-    public string Id { get; set; }
-
-    /// <summary>
-    /// Gets or sets the unique identifier of the fixture instance.
-    /// </summary>
-    [JsonPropertyName("instanceId")]
-    public string InstanceId { get; set; }
+    public string FixtureId { get; set; }
 
     /// <summary>
     /// Gets or sets the display name of the fixture.
