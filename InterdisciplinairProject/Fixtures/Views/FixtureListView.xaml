@@ -4,22 +4,92 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+             xmlns:models="clr-namespace:InterdisciplinairProject.Fixtures.Models"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <!-- Main list of fixtures -->
-    <ListView Margin="5" ItemsSource="{Binding Fixtures}" SelectedItem="{Binding SelectedFixture, Mode=TwoWay}">
-        <ListView.ItemTemplate>
-            <DataTemplate>
-                <DockPanel>
-                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                </DockPanel>
-            </DataTemplate>
-        </ListView.ItemTemplate>
-        
-        <ListView.ItemContainerStyle>
-            <Style TargetType="ListViewItem">
-                <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
-            </Style>
-        </ListView.ItemContainerStyle>
-    </ListView>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <TextBox Grid.Row="1"
+         Height="28"
+         Padding="4"
+         Margin="0,0,0,8"
+         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- SEARCH BAR -->
+        <TextBox Grid.Row="1"
+                 Height="28"
+                 Padding="4"
+                 Margin="0,0,0,8"
+                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <!-- MAIN CONTENT -->
+        <Border Grid.Row="2" Padding="10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding ManufacturerGroups}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Expander Header="{Binding Manufacturer}" IsExpanded="True" Margin="0,0,0,8">
+                                <Expander.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="8" Background="#EEE" CornerRadius="6">
+                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="16"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </Expander.HeaderTemplate>
+
+                                <!-- Fixtures displayed in a ListBox with WrapPanel for selection -->
+                                <ListBox ItemsSource="{Binding FilteredFixtures}"
+         SelectedItem="{Binding DataContext.SelectedFixture, RelativeSource={RelativeSource AncestorType=UserControl}}"
+         BorderThickness="0"
+         Background="Transparent"
+                                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+         PreviewMouseWheel="ListBox_PreviewMouseWheel">
+
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="LightGray"
+                                                    BorderThickness="1"
+                                                    Padding="8"
+                                                    Margin="4"
+                                                    Background="White"
+                                                    CornerRadius="4"
+                                                    Width="190">
+                                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                    <!-- PNG above fixture name -->
+                                                    <Image Source="{Binding ImagePath}" Height="80" Stretch="Uniform" Margin="0,0,0,6"/>
+                                                    <!-- Fixture name -->
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                            </Expander>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
 </UserControl>
