@@ -61,7 +61,15 @@
                                             <TextBlock Text="{Binding Type}" FontStyle="Italic" FontSize="12" Margin="0,2,0,0"/>
                                         </StackPanel>
 
-                                        <TextBlock Grid.Column="1" Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <TextBox x:Name="valueTextbox" 
+                                                 Width="90"
+                                                 Height="32"/>
+
+                                        <Button x:Name="testButton"
+                                                Content="Test"
+                                                Width="90"
+                                                Height="32"
+                                                HorizontalAlignment="Right"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

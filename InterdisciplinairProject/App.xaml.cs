@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 
 namespace InterdisciplinairProject;
@@ -18,15 +18,50 @@ namespace InterdisciplinairProject;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// Called when the application starts.
+    /// </summary>
+    /// <param name="e">The startup event arguments.</param>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // map 'data' aanmaken
-        string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-        if (!Directory.Exists(dataDir)) 
+        // Initialiseer data directories
+        string appDataDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "InterdisciplinairProject");
+
+        if (!Directory.Exists(appDataDir))
         {
-            Directory.CreateDirectory(dataDir);
+            Directory.CreateDirectory(appDataDir);
+        }
+
+        // Kopieer fixtures.json als deze nog niet bestaat
+        string fixturesDestPath = Path.Combine(appDataDir, "fixtures.json");
+        if (!File.Exists(fixturesDestPath))
+        {
+            // Probeer het uit verschillende locaties te kopiëren
+            string[] possibleSourcePaths = new[]
+            {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "fixtures.json"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "InterdisciplinairProject.Features", "Scene", "data", "fixtures.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "InterdisciplinairProject.Features", "Scene", "data", "fixtures.json"),
+            };
+
+            foreach (var sourcePath in possibleSourcePaths)
+            {
+                if (File.Exists(sourcePath))
+                {
+                    File.Copy(sourcePath, fixturesDestPath);
+                    break;
+                }
+            }
+
+            // Als geen bestand gevonden, maak een leeg fixtures bestand aan
+            if (!File.Exists(fixturesDestPath))
+            {
+                File.WriteAllText(fixturesDestPath, "{\"fixtures\":[]}");
+            }
         }
     }
 }
