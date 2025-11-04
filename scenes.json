@@ -9,7 +9,7 @@
         "instanceId": "fixture-inst-001",
         "name": "LED Par 1",
         "channels": {
-          "dimmer": 255,
+          "dimmer": 157,
           "red": 255,
           "green": 75,
           "blue": 158

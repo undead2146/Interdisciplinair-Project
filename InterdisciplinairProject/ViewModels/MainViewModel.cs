@@ -11,24 +11,30 @@ namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
 /// Main ViewModel for the InterdisciplinairProject application.
+/// </summary>
 /// <remarks>
 /// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
-/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
-/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
+/// It inherits from <see cref="ObservableObject"/> to enable property change notifications.
+/// Properties and commands here can bind to UI elements in <see cref="MainWindow"/>.
 /// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
 /// </remarks>
-/// <seealso cref="ObservableObject" />
-/// <seealso cref="MainWindow" />
-/// </summary>
+/// <seealso cref="ObservableObject"/>
+/// <seealso cref="MainWindow"/>
 public partial class MainViewModel : ObservableObject
 {
     private readonly ShowbuilderViewModel _showbuilderViewModel;
 
+    /// <summary>
+    /// Gets or sets the window title.
+    /// </summary>
     [ObservableProperty]
     private string title = "InterdisciplinairProject - DMX Lighting Control";
 
+    /// <summary>
+    /// Gets or sets the current view displayed in the main window.
+    /// </summary>
     [ObservableProperty]
-    private UserControl currentView;
+    private UserControl? currentView;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -56,10 +62,13 @@ public partial class MainViewModel : ObservableObject
         Debug.WriteLine("[DEBUG] OpenFixtureSettings() called - Fixture Settings button clicked");
         var fixtureSettingsView = new InterdisciplinairProject.Views.FixtureSettingsView();
         Debug.WriteLine("[DEBUG] FixtureSettingsView instance created");
-        fixtureSettingsView.Show();
+        //fixtureSettingsView.Show();
         Debug.WriteLine("[DEBUG] FixtureSettingsView.Show() called - window should be visible now");
     }
 
+    /// <summary>
+    /// Opens the show builder view.
+    /// </summary>
     [RelayCommand]
     private void OpenShowBuilder()
     {
@@ -70,5 +79,14 @@ public partial class MainViewModel : ObservableObject
     public void SaveCloseForShow()
     {
         _showbuilderViewModel.SaveCommand.Execute(currentView);
+    }
+
+    /// <summary>
+    /// Opens the scene builder view.
+    /// </summary>
+    [RelayCommand]
+    private void OpenSceneBuilder()
+    {
+        CurrentView = new ScenebuilderView();
     }
 }
