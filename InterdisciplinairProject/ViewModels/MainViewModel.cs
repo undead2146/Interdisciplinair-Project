@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
 using System.Windows.Controls;
@@ -31,6 +32,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private UserControl? currentView;
 
+    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
     /// </summary>
@@ -40,6 +43,7 @@ public partial class MainViewModel : ObservableObject
 
         // Initialize ViewModel, e.g., load services from DI if injected
         OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
+        
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
     }
 
@@ -59,6 +63,10 @@ public partial class MainViewModel : ObservableObject
         //fixtureSettingsView.Show();
         Debug.WriteLine("[DEBUG] FixtureSettingsView.Show() called - window should be visible now");
     }
+
+    [RelayCommand]
+    private void OpenFixtureBuilder() => CurrentView = new MainWindowFixtures();
+
 
     /// <summary>
     /// Opens the show builder view.

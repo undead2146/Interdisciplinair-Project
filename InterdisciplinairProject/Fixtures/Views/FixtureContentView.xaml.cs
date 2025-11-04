@@ -3,7 +3,7 @@
 namespace InterdisciplinairProject.Fixtures.Views
 {
     /// <summary>
-    /// Interaction logic for FixtureContentView.xaml
+    /// Interaction logic for FixtureContentView.xaml.
     /// </summary>
     public partial class FixtureContentView : UserControl
     {
