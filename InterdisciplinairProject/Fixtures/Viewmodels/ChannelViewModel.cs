@@ -3,6 +3,49 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
 using System.Linq;
 
+
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+//------- GEBRUIK DEZE VIEWMODEL NIET MEER -------
+
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class ChannelViewModel : ObservableObject
