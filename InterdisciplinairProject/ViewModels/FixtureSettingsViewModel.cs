@@ -1,10 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using InterdisciplinairProject.Core.Interfaces;
-using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Features.Fixture;
 using InterdisciplinairProject.Services;
 
 namespace InterdisciplinairProject.ViewModels;
@@ -111,16 +113,16 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
             // Update the fixture model
             _currentFixture.Channels[channelVm.Name] = channelVm.Value;
-            Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
+            Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.FixtureId}.{channelVm.Name} = {channelVm.Value}");
 
             // Send to hardware connection
             Debug.WriteLine($"[DEBUG] About to call SetChannelValueAsync with:");
-            Debug.WriteLine($"[DEBUG]   - fixtureInstanceId: '{_currentFixture.InstanceId}'");
+            Debug.WriteLine($"[DEBUG]   - fixtureInstanceId: '{_currentFixture.FixtureId}'");
             Debug.WriteLine($"[DEBUG]   - channelName: '{channelVm.Name}'");
             Debug.WriteLine($"[DEBUG]   - value: {channelVm.Value}");
 
             var result = await _hardwareConnection.SetChannelValueAsync(
-                _currentFixture.InstanceId,
+                _currentFixture.FixtureId,
                 channelVm.Name,
                 channelVm.Value);
 
@@ -252,8 +254,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
             var fixture = new Fixture
             {
-                Id = fixtureId ?? "unknown",
-                InstanceId = instanceId ?? fixtureId ?? "unknown",
+                FixtureId = instanceId ?? fixtureId ?? "unknown",
                 Name = name ?? "Fixture",
                 Channels = channels,
             };
@@ -274,8 +275,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         var defaultFixture = new Fixture
         {
-            Id = "default-wash",
-            InstanceId = "fixture-inst-default",
+            FixtureId = "fixture-inst-default",
             Name = "Default Wash Light",
             Channels = new Dictionary<string, byte?>
             {
@@ -306,8 +306,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
                     {
                         new
                         {
-                            fixtureId = defaultFixture.Id,
-                            instanceId = defaultFixture.InstanceId,
+                            fixtureId = "default-wash",
+                            instanceId = defaultFixture.FixtureId,
                             name = defaultFixture.Name,
                             channels = defaultFixture.Channels.ToDictionary(
                                 kvp => kvp.Key,

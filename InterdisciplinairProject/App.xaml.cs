@@ -1,9 +1,8 @@
 ﻿using InterdisciplinairProject.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-﻿using System.IO;
 using System.Windows;
 
-namespace InterdisciplinairProject;
+namespace InterdiscplinairProject;
 
 /// <summary>
 /// Interaction logic for <see cref="App.xaml"/>.
@@ -47,11 +46,5 @@ public partial class App : Application
 
         // 🪟 Views
         services.AddTransient<MainWindow>();
-        // map 'data' aanmaken
-        string dataDir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-        if (!Directory.Exists(dataDir)) 
-        {
-            Directory.CreateDirectory(dataDir);
-        }
     }
 }

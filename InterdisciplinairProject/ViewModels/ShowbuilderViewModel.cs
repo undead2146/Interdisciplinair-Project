@@ -1,27 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Show;
+using Show.Model;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Show;
-
 using System.Windows;
 using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
 
-namespace InterdisciplinairProject.ViewModels;
-
-/// <summary>
-/// ViewModel for building and managing shows, including importing scenes.
-/// </summary>
-public partial class ShowbuilderViewModel : ObservableObject
+namespace InterdisciplinairProject.ViewModels
 {
-    public ObservableCollection<Scene> Scenes { get; } = new();
-
-    [RelayCommand]
-    private void ImportScenes()
+    public partial class ShowbuilderViewModel : ObservableObject
     {
 
         private Shows _show = new Shows();
@@ -75,21 +68,17 @@ public partial class ShowbuilderViewModel : ObservableObject
         // ============================================================
         [RelayCommand]
         private void ImportScenes()
-        var openFileDialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Import Scene",
-            Filter = "JSON files (*.json)|*.json",
-            Multiselect = false,
-        };
-
-        try
-        {
-            if (openFileDialog.ShowDialog() == true)
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                string selectedScenePath = openFileDialog.FileName;
+                Title = "Import Scene",
+                Filter = "JSON files (*.json)|*.json",
+                Multiselect = false,
+            };
 
-                Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
-                if (!Scenes.Any(s => s.Id == scene.Id))
+            try
+            {
+                if (openFileDialog.ShowDialog() == true)
                 {
                     string selectedScenePath = openFileDialog.FileName;
 
@@ -183,18 +172,6 @@ public partial class ShowbuilderViewModel : ObservableObject
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
-                    Scenes.Add(scene);
-                    MessageBox.Show($"Scene '{scene.Name}' imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("This scene has already been imported.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         [RelayCommand]

@@ -6,7 +6,6 @@
 Local/
 .vscode/
 .*
-!.github/
 
 # User-specific files
 *.rsuser

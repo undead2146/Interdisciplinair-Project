@@ -1,4 +1,4 @@
-namespace InterdisciplinairProject.Core.Models;
+namespace InterdisciplinairProject.Features.Fixture;
 
 /// <summary>
 /// Represents the type of a DMX channel.
