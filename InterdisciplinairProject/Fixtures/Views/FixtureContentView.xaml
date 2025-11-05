@@ -9,7 +9,8 @@
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -30,10 +31,10 @@
         </DockPanel>
 
         <!-- MAIN CONTENT: Fixture details -->
-        <Grid>
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <!-- LINKER BLOKJE: Fixture Info -->
             <Border Grid.Column="0" Padding="12" Margin="0,0,12,0" Background="#f5f5f5" CornerRadius="6">
@@ -46,7 +47,7 @@
             </Border>
 
             <!-- RECHTER BLOKJE: Compoort + Knop -->
-            <Border Grid.Column="1" Padding="12" Background="#f5f5f5" CornerRadius="6">
+            <Border Grid.Column="1" Padding="12" Background="LightBlue" CornerRadius="6">
                 <StackPanel>
                     <TextBlock Text="Compoort" FontWeight="Bold"/>
                     <TextBox Width="150" Margin="0,4,0,12" Text="{Binding ComPort}" />
@@ -54,48 +55,50 @@
                 </StackPanel>
             </Border>
         </Grid>
-        <Border Grid.Row="1" Padding="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <!-- Channels header -->
-                    <TextBlock Text="Channels" FontWeight="Bold" Margin="0,6,0,6"/>
+        <Grid Grid.Row="2" Margin="0,12,0,0">
+            <Border Grid.Row="1" Padding="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Channels header -->
+                        <TextBlock Text="Channels" FontWeight="Bold" Margin="0,6,0,6"/>
 
-                    <!-- Channels list -->
-                    <ItemsControl ItemsSource="{Binding Channels}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="8" Margin="0,0,0,8" Background="#FAFAFA" BorderBrush="#EEE" BorderThickness="1" CornerRadius="4">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+                        <!-- Channels list -->
+                        <ItemsControl ItemsSource="{Binding Channels}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="8" Margin="0,0,0,8" Background="#FAFAFA" BorderBrush="#EEE" BorderThickness="1" CornerRadius="4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                                        <StackPanel Orientation="Vertical">
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Type}" FontStyle="Italic" FontSize="12" Margin="0,2,0,0"/>
-                                        </StackPanel>
+                                            <StackPanel Orientation="Vertical">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Type}" FontStyle="Italic" FontSize="12" Margin="0,2,0,0"/>
+                                            </StackPanel>
 
-                                        <TextBox x:Name="valueTextbox" 
+                                            <TextBox x:Name="valueTextbox" 
                                                  Width="90"
                                                  Height="32"/>
 
-                                        <Button x:Name="testButton"
+                                            <Button x:Name="testButton"
                                                 Content="Test"
                                                 Width="90"
                                                 Height="32"
                                                 HorizontalAlignment="Right"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
 
         <!-- FOOTER: Edit knop -->
-        <Grid Grid.Row="2" Margin="0,8,0,0">
+        <Grid Grid.Row="3" Margin="0,8,0,0">
             <Button x:Name="EditButton"
                     Content="Edit"
                     Width="90"
