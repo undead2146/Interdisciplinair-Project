@@ -309,6 +309,30 @@
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="border" Property="Background" Value="#78909C"/>
                                                 <Setter TargetName="border" Property="BorderBrush" Value="#607D8B"/>
+                
+                <Button Width="70" Height="36" Margin="0,4" Background="White" BorderBrush="#BDBDBD" BorderThickness="1.5">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" 
+                                                Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="8">
+                                            <Border.Effect>
+                                                <DropShadowEffect Color="#000000" Opacity="0.08" BlurRadius="4" ShadowDepth="2" Direction="270"/>
+                                            </Border.Effect>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="M3,3 L11,11 M11,11 L7,11 M11,11 L11,7" Stroke="#2196F3" StrokeThickness="1.5" Width="14" Height="14" Margin="0,0,4,0"/>
+                                                <TextBlock Text="Fade-out" FontSize="10" Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#2196F3"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>

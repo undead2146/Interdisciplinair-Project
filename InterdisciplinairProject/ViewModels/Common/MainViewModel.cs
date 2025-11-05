@@ -26,7 +26,6 @@ namespace InterdisciplinairProject.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly ShowbuilderViewModel _showbuilderViewModel;
-    private readonly MainWindowFixturesViewModel _mainWindowFixturesViewModel;
     private readonly ISceneRepository _sceneRepository = null!;
     private readonly IFixtureRepository _fixtureRepository = null!;
     private readonly IHardwareConnection _hardwareConnection = null!;
@@ -91,8 +90,8 @@ public partial class MainViewModel : ObservableObject
         }
 
         // Initialize ViewModel, e.g., load services from DI if injected
+        OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
         _showbuilderViewModel = new ShowbuilderViewModel();
-        _mainWindowFixturesViewModel = new MainWindowFixturesViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
 
         // Show welcome view by default
@@ -170,5 +169,10 @@ public partial class MainViewModel : ObservableObject
             Debug.WriteLine($"[ERROR] OpenSceneBuilder failed: {ex.Message}");
             MessageBox.Show($"Error opening Scene Builder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    public void SaveCloseForShow()
+    {
+        _showbuilderViewModel.SaveCommand.Execute(currentView);
     }
 }

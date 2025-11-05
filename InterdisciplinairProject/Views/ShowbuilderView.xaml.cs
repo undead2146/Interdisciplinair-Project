@@ -1,4 +1,4 @@
-﻿using InterdisciplinairProject.ViewModels;
+﻿﻿using InterdisciplinairProject.ViewModels;
 using System.Windows.Controls;
 
 namespace InterdisciplinairProject.Views
