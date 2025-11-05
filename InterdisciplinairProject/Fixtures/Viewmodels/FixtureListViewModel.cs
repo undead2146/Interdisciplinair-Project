@@ -99,17 +99,25 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         if (string.IsNullOrEmpty(fixture.Manufacturer))
                             fixture.Manufacturer = "Unknown";
 
+                        // image decompressie
                         if (!string.IsNullOrEmpty(fixture.ImageBase64))
                         {
-                            byte[] imageBytes = Convert.FromBase64String(fixture.ImageBase64);
-                            using (var ms = new MemoryStream(imageBytes))
+                            byte[] compressedBytes = Convert.FromBase64String(fixture.ImageBase64);
+
+                            using (var compressedStream = new MemoryStream(compressedBytes))
+                            using (var gzip = new System.IO.Compression.GZipStream(compressedStream, System.IO.Compression.CompressionMode.Decompress))
+                            using (var ms = new MemoryStream())
                             {
+                                gzip.CopyTo(ms);
+                                ms.Position = 0;
+
                                 var bitmap = new BitmapImage();
                                 bitmap.BeginInit();
                                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                                 bitmap.StreamSource = ms;
                                 bitmap.EndInit();
                                 bitmap.Freeze();
+
                                 fixture.ImageSource = bitmap;
                             }
                         }

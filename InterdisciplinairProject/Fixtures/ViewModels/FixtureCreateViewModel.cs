@@ -249,6 +249,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
             }
         }
+
         private void Cancel()
         {
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -278,12 +279,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 try
                 {
-                    // Lees de afbeelding in als byte array en converteer naar Base64
                     byte[] imageBytes = File.ReadAllBytes(selectedFile);
-                    string imageBase64 = Convert.ToBase64String(imageBytes);
 
-                    // Sla de Base64 string op in de fixture
-                    _currentFixture.ImageBase64 = imageBase64;
+                    // comprimeren met gzip
+                    using (var inputStream = new MemoryStream(imageBytes))
+                    using (var outputStream = new MemoryStream())
+                    {
+                        using (var gzip = new System.IO.Compression.GZipStream(outputStream, System.IO.Compression.CompressionLevel.Optimal))
+                        {
+                            inputStream.CopyTo(gzip);
+                        }
+
+                        // gecomprimeerde bytes omzetten naar Base64
+                        string compressedBase64 = Convert.ToBase64String(outputStream.ToArray());
+
+                        _currentFixture.ImageBase64 = compressedBase64;
+                    }
                 }
                 catch (Exception ex)
                 {
