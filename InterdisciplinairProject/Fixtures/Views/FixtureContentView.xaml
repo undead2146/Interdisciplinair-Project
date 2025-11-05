@@ -50,7 +50,7 @@
             <Border Grid.Column="1" Padding="12" Background="LightBlue" CornerRadius="6">
                 <StackPanel>
                     <TextBlock Text="Compoort" FontWeight="Bold"/>
-                    <TextBox Width="150" Margin="0,4,0,12" Text="{Binding ComPort}" />
+                    <TextBox Width="150" Margin="0,4,0,12" Text="{Binding ComPort, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Width="120" Content="Test Alles" Command="{Binding TestAllCommand}" />
                 </StackPanel>
             </Border>
@@ -80,13 +80,15 @@
 
                                             <TextBox x:Name="valueTextbox" 
                                                  Width="90"
-                                                 Height="32"/>
+                                                 Height="32"
+                                                 Text="{Binding Parameter, UpdateSourceTrigger=PropertyChanged}"/>
 
                                             <Button x:Name="testButton"
                                                 Content="Test"
                                                 Width="90"
                                                 Height="32"
-                                                HorizontalAlignment="Right"/>
+                                                HorizontalAlignment="Right"
+                                                Command="{Binding TestCommand}"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
