@@ -13,9 +13,18 @@ namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
 /// Main ViewModel for the InterdisciplinairProject application.
+/// <remarks>
+/// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
+/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
+/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
+/// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
+/// </remarks>
+/// <seealso cref="ObservableObject" />
+/// <seealso cref="MainWindow" />
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
+    private readonly ShowbuilderViewModel _showbuilderViewModel;
     private readonly ISceneRepository _sceneRepository = null!;
     private readonly IFixtureRepository _fixtureRepository = null!;
     private readonly IHardwareConnection _hardwareConnection = null!;
@@ -80,7 +89,7 @@ public partial class MainViewModel : ObservableObject
         }
         // Initialize ViewModel, e.g., load services from DI if injected
         OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
-        
+        _showbuilderViewModel = new ShowbuilderViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
     }
 
@@ -109,7 +118,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenShowBuilder()
     {
-        CurrentView = new ShowbuilderView();
+        CurrentView = new ShowbuilderView(_showbuilderViewModel);
+        Title = "InterdisciplinairProject - Showbuilder";
     }
 
     /// <summary>
@@ -141,5 +151,10 @@ public partial class MainViewModel : ObservableObject
             Debug.WriteLine($"[ERROR] OpenSceneBuilder failed: {ex.Message}");
             MessageBox.Show($"Error opening Scene Builder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    public void SaveCloseForShow()
+    {
+        _showbuilderViewModel.SaveCommand.Execute(currentView);
     }
 }
