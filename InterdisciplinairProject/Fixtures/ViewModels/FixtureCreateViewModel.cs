@@ -26,6 +26,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly ManufacturerService _manufacturerService;
 
         [ObservableProperty]
+        private ChannelItem? selectedChannel;
+
+        //partial void OnSliderDivisionsChanged(int value) => OnPropertyChanged(nameof(TickFrequency));
+
+        /// <summary>
+        /// ----------------------------------------------------------------------------------------------------------------------------------
+        /// </summary>
+
+        [ObservableProperty]
         private string fixtureName = "New Fixture";
 
         [ObservableProperty]
@@ -35,15 +44,24 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private string? _selectedManufacturer;
 
         public event EventHandler? BackRequested;
+
         public event EventHandler? FixtureSaved;
-        public ObservableCollection<ChannelViewModel> Channels { get; } = new();
+
+        public ObservableCollection<ChannelItem> Channels { get; } = new();
 
         public ICommand AddChannelCommand { get; }
+
         public ICommand DeleteChannelCommand { get; }
+
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
+
         public ICommand RegisterManufacturerCommand { get; }
+
         public ICommand AddImageCommand { get; }
+
+        public ICommand AddTypeBtn { get; }
 
         private Fixture _currentFixture = new Fixture();
 
@@ -62,11 +80,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
-            DeleteChannelCommand = new RelayCommand<ChannelViewModel>(DeleteChannel, CanDeleteChannel);
+            DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
             AddImageCommand = new RelayCommand<Fixture>(AddImage);
+
+            
 
             if (existing != null)
             {
@@ -78,7 +98,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 Channels.Clear();
                 foreach (var ch in existing.Channels)
-                    Channels.Add(new ChannelViewModel(ch));
+                    Channels.Add(new ChannelItem(ch));
 
                 _currentFixture.Name = FixtureName;
                 _currentFixture.Manufacturer = SelectedManufacturer!;
@@ -162,7 +182,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     ["Name"] = ch.Name,
                     ["Type"] = ch.SelectedType,
-                    ["value"] = ch.Parameter,
+                    ["value"] = ch.Level.ToString(),
                 };
                 channelsArray.Add(channelObj);
             }
@@ -211,24 +231,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 Type = "Lamp",
                 Value = "0"
             };
-            Channels.Add(new ChannelViewModel(newModel));
-            (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
+            Channels.Add(new ChannelItem(newModel));
+            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
         }
 
-        private bool CanDeleteChannel(ChannelViewModel? channel)
+        private bool CanDeleteChannel(ChannelItem? channel)
         {
             return channel != null && Channels.Count > 1;
         }
 
-        private void DeleteChannel(ChannelViewModel? channel)
+        private void DeleteChannel(ChannelItem? channel)
         {
             if (channel != null)
             {
                 Channels.Remove(channel);
-                (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
+                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
             }
         }
-
         private void Cancel()
         {
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -287,5 +306,158 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
         }
+
+        public partial class ChannelItem : ObservableObject
+        {
+            private readonly Channel _model;
+
+            [ObservableProperty]
+            private bool isEditing;
+
+            [ObservableProperty]
+            private bool isExpanded;
+
+            public ChannelItem(Channel model)
+            {
+                _model = model;
+
+                Name = _model.Name;
+                SelectedType = string.IsNullOrWhiteSpace(_model.Type) ? "Lamp" : _model.Type!;
+                if (int.TryParse(_model.Value, out var lvl)) Level = lvl;
+
+                TypeCatalogService.EnsureLoaded();
+                ApplyTypeSpec(SelectedType);
+
+                AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
+            }
+
+            // Name <-> model
+            private string _name = "";
+            public string Name
+            {
+                get => _name;
+                set { if (SetProperty(ref _name, value)) _model.Name = value; }
+            }
+
+            // SelectedType drives panels
+            private string _selectedType = "Lamp";
+            public string SelectedType
+            {
+                get => _selectedType;
+                set
+                {
+                    if (SetProperty(ref _selectedType, value))
+                    {
+                        _model.Type = value;
+                        ApplyTypeSpec(value);
+                        if (IsSliderType) Level = Level; // re-snap
+                    }
+                }
+            }
+
+            // Slider level <-> model.Value
+            private int _level;
+            public int Level
+            {
+                get => _level;
+                set
+                {
+                    var snapped = Snap(value, Math.Max(1, SliderDivisions));
+                    if (SetProperty(ref _level, snapped))
+                        _model.Value = snapped.ToString();
+                }
+            }
+
+            public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
+
+            private bool _isSliderType;
+            public bool IsSliderType
+            {
+                get => _isSliderType;
+                set => SetProperty(ref _isSliderType, value);
+            }
+
+            private bool _isCustomType;
+            public bool IsCustomType
+            {
+                get => _isCustomType;
+                set => SetProperty(ref _isCustomType, value);
+            }
+
+            private int _sliderDivisions = 255;
+            public int SliderDivisions
+            {
+                get => _sliderDivisions;
+                set
+                {
+                    if (SetProperty(ref _sliderDivisions, value))
+                        OnPropertyChanged(nameof(TickFrequency));
+                }
+            }
+
+            public int TickFrequency => Math.Max(1, 255 / Math.Max(1, SliderDivisions));
+
+            // Custom panel fields
+            private string? _customTypeName;
+            public string? CustomTypeName
+            {
+                get => _customTypeName;
+                set => SetProperty(ref _customTypeName, value);
+            }
+
+            private int _customTypeSliderValue;
+            public int CustomTypeSliderValue
+            {
+                get => _customTypeSliderValue;
+                set => SetProperty(ref _customTypeSliderValue, value);
+            }
+
+            public IRelayCommand AddCustomTypeCommand { get; }
+
+            private void DoAddCustomType()
+            {
+                var name = (CustomTypeName ?? "").Trim();
+                var divisions = CustomTypeSliderValue;
+
+                if (string.IsNullOrWhiteSpace(name)) { MessageBox.Show("Type name is empty."); return; }
+                if (divisions <= 0 || divisions > 255) { MessageBox.Show("Step value must be between 1 and 255."); return; }
+                if (string.Equals(name, "Custom", StringComparison.OrdinalIgnoreCase)) { MessageBox.Show("Choose another name than 'Custom'."); return; }
+
+                var spec = new TypeSpecification { name = name, input = "slider", divisions = divisions };
+                if (!TypeCatalogService.AddOrUpdate(spec)) { MessageBox.Show("Failed to save the type."); return; }
+
+                OnPropertyChanged(nameof(AvailableTypes)); // refresh ComboBox
+                SelectedType = name;                       // becomes slider with divisions
+                IsCustomType = false;                      // hide custom panel
+            }
+
+            private void ApplyTypeSpec(string? typeName)
+            {
+                IsSliderType = false;
+                IsCustomType = false;
+
+                var spec = TypeCatalogService.GetByName(typeName);
+                if (spec == null) return;
+
+                if (spec.input.Equals("slider", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsSliderType = true;
+                    SliderDivisions = spec.divisions.GetValueOrDefault(255);
+                }
+                else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsCustomType = true;
+                }
+                // "text" -> panels remain collapsed by XAML triggers
+            }
+
+            private static int Snap(int value, int divisions)
+            {
+                var step = Math.Max(1, 255 / Math.Max(1, divisions));
+                var snapped = (int)Math.Round((double)value / step) * step;
+                return Math.Max(0, Math.Min(255, snapped));
+            }
+        }
+
     }
 }

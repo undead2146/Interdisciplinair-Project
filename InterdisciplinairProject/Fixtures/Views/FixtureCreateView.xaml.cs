@@ -3,13 +3,17 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using System.Windows.Media;
+using static InterdisciplinairProject.Fixtures.ViewModels.FixtureCreateViewModel;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
     public partial class FixtureCreateView : UserControl
     {
-        private ChannelViewModel? _selectedChannel; // Veld om de geselecteerde staat bij te houden
+
+        private ChannelItem? _selectedChannel; // Veld om de geselecteerde staat bij te houden
         private Point _dragStartPoint;  //needed for drag drop functionality for reordering channels
+
+
         public FixtureCreateView()
         {
             InitializeComponent();
@@ -17,7 +21,7 @@ namespace InterdisciplinairProject.Fixtures.Views
 
         private void ChannelsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count > 0 && e.AddedItems[0] is ChannelViewModel newSelection)
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is ChannelItem newSelection)
             {
                 // Sluit het eerder geselecteerde kanaal
                 if (_selectedChannel != null && _selectedChannel != newSelection)
@@ -41,7 +45,7 @@ namespace InterdisciplinairProject.Fixtures.Views
         private void ChannelsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             // Start de bewerkingsmodus bij dubbelklik
-            if (ChannelsListBox.SelectedItem is ChannelViewModel selected)
+            if (ChannelsListBox.SelectedItem is ChannelItem selected)
             {
                 selected.IsEditing = true;
             }
@@ -51,7 +55,7 @@ namespace InterdisciplinairProject.Fixtures.Views
         {
             if (e.Key == Key.Enter)
             {
-                if (((System.Windows.FrameworkElement)sender).DataContext is ChannelViewModel channelVm)
+                if (((System.Windows.FrameworkElement)sender).DataContext is ChannelItem channelVm)
                 {
                     channelVm.IsEditing = false; // Stop de bewerking
 
@@ -117,10 +121,10 @@ namespace InterdisciplinairProject.Fixtures.Views
         {
             if (sender is not ListBox listBox) return;
 
-            var source = e.Data.GetData(typeof(ChannelViewModel)) as ChannelViewModel;
+            var source = e.Data.GetData(typeof(ChannelItem)) as ChannelItem;
             if (source == null) return;
 
-            var target = GetNearestContainer(listBox, e.GetPosition(listBox))?.DataContext as ChannelViewModel;
+            var target = GetNearestContainer(listBox, e.GetPosition(listBox))?.DataContext as ChannelItem;
             if (target == null || ReferenceEquals(source, target)) return;
 
             if (DataContext is not FixtureCreateViewModel vm) return;

@@ -1,0 +1,18 @@
+[
+  { "name": "Lamp",       "input": "text" },
+  { "name": "Ster",       "input": "text" },
+  { "name": "Klok",       "input": "text" },
+  { "name": "Tilt",       "input": "text" },
+  { "name": "Ventilator", "input": "text" },
+
+  { "name": "Rood",  "input": "slider", "divisions": 255 },
+  { "name": "Groen", "input": "slider", "divisions": 255 },
+  { "name": "Blauw", "input": "slider", "divisions": 255 },
+  { "name": "Wit",   "input": "slider", "divisions": 255 },
+
+  { "name": "Test5",   "input": "slider", "divisions": 5 },
+  { "name": "Test25",   "input": "slider", "divisions": 25 }
+
+  
+]
+
