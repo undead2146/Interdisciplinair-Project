@@ -17,10 +17,10 @@
 
         <!-- HEADER -->
         <TextBox Grid.Row="1"
-         Height="28"
-         Padding="4"
-         Margin="0,0,0,8"
-         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                 Height="28"
+                 Padding="4"
+                 Margin="0,0,0,8"
+                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!-- SEARCH BAR -->
         <TextBox Grid.Row="1"
@@ -46,12 +46,12 @@
 
                                 <!-- Fixtures displayed in a ListBox with WrapPanel for selection -->
                                 <ListBox ItemsSource="{Binding FilteredFixtures}"
-         SelectedItem="{Binding DataContext.SelectedFixture, RelativeSource={RelativeSource AncestorType=UserControl}}"
-         BorderThickness="0"
-         Background="Transparent"
+                                         SelectedItem="{Binding DataContext.SelectedFixture, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         BorderThickness="0"
+                                         Background="Transparent"
                                          ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-         PreviewMouseWheel="ListBox_PreviewMouseWheel">
+                                         PreviewMouseWheel="ListBox_PreviewMouseWheel">
 
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -76,7 +76,7 @@
                                                     Width="190">
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                     <!-- PNG above fixture name -->
-                                                    <Image Source="{Binding ImagePath}" Height="80" Stretch="Uniform" Margin="0,0,0,6"/>
+                                                    <Image Source="{Binding ImageSource}" Height="80" Stretch="Uniform" Margin="0,0,0,6"/>
                                                     <!-- Fixture name -->
                                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" HorizontalAlignment="Center"/>
                                                 </StackPanel>

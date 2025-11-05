@@ -14,6 +14,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -98,25 +99,28 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         if (string.IsNullOrEmpty(fixture.Manufacturer))
                             fixture.Manufacturer = "Unknown";
 
-                        if (string.IsNullOrEmpty(fixture.ImagePath))
+                        if (!string.IsNullOrEmpty(fixture.ImageBase64))
                         {
-                            fixture.ImagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
+                            byte[] imageBytes = Convert.FromBase64String(fixture.ImageBase64);
+                            using (var ms = new MemoryStream(imageBytes))
+                            {
+                                var bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.StreamSource = ms;
+                                bitmap.EndInit();
+                                bitmap.Freeze();
+                                fixture.ImageSource = bitmap;
+                            }
                         }
-                        else 
+                        else
                         {
-                            // Get just the file name ("test.png") from "Images/test.png"
-                            string fileName = Path.GetFileName(fixture.ImagePath);
-
-                            string appDataImages = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                "InterdisciplinairProject",
-                                "Images"
-                            );
-
-                            fixture.ImagePath = Path.Combine(appDataImages, fileName);
+                            // fallback naar default image
+                            var bitmap = new BitmapImage(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png")));
+                            fixture.ImageSource = bitmap;
                         }
 
-                            allFixtures.Add(fixture);
+                        allFixtures.Add(fixture);
                     }
                 }
                 catch (Exception ex)

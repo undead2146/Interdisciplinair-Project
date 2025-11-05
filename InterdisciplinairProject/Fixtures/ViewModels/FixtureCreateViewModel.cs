@@ -187,12 +187,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 channelsArray.Add(channelObj);
             }
 
+            // json root
             var root = new JsonObject
             {
                 ["name"] = FixtureName,
                 ["manufacturer"] = manufacturer,
                 ["channels"] = channelsArray,
-                ["imagePath"] = _currentFixture.ImagePath
+                ["imageBase64"] = _currentFixture.ImageBase64,
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -264,41 +265,25 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddImage(Fixture fixture)
         {
-            string imagesDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Images");
-
-            if (!Directory.Exists(imagesDir))
-                Directory.CreateDirectory(imagesDir);
-
             var dlg = new OpenFileDialog
             {
                 Title = "Select an image",
                 Filter = "images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg",
                 Multiselect = false,
-                InitialDirectory = imagesDir
             };
 
             if (dlg.ShowDialog() == true)
             {
                 string selectedFile = dlg.FileName;
-                string safeFileName = Path.GetFileName(selectedFile);
-                string destPath = Path.Combine(imagesDir, safeFileName);
 
                 try
                 {
-                    if (!File.Exists(destPath))
-                    {
-                        File.Copy(selectedFile, destPath);
-                        MessageBox.Show($"image copied to:\n{destPath}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show($"path added to fixture.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    // Lees de afbeelding in als byte array en converteer naar Base64
+                    byte[] imageBytes = File.ReadAllBytes(selectedFile);
+                    string imageBase64 = Convert.ToBase64String(imageBytes);
 
-                    _currentFixture.ImagePath = $"Images/{safeFileName}";
+                    // Sla de Base64 string op in de fixture
+                    _currentFixture.ImageBase64 = imageBase64;
                 }
                 catch (Exception ex)
                 {
