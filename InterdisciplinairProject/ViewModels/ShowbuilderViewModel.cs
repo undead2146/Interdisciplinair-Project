@@ -272,6 +272,16 @@ namespace InterdisciplinairProject.ViewModels
             if (scene == null)
                 return;
 
+            // Ask for confirmation before deleting
+            var result = MessageBox.Show(
+                $"Weet je zeker dat je de scene '{scene.Name}' wilt verwijderen?",
+                "Bevestig verwijderen",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
             // remove from the UI collection
             if (Scenes.Contains(scene))
                 Scenes.Remove(scene);
