@@ -87,7 +87,12 @@
                      SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
                      SelectionChanged="ChannelsListBox_SelectionChanged"
                      MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
-                     Margin="0">
+                     Margin="0"
+                     AllowDrop="True"
+                     PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
+                     PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
+                     Drop="ChannelsListBox_Drop"
+                     DragOver="ChannelsListBox_DragOver">
 
                 <ListBox.Resources>
                     <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
@@ -132,7 +137,7 @@
                                         BorderBrush="#D0D0D0" 
                                         BorderThickness="1">
                                     <StackPanel Orientation="Vertical">
-                                        <TextBlock Text="Selecteer kanaal type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Select Channel Type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                         <ComboBox ItemsSource="{Binding AvailableTypes}"
                                                   SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Width="180"/>

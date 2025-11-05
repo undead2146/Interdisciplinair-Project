@@ -37,7 +37,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> availableTypes = new()
         {
-            "Lamp", "Ster", "Klok", "Tilt", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
+            "Lamp", "Star", "Clock", "Tilt", "Fan", "Red", "Green", "Blue", "White",
         };
 
         [ObservableProperty]
