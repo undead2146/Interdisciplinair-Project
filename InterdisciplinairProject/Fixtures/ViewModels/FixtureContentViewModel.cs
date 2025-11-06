@@ -39,6 +39,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             set => SetProperty(ref _imagePath, value);
         }
 
+        public string? ImageBase64 { get; set; }
+
         public ObservableCollection<Channel> Channels { get; set; } = new();
 
         public ICommand BackCommand { get; }
@@ -67,8 +69,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (parsed != null)
             {
                 Name = parsed.Name ?? string.Empty;
-
-                // NIEUW: Laad de fabrikant uit het geparsete model
                 Manufacturer = parsed.Manufacturer ?? "None";
 
                 Channels.Clear();
@@ -78,6 +78,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         Channels.Add(c);
                 }
             }
+
+            ImageBase64 = parsed.ImageBase64;
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using InterdisciplinairProject.Fixtures.ViewModels;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows;
 using System.Windows.Media;
+using InterdisciplinairProject.Fixtures.ViewModels;
 using static InterdisciplinairProject.Fixtures.ViewModels.FixtureCreateViewModel;
 
 namespace InterdisciplinairProject.Fixtures.Views
