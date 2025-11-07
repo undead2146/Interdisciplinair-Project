@@ -88,7 +88,6 @@
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
-
                             </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
