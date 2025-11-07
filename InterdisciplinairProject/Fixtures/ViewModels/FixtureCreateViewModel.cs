@@ -1,19 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.Services;
-using System.Collections.ObjectModel;
+using InterdisciplinairProject.Fixtures.Views;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -126,7 +127,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 _currentFixture.Name = FixtureName;
                 _currentFixture.Manufacturer = SelectedManufacturer!;
 
-                ImageBase64 = DecompressBase64(existing.ImageBase64 ?? string.Empty);
+                ImageBase64 = ImageCompressionHelpers.DecompressBase64(existing.ImageBase64 ?? string.Empty);
             }
             else
             {
@@ -218,7 +219,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ["name"] = FixtureName,
                 ["manufacturer"] = manufacturer,
                 ["channels"] = channelsArray,
-                ["imageBase64"] = !string.IsNullOrEmpty(ImageBase64) ? CompressBase64(ImageBase64) : _currentFixture.ImageBase64,
+                ["imageBase64"] = !string.IsNullOrEmpty(ImageBase64) ? ImageCompressionHelpers.CompressBase64(ImageBase64) : _currentFixture.ImageBase64,
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -312,30 +313,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
             string invalidRegex = string.Format(@"[{0}]", invalidChars);
             return Regex.Replace(name, invalidRegex, "_");
-        }
-
-        private string CompressBase64(string base64)
-        {
-            byte[] bytes = Convert.FromBase64String(base64);
-
-            using var inputStream = new MemoryStream(bytes);
-            using var outputStream = new MemoryStream();
-            using (var gzip = new System.IO.Compression.GZipStream(outputStream, System.IO.Compression.CompressionLevel.Optimal))
-            {
-                inputStream.CopyTo(gzip);
-            }
-
-            return Convert.ToBase64String(outputStream.ToArray());
-        }
-
-        private string DecompressBase64(string compressedBase64)
-        {
-            byte[] compressedBytes = Convert.FromBase64String(compressedBase64);
-            using var inputStream = new MemoryStream(compressedBytes);
-            using var gzip = new System.IO.Compression.GZipStream(inputStream, System.IO.Compression.CompressionMode.Decompress);
-            using var outputStream = new MemoryStream();
-            gzip.CopyTo(outputStream);
-            return Convert.ToBase64String(outputStream.ToArray());
         }
 
         public partial class ChannelItem : ObservableObject

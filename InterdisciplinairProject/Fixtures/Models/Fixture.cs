@@ -23,8 +23,6 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("imageBase64")]
         public string ImageBase64 { get; set; } = string.Empty;
 
-        public ImageSource? ImageSource { get; set; }
-
         public Fixture(string name)
         {
             Name = name;

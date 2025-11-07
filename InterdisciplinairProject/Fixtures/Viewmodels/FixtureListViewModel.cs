@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
@@ -99,33 +100,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         if (string.IsNullOrEmpty(fixture.Manufacturer))
                             fixture.Manufacturer = "Unknown";
 
-                        // image decompressie
                         if (!string.IsNullOrEmpty(fixture.ImageBase64))
                         {
-                            byte[] compressedBytes = Convert.FromBase64String(fixture.ImageBase64);
-
-                            using (var compressedStream = new MemoryStream(compressedBytes))
-                            using (var gzip = new System.IO.Compression.GZipStream(compressedStream, System.IO.Compression.CompressionMode.Decompress))
-                            using (var ms = new MemoryStream())
-                            {
-                                gzip.CopyTo(ms);
-                                ms.Position = 0;
-
-                                var bitmap = new BitmapImage();
-                                bitmap.BeginInit();
-                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                                bitmap.StreamSource = ms;
-                                bitmap.EndInit();
-                                bitmap.Freeze();
-
-                                fixture.ImageSource = bitmap;
-                            }
-                        }
-                        else
-                        {
-                            // fallback naar default image
-                            var bitmap = new BitmapImage(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png")));
-                            fixture.ImageSource = bitmap;
+                            fixture.ImageBase64 = ImageCompressionHelpers.DecompressBase64(fixture.ImageBase64);
                         }
 
                         allFixtures.Add(fixture);
