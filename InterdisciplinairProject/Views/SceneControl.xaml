@@ -190,6 +190,7 @@
                                 Orientation="Vertical" 
                                 Minimum="0" 
                                 Maximum="100"
+                                Value="{Binding Dimmer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 HorizontalAlignment="Center" 
                                 VerticalAlignment="Stretch"
                                 Margin="0"

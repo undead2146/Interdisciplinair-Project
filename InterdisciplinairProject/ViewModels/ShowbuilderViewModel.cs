@@ -10,13 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
-using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
+using InterdisciplinairProject.Views;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
-
         private Shows _show = new Shows();
         private string? _currentShowPath;
 
@@ -33,6 +32,77 @@ namespace InterdisciplinairProject.ViewModels
 
         [ObservableProperty]
         private string? message;
+
+        // ============================================================
+        // EVENT: OnSceneChanged
+        // ============================================================
+        /// <summary>
+        /// Event that is triggered when a scene is modified, added, or deleted.
+        /// </summary>
+        public event EventHandler<SceneChangedEventArgs>? OnSceneChanged;
+
+        /// <summary>
+        /// Raises the OnSceneChanged event.
+        /// </summary>
+        /// <param name="scene">The scene that was changed.</param>
+        /// <param name="changeType">The type of change that occurred.</param>
+        protected virtual void RaiseSceneChanged(Scene? scene, SceneChangeType changeType)
+        {
+            OnSceneChanged?.Invoke(this, new SceneChangedEventArgs(scene, changeType));
+        }
+
+        // ============================================================
+        // EXPORT SCENE (was SaveSceneParameters)
+        // ============================================================
+        /// <summary>
+        /// Exports a specific scene to a JSON file with the correct wrapper format.
+        /// This allows the scene to be imported later via ImportScenes.
+        /// </summary>
+        [RelayCommand]
+        private void ExportScene(Scene? scene)
+        {
+            if (scene == null)
+            {
+                MessageBox.Show("Geen scene geselecteerd om te exporteren.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = "Scene Exporteren",
+                    Filter = "JSON files (*.json)|*.json",
+                    DefaultExt = ".json",
+                    FileName = $"{scene.Name}.json",
+                    AddExtension = true
+                };
+
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    // Wrap scene in "scene" object for compatibility with SceneExtractor
+                    var wrapper = new { scene = scene };
+                    
+                    var options = new JsonSerializerOptions 
+                    { 
+                        WriteIndented = true,
+                        PropertyNamingPolicy = null, // Don't convert property names to camelCase
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
+                    };
+                    string json = JsonSerializer.Serialize(wrapper, options);
+                    File.WriteAllText(saveFileDialog.FileName, json, Encoding.UTF8);
+
+                    Message = $"Scene '{scene.Name}' geëxporteerd naar '{saveFileDialog.FileName}'";
+                    MessageBox.Show($"Scene succesvol geëxporteerd!\nDimmer waarde: {scene.Dimmer}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    RaiseSceneChanged(scene, SceneChangeType.Exported);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij exporteren scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         // ============================================================
         // CREATE SHOW
@@ -88,11 +158,14 @@ namespace InterdisciplinairProject.ViewModels
                         // ensure imported scene slider starts at 0
                         scene.Dimmer = 0;
                         Scenes.Add(scene);
-                        Message = $"Scene '{scene.Name}' imported successfully!";
+                        Message = $"Scene '{scene.Name}' geïmporteerd!";
+
+                        RaiseSceneChanged(scene, SceneChangeType.Added);
                     }
                     else
                     {
-                        Message = "This scene has already been imported.";
+                        Message = "Deze scene is al geïmporteerd.";
+                        MessageBox.Show("Deze scene bestaat al in de huidige show.", "Scene Bestaat Al", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
             }
@@ -110,6 +183,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SceneSelectionChanged(Scene selectedScene)
         {
             SelectedScene = selectedScene;
+            RaiseSceneChanged(selectedScene, SceneChangeType.Selected);
         }
 
         // ============================================================
@@ -291,6 +365,37 @@ namespace InterdisciplinairProject.ViewModels
                 _show.Scenes.Remove(scene);
 
             Message = $"Scene '{scene.Name}' verwijderd.";
+            RaiseSceneChanged(scene, SceneChangeType.Deleted);
         }
+    }
+
+    // ============================================================
+    // SCENE CHANGE EVENT ARGS
+    // ============================================================
+    /// <summary>
+    /// Event arguments for scene change events.
+    /// </summary>
+    public class SceneChangedEventArgs : EventArgs
+    {
+        public Scene? Scene { get; }
+        public SceneChangeType ChangeType { get; }
+
+        public SceneChangedEventArgs(Scene? scene, SceneChangeType changeType)
+        {
+            Scene = scene;
+            ChangeType = changeType;
+        }
+    }
+
+    /// <summary>
+    /// Enum representing the type of scene change.
+    /// </summary>
+    public enum SceneChangeType
+    {
+        Added,
+        Deleted,
+        Modified,
+        Selected,
+        Exported
     }
 }
