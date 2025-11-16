@@ -7,16 +7,20 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Windows.Input;
+using System;
+using System.Collections.Generic;
+using System.Linq; // TOEGEVOEGD: Nodig voor het gebruik van .Any() in de importlogica
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
-    public partial class MainWindowFixturesViewModel : ObservableObject
+    // De klasse is partial en erft van ObservableObject, wat de basis is voor de MVVM Toolkit.
+    public partial class MainWindowFixturesViewModel : ObservableObject
     {
         private readonly FixtureListViewModel fixtureListVm;
         private readonly string _fixturesFolder;
 
-        // Track currently selected fixture
-        private Fixture? _selectedFixture;
+        // Track currently selected fixture
+        private Fixture? _selectedFixture;
 
         [ObservableProperty]
         private object currentViewModel;
@@ -38,16 +42,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         public ICommand CreateFixtureCommand { get; }
-
         public ICommand DeleteCommand { get; }
-
         public ICommand ImportFixtureCommand { get; }
-
         public ICommand ExportFixtureCommand { get; }
 
         public MainWindowFixturesViewModel()
         {
-            CreateFixtureCommand = new RelayCommand(CreateFixture);
+            // Initialisatie van alle commando's (BEHOUDEN)
+            CreateFixtureCommand = new RelayCommand(CreateFixture);
             DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
             ImportFixtureCommand = new RelayCommand(ImportFixture);
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
@@ -55,28 +57,28 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             fixtureListVm = new FixtureListViewModel();
             fixtureListVm.FixtureSelected += OnFixtureSelected;
 
-            // Sync SelectedFixture between both viewmodels
-            fixtureListVm.PropertyChanged += (s, e) =>
+            // Sync SelectedFixture logic (BEHOUDEN)
+            fixtureListVm.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(fixtureListVm.SelectedFixture))
                     SelectedFixture = fixtureListVm.SelectedFixture;
             };
 
-            // Folder for fixtures (matches FixtureListViewModel)
-            _fixturesFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Fixtures");
+            // Folder logic (BEHOUDEN)
+            _fixturesFolder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "InterdisciplinairProject",
+        "Fixtures");
 
             Directory.CreateDirectory(_fixturesFolder);
 
-            CurrentViewModel = fixtureListVm;
-        }
+            CurrentViewModel = fixtureListVm; // Start met de lijstweergave
+        }
 
-        // ------------------------------------------------------------
-        // VIEW NAVIGATION
-        // ------------------------------------------------------------
-        private void OnFixtureSelected(object? sender, string json)
+        // ------------------------------------------------------------
+        // VIEW NAVIGATION (OnFixtureSelected is BEHOUDEN)
+        // ------------------------------------------------------------
+        private void OnFixtureSelected(object? sender, string json)
         {
             var detailVm = new FixtureContentViewModel(json);
             detailVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
@@ -103,16 +105,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             createVm.BackRequested += (_, __) =>
             {
-                fixtureListVm.ReloadFixturesFromFiles();
+                // FIX & BEHOUDEN: Zorgt ervoor dat de lijst wordt herladen en de navigatie terug gaat naar de lijst.
+                fixtureListVm.ReloadFixturesFromFiles();
                 CurrentViewModel = fixtureListVm;
             };
 
-            CurrentViewModel = createVm;
-        }
+            CurrentViewModel = createVm; // Cruciale stap: Stelt de Create View in als de huidige view.
+        }
 
-        private void OnFixtureDelete(string fixtureName, string manufacturerName)
+        // OnFixtureDelete is BEHOUDEN
+        private void OnFixtureDelete(string fixtureName, string manufacturerName)
         {
-            string filePath = Path.Combine(_fixturesFolder,manufacturerName, fixtureName + ".json");
+            string filePath = Path.Combine(_fixturesFolder, manufacturerName, fixtureName + ".json");
 
             if (!File.Exists(filePath))
             {
@@ -121,10 +125,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
 
             var confirm = System.Windows.MessageBox.Show(
-                $"Are you sure you want to delete '{fixtureName}'?",
-                "Confirm deletion",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
+              $"Are you sure you want to delete '{fixtureName}'?",
+              "Confirm deletion",
+              System.Windows.MessageBoxButton.YesNo,
+              System.Windows.MessageBoxImage.Warning);
 
             if (confirm == System.Windows.MessageBoxResult.Yes)
             {
@@ -142,14 +146,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ------------------------------------------------------------
-        // IMPORT FIXTURE
-        // ------------------------------------------------------------
-        private void ImportFixture()
+        // ImportFixture is BEHOUDEN
+        private void ImportFixture()
         {
             string downloadsFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Downloads");
+              Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+              "Downloads");
 
             var dialog = new OpenFileDialog
             {
@@ -174,11 +176,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return;
                 }
 
-                // Validate essential fields
-                var allowedTypes = new HashSet<string>
-                {
-                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
-                };
+                // Validate essential fields (BEHOUDEN)
+                var allowedTypes = new HashSet<string>
+        {
+          "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
+        };
 
                 var missingFields = new List<string>();
 
@@ -190,7 +192,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     missingFields.Add("'name'");
                 }
 
-                if (string.IsNullOrWhiteSpace(manufacturer)) 
+                if (string.IsNullOrWhiteSpace(manufacturer))
                 {
                     manufacturer = "Unknown";
                     root["manufacturer"] = manufacturer;
@@ -228,13 +230,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 if (missingFields.Count > 0)
                 {
                     string msg = "The following required fields are missing or invalid:\n- " +
-                                 string.Join("\n- ", missingFields);
+                          string.Join("\n- ", missingFields);
                     System.Windows.MessageBox.Show(msg);
                     return;
                 }
 
-                // Use filename (without extension) as fixture name
-                string fixtureName = Path.GetFileNameWithoutExtension(jsonPath);
+                // Use filename (without extension) as fixture name
+                string fixtureName = Path.GetFileNameWithoutExtension(jsonPath);
 
                 if (fixtureListVm.Fixtures.Any(f => f.Name.Equals(fixtureName, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -242,8 +244,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return;
                 }
 
-                // Save fixture into local fixtures folder
-                string manufactorFolder = Path.Combine(_fixturesFolder, manufacturer);
+                // Save fixture into local fixtures folder (BEHOUDEN)
+                string manufactorFolder = Path.Combine(_fixturesFolder, manufacturer);
                 Directory.CreateDirectory(manufactorFolder);
                 string targetPath = Path.Combine(manufactorFolder, fixtureName + ".json");
                 root["name"] = fixtureName;
@@ -263,10 +265,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ------------------------------------------------------------
-        // EXPORT FIXTURE
-        // ------------------------------------------------------------
-        private bool CanExportFixture() => SelectedFixture != null;
+        // CanExportFixture en ExportFixture zijn BEHOUDEN
+        private bool CanExportFixture() => SelectedFixture != null;
 
         private void ExportFixture()
         {
@@ -290,8 +290,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return;
                 }
 
-                // Ask user for new fixture name
-                var exportWindow = new ExportFixtureWindow(SelectedFixture.Name)
+                // Ask user for new fixture name
+                var exportWindow = new ExportFixtureWindow(SelectedFixture.Name)
                 {
                     Owner = System.Windows.Application.Current.MainWindow,
                 };
@@ -307,9 +307,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     root["name"] = newName;
 
-                    // Save directly to Downloads folder
-                    string downloadsFolder = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                    // Save directly to Downloads folder
+                    string downloadsFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
                     Directory.CreateDirectory(downloadsFolder);
 
                     string exportPath = Path.Combine(downloadsFolder, newName + ".json");
