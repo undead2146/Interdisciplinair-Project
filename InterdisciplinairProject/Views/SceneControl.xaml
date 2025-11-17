@@ -111,8 +111,9 @@
 
             <!-- stacked content sits below the top area; margin top increased to avoid overlap with corner buttons -->
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,28,0,0">
-                <!-- Play button (same styling as settings button, triangle play icon) -->
-                <Button Width="40" Height="40" ToolTip="Play scene" x:Name="PART_PlayButton">
+                <!-- Play button (now wired to PlayCommand) -->
+                <Button Width="40" Height="40" ToolTip="Play scene" x:Name="PART_PlayButton"
+                        Command="{Binding PlayCommand}">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Template">
@@ -126,7 +127,6 @@
                                             <!-- Larger centered, rounded-corner play icon -->
                                             <Viewbox Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <Canvas Width="24" Height="24">
-                                                    <!-- Bigger triangle with rounded visual corners: increased stroke and slight translation to center -->
                                                     <Path Fill="White" Stroke="White" StrokeThickness="1.9"
                                                           StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                                           Data="M7,5 L19,12 L7,19 Z"
@@ -284,7 +284,10 @@
                     </Grid>
                 </Border>
 
-                <Button Width="40" Height="40">
+                <!-- Settings button: wired to OpenSettingsCommand on the SceneControlViewModel -->
+                <Button Width="40" Height="40" ToolTip="Settings"
+                        Command="{Binding OpenSettingsCommand}"
+                        CommandParameter="{Binding SceneModel}">
                     <Button.Style>
                         <Style TargetType="{x:Type Button}">
                             <Setter Property="Template">

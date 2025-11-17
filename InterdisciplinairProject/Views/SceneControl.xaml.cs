@@ -1,12 +1,9 @@
 using InterdisciplinairProject.ViewModels;
 using Show.Model;
-using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows;
 using System.Windows.Media;
 
 namespace InterdisciplinairProject.Views
@@ -26,7 +23,10 @@ namespace InterdisciplinairProject.Views
         {
             // If the DataContext is already a SceneControlViewModel, do nothing.
             if (DataContext is SceneControlViewModel)
+            {
+                AttachSliderHandlers();
                 return;
+            }
 
             // If the DataContext provided by the ItemsControl is a Scene model,
             // replace it with a SceneControlViewModel that wraps the model and
@@ -35,6 +35,34 @@ namespace InterdisciplinairProject.Views
             {
                 var parentShowVm = FindParentShowbuilderViewModel();
                 this.DataContext = new SceneControlViewModel(sceneModel, parentShowVm);
+            }
+
+            AttachSliderHandlers();
+        }
+
+        private void AttachSliderHandlers()
+        {
+            var slider = this.FindName("PART_DimmerSlider") as Slider;
+            if (slider != null)
+            {
+                // when user presses the slider, select this scene so fixture details show
+                slider.PreviewMouseLeftButtonDown -= Slider_PreviewMouseLeftButtonDown;
+                slider.PreviewMouseLeftButtonDown += Slider_PreviewMouseLeftButtonDown;
+
+                // also handle keyboard focus/clicks
+                slider.PreviewMouseDown -= Slider_PreviewMouseLeftButtonDown;
+                slider.PreviewMouseDown += Slider_PreviewMouseLeftButtonDown;
+            }
+        }
+
+        private void Slider_PreviewMouseLeftButtonDown(object? sender, MouseButtonEventArgs e)
+        {
+            var parentShowVm = FindParentShowbuilderViewModel();
+            if (parentShowVm == null) return;
+
+            if (DataContext is SceneControlViewModel vm && vm.SceneModel != null)
+            {
+                parentShowVm.SelectedScene = vm.SceneModel;
             }
         }
 

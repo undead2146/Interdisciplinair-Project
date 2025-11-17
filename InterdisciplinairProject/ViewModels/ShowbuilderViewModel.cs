@@ -12,12 +12,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
-
         private Shows _show = new Shows();
         private string? _currentShowPath;
 
@@ -34,6 +35,9 @@ namespace InterdisciplinairProject.ViewModels
 
         [ObservableProperty]
         private string? message;
+
+        // new: per-scene fade cancellation tokens
+        private readonly Dictionary<Scene, CancellationTokenSource> _fadeCts = new();
 
         // ============================================================
         // CREATE SHOW
@@ -299,6 +303,9 @@ namespace InterdisciplinairProject.ViewModels
             if (scene == null)
                 return;
 
+            // Cancel any fade in progress for this scene because user is manually changing it
+            CancelFadeForScene(scene);
+
             dimmer = Math.Max(0, Math.Min(100, dimmer));
 
             // if we're turning this scene on (dimmer > 0), immediately turn all other scenes off.
@@ -363,6 +370,153 @@ namespace InterdisciplinairProject.ViewModels
             {
                 var idx = Scenes.IndexOf(scene);
                 if (idx >= 0) Scenes[idx] = scene;
+            }
+        }
+
+        // Cancels any running fade for the provided scene
+        private void CancelFadeForScene(Scene scene)
+        {
+            if (scene == null) return;
+
+            if (_fadeCts.TryGetValue(scene, out var cts))
+            {
+                try
+                {
+                    cts.Cancel();
+                }
+                catch { }
+                cts.Dispose();
+                _fadeCts.Remove(scene);
+            }
+        }
+
+        // Fade a single scene to target over durationMs, updating fixtures and Scenes on the UI thread.
+        private async Task FadeSceneAsync(Scene scene, int target, int durationMs, CancellationToken token)
+        {
+            if (scene == null) return;
+
+            if (durationMs <= 0)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    scene.Dimmer = target;
+                    UpdateFixturesForScene(scene, target);
+                    var idx = Scenes.IndexOf(scene);
+                    if (idx >= 0) Scenes[idx] = scene;
+                    if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+                });
+                return;
+            }
+
+            const int intervalMs = 20;
+            int steps = Math.Max(1, durationMs / intervalMs);
+
+            // read authoritative start on UI thread (await returns the value)
+            int start = await Application.Current.Dispatcher.InvokeAsync(() => scene.Dimmer);
+
+            double delta = (target - start) / (double)steps;
+
+            for (int i = 1; i <= steps; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                double next = start + delta * i;
+                int nextInt = (int)Math.Round(Math.Max(0, Math.Min(100, next)));
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    scene.Dimmer = nextInt;
+                    UpdateFixturesForScene(scene, nextInt);
+                    var idx = Scenes.IndexOf(scene);
+                    if (idx >= 0) Scenes[idx] = scene;
+                    if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+                });
+
+                await Task.Delay(intervalMs, token);
+            }
+
+            // ensure exact target at end
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                scene.Dimmer = target;
+                UpdateFixturesForScene(scene, target);
+                var idx = Scenes.IndexOf(scene);
+                if (idx >= 0) Scenes[idx] = scene;
+                if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+            });
+        }
+
+        // Helper to update fixture dimmer channels for a scene on the caller thread (call from UI dispatcher)
+        private void UpdateFixturesForScene(Scene scene, int dimmer)
+        {
+            if (scene?.Fixtures == null) return;
+            byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
+            foreach (var fixture in scene.Fixtures)
+            {
+                try
+                {
+                    fixture.Dimmer = channelValue;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[DEBUG] Error updating fixture channels/dimmer: {ex.Message}");
+                }
+            }
+        }
+
+        // Public method used by SceneControlViewModel.PlayAsync to activate scene with fade orchestration.
+        public async Task FadeToAndActivateAsync(Scene targetScene, int targetDimmer)
+        {
+            if (targetScene == null) return;
+
+            // Cancel any fade for the target (we'll run a new one)
+            CancelFadeForScene(targetScene);
+
+            // collect currently active other scenes
+            var activeOthers = Scenes.Where(s => !ReferenceEquals(s, targetScene) && s.Dimmer > 0).ToList();
+
+            // fade out others in parallel
+            var fadeOutTasks = new List<Task>();
+            foreach (var other in activeOthers)
+            {
+                // cancel existing token for other and create a new one
+                CancelFadeForScene(other);
+                var cts = new CancellationTokenSource();
+                _fadeCts[other] = cts;
+                fadeOutTasks.Add(Task.Run(() => FadeSceneAsync(other, 0, Math.Max(0, other.FadeOutMs), cts.Token)));
+            }
+
+            try
+            {
+                // wait for all fade-outs to complete
+                await Task.WhenAll(fadeOutTasks);
+            }
+            catch (OperationCanceledException) { /* one of fades cancelled; continue */ }
+
+            // ensure other scenes are set to 0 (defensive)
+            foreach (var other in activeOthers)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    other.Dimmer = 0;
+                    UpdateFixturesForScene(other, 0);
+                    var idx = Scenes.IndexOf(other);
+                    if (idx >= 0) Scenes[idx] = other;
+                });
+                CancelFadeForScene(other);
+            }
+
+            // now fade target scene to requested dimmer using its FadeInMs
+            CancelFadeForScene(targetScene);
+            var ctsTarget = new CancellationTokenSource();
+            _fadeCts[targetScene] = ctsTarget;
+
+            try
+            {
+                await FadeSceneAsync(targetScene, targetDimmer, Math.Max(0, targetScene.FadeInMs), ctsTarget.Token);
+            }
+            finally
+            {
+                CancelFadeForScene(targetScene);
             }
         }
     }
