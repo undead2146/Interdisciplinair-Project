@@ -21,11 +21,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public class FixtureListViewModel : INotifyPropertyChanged
     {
-        // Private instantie van de service
-        private readonly InterdisciplinairProject.Fixtures.Services.ManufacturerService _manufacturerService = new();
-
-        // Command property voor het verwijderen van een fabrikant
-        public ICommand DeleteManufacturerCommand { get; }
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
 
@@ -80,14 +75,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             ReloadFixturesFromFiles();
             StartWatchingDataFolder();
-            // Locatie: Aan het einde van de constructor FixtureListViewModel()
-
-            // 🔴 Initialisatie voor Fabrikant Verwijderen Command
-            DeleteManufacturerCommand = new RelayCommand<string>(
-                ExecuteDeleteManufacturer,
-                CanExecuteDeleteManufacturer
-            );
         }
+
         public void ReloadFixturesFromFiles()
         {
             ManufacturerGroups.Clear();
@@ -200,53 +189,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             };
 
             _watcher.EnableRaisingEvents = true;
-        }
-        // --- LOGICA VOOR FABRIKANT VERWIJDEREN COMMAND ---
-
-        private bool CanExecuteDeleteManufacturer(string? manufacturerName)
-        {
-            // Het command kan alleen worden uitgevoerd als de naam niet leeg is.
-            return !string.IsNullOrWhiteSpace(manufacturerName);
-        }
-
-        // Locatie: In de FixtureListViewModel.cs klasse
-
-        private void ExecuteDeleteManufacturer(string? manufacturerName)
-        {
-            if (string.IsNullOrWhiteSpace(manufacturerName)) return;
-
-            // 1. Bevestigingspopup
-            MessageBoxResult result = MessageBox.Show(
-                $"Weet u zeker dat u de fabrikant '{manufacturerName}' wilt verwijderen? Dit is enkel mogelijk als er geen fixtures onder bestaan.",
-                "Fabrikant verwijderen",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning
-            );
-
-            if (result != MessageBoxResult.Yes)
-            {
-                return;
-            }
-
-            // 2. Roep de Service aan (deze methode regelt nu het SanitizeFileName en Directory.Delete)
-            bool success = _manufacturerService.DeleteManufacturer(manufacturerName);
-
-            // 3. Afhandeling van het resultaat
-            if (success)
-            {
-                MessageBox.Show($"Fabrikant '{manufacturerName}' succesvol verwijderd.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                ReloadFixturesFromFiles(); // Zorgt dat de map uit de lijst verdwijnt
-            }
-            else
-            {
-                // Foutmelding
-                MessageBox.Show(
-                    $"Fabrikant '{manufacturerName}' kon NIET worden verwijderd. Zorg ervoor dat er geen fixtures (bestanden) onder deze fabrikant bestaan.",
-                    "Fout bij verwijderen",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
-                );
-            }
         }
     }
 }

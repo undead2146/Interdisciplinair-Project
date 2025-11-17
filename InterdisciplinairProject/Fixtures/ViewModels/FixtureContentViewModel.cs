@@ -34,16 +34,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             set => SetProperty(ref _manufacturer, value);
         }
 
-
         public string? ImagePath
         {
             get => _imagePath;
             set => SetProperty(ref _imagePath, value);
         }
-        // ✅ TOEGEVOEGD: Publieke property om de DmxDivisions op te slaan. 
-        // Dit lost de fout CS1061 op.
-        [ObservableProperty]
-        private int _dmxDivisions = 255;
 
         public string? ImageBase64 { get; set; }
 
