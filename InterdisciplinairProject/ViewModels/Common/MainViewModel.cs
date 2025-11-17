@@ -41,8 +41,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private UserControl? currentView;
 
-    
-
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
     /// </summary>
@@ -87,16 +85,28 @@ public partial class MainViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+
         // Initialize ViewModel, e.g., load services from DI if injected
-        OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
         _showbuilderViewModel = new ShowbuilderViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
+
+        // Show welcome view by default
+        CurrentView = new WelcomeView { DataContext = this };
+        Debug.WriteLine("[DEBUG] WelcomeView set as default view");
     }
 
     /// <summary>
     /// Gets the command to open the fixture settings view.
     /// </summary>
     public RelayCommand OpenFixtureSettingsCommand { get; private set; } = null!;
+
+    /// <summary>
+    /// Saves and closes the show.
+    /// </summary>
+    public void SaveCloseForShow()
+    {
+        _showbuilderViewModel.SaveCommand.Execute(CurrentView);
+    }
 
     /// <summary>
     /// Opens the fixture settings view window.
@@ -109,8 +119,11 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenFixtureBuilder() => CurrentView = new MainWindowFixtures();
-
+    private void OpenFixtureBuilder()
+    {
+        CurrentView = new MainWindowFixtures();
+        Title = "InterdisciplinairProject - Fixture Builder";
+    }
 
     /// <summary>
     /// Opens the show builder view.
@@ -145,16 +158,12 @@ public partial class MainViewModel : ObservableObject
             // Toon de SceneBuilderView in het MainWindow
             // SceneBuilderViewModel handelt zijn eigen interne navigatie af naar SceneEditorView
             CurrentView = sceneBuilderView;
+            Title = "InterdisciplinairProject - Scene Builder";
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"[ERROR] OpenSceneBuilder failed: {ex.Message}");
             MessageBox.Show($"Error opening Scene Builder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-    }
-
-    public void SaveCloseForShow()
-    {
-        _showbuilderViewModel.SaveCommand.Execute(currentView);
     }
 }
