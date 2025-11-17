@@ -3,66 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
              xmlns:viewmodels="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
-             
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance viewmodels:FixtureCreateViewModel}"
-             x:Name="RootControl">
+             d:DataContext="{d:DesignInstance viewmodels:FixtureCreateViewModel}">
+    <Grid Margin="10,10,10,6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <Label Content="Fixture name:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <TextBox x:Name="FixtureNameTextBox"
+                     Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     VerticalAlignment="Center"
+                     Width="200"
+                     Padding="3"/>
+        </StackPanel>
 
-        <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-    </UserControl.Resources>
-
-    <DockPanel Margin="10">
-
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Label Content="Fixture name:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
-                <TextBox x:Name="FixtureNameTextBox"
-                         Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
-                         TextWrapping="Wrap"
-                         VerticalAlignment="Center"
-                         Width="200"
-                         Padding="3"/>
-
-                <Label Content="DMX Divisies (2-255):" VerticalAlignment="Center" Margin="20,0,10,0" FontWeight="SemiBold"/>
-
-                <Grid Width="Auto" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBox Grid.Column="0"
-                             Text="{Binding DmxDivisionsInput, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                             Width="50"
-                             VerticalAlignment="Center"
-                             Padding="3"
-                             Margin="0,0,5,0"/>
-
-                    <TextBlock Grid.Column="1"
-                               Text="✔ OK" 
-                               VerticalAlignment="Center"
-                               FontWeight="Bold"
-                               Foreground="Green"
-                               Visibility="{Binding IsDmxDivisionsValid, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                </Grid>
-            </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,10">
 
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -84,51 +52,51 @@
                         Background="#FF9800"
                         Foreground="White"
                         FontWeight="Bold"/>
-
+                
                 <Button Grid.Column="3" 
-                        Content="Add Image" 
-                        Command="{Binding AddImageCommand}"
-                        VerticalAlignment="Center"
-                        Padding="5,3"
-                        Margin="10,0,0,0"
-                        Background="#77DD11"
-                        Foreground="White"
-                        FontWeight="Bold"/>
+                Content="Add Image" 
+                Command="{Binding AddImageCommand}"
+                VerticalAlignment="Center"
+                Padding="5,3"
+                Margin="45,0,178,0"
+                Background="#77DD11"
+                Foreground="White"
+                FontWeight="Bold"/>
+                
             </Grid>
 
-            <Button Content="+ Add channel" 
-                    Padding="10"
-                    Margin="0,0,0,10" 
-                    Command="{Binding AddChannelCommand}"
-                    Background="#1E90FF"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Left"/>
+            <Button 
+                Content="+ Add channel" 
+                Padding="10"
+                Margin="0,0,0,10" 
+                Command="{Binding AddChannelCommand}"
+                Background="#1E90FF"
+                Foreground="White"
+                FontWeight="Bold"/>
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Bottom"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Margin="0,8,0,0">
-
-            <Button Content="Save"
-                    Width="90" Height="36" Margin="0,0,8,0"
-                    Command="{Binding SaveCommand}"
-                    IsEnabled="{Binding IsDmxDivisionsValid}"/>
-
-            <Button Content="Cancel"
-                    Width="90" Height="36"
-                    Command="{Binding CancelCommand}"/>
-        </StackPanel>
-
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
             <ListBox x:Name="ChannelsListBox" 
+                     Grid.Row="0"
                      ItemsSource="{Binding Channels}"
                      SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
                      SelectionChanged="ChannelsListBox_SelectionChanged"
                      MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
                      Margin="0">
+
+                <ListBox.Resources>
+                    <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </ListBox.Resources>
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -151,6 +119,8 @@
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
+
+                                        
                                 </Grid>
 
                                 <Border x:Name="OptionsPanel" 
@@ -165,51 +135,43 @@
                                         <TextBlock Text="Selecteer kanaal type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                         <ComboBox ItemsSource="{Binding AvailableTypes}"
                                                   SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                  Width="180"
-                                                  HorizontalAlignment="Left"/>
+                                                  Width="180"/>
 
                                         <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <Slider Minimum="0" Maximum="255"
                                                     Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    TickFrequency="{Binding DataContext.DmxStepSize, ElementName=RootControl}"
-                                                    IsSnapToTickEnabled="True"/>
-
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                                <TextBlock Text="Waarde: "/>
-                                                <TextBlock x:Name="sliderValue" Text="{Binding Level}"/>
-                                                <TextBlock Text=" | Stap: " Margin="10,0,0,0"/>
-                                                <TextBlock Text="{Binding DataContext.DmxStepSize, ElementName=RootControl, StringFormat={}{0:F1}}"/>
-                                            </StackPanel>
+                                                    TickFrequency="1" IsSnapToTickEnabled="True"/>
+                                            <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
 
                                         <StackPanel x:Name="TypeInputPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Input value" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <TextBox x:Name="inputValue" Text="{Binding Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
                                         </StackPanel>
+
+                                        
                                     </StackPanel>
                                 </Border>
-
+                                <!-- NEW: Delete button shown only while editing -->
                                 <Button x:Name="DeleteButton"
-                                        Grid.Column="1"
-                                        Content="Delete"
-                                        Padding="6,2"
-                                        Margin="0,10,0,10"
-                                        Visibility="Collapsed"
-                                        Command="{Binding DataContext.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                        CommandParameter="{Binding .}"
-                                        Background="Red"
-                                        Foreground="White"
-                                        HorizontalAlignment="Right"/>
+                                            Grid.Column="1"
+                                            Content="Delete"
+                                            Padding="6,2"
+                                            Margin="0,10,0,10"
+                                            Visibility="Collapsed"
+                                            Command="{Binding DataContext.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding .}"/>
                             </StackPanel>
                         </Border>
 
                         <DataTemplate.Triggers>
-
                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                                
+
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
@@ -251,20 +213,21 @@
                                 <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </DataTemplate.Triggers>
-
                     </DataTemplate>
                 </ListBox.ItemTemplate>
-
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                <Setter Property="IsSelected" Value="True"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.ItemContainerStyle>
             </ListBox>
-        </ScrollViewer>
-    </DockPanel>
+
+            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,8,0,0">
+                <Button Content="Save"
+                        Width="90" Height="36" Margin="0,0,8,0"
+                        Command="{Binding SaveCommand}"/>
+                <Button Content="Cancel"
+                        Width="90" Height="36"
+                        Command="{Binding CancelCommand}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </UserControl>
