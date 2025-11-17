@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,22 +10,28 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
+    public enum SearchMode
+    {
+        Fixture,
+        Manufacturer
+    }
+
     public class FixtureListViewModel : INotifyPropertyChanged
     {
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
+        public Array SearchModes => Enum.GetValues(typeof(SearchMode));
+
 
         public event EventHandler<string>? FixtureSelected;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ObservableCollection<Fixture> Fixtures { get; } = new();
         public ObservableCollection<ManufacturerGroup> ManufacturerGroups { get; set; } = new();
 
         private string _searchText = "";
@@ -38,8 +44,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     _searchText = value;
                     OnPropertyChanged(nameof(SearchText));
-                    foreach (var group in ManufacturerGroups)
-                        group.RefreshFilteredFixtures(_searchText);
+                    ApplySearch();
+                }
+            }
+        }
+
+        private SearchMode _selectedSearchMode = SearchMode.Fixture;
+        public SearchMode SelectedSearchMode
+        {
+            get => _selectedSearchMode;
+            set
+            {
+                if (_selectedSearchMode != value)
+                {
+                    _selectedSearchMode = value;
+                    OnPropertyChanged(nameof(SelectedSearchMode));
+                    ApplySearch();
                 }
             }
         }
@@ -79,8 +99,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             ManufacturerGroups.Clear();
 
-            if (!Directory.Exists(_fixturesFolder))
-                return;
+            if (!Directory.Exists(_fixturesFolder)) return;
 
             var allFixtures = new List<Fixture>();
 
@@ -98,25 +117,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         if (string.IsNullOrEmpty(fixture.Manufacturer))
                             fixture.Manufacturer = "Unknown";
 
-                        if (string.IsNullOrEmpty(fixture.ImagePath))
+                        if (!string.IsNullOrEmpty(fixture.ImageBase64))
                         {
-                            fixture.ImagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
-                        }
-                        else 
-                        {
-                            // Get just the file name ("test.png") from "Images/test.png"
-                            string fileName = Path.GetFileName(fixture.ImagePath);
-
-                            string appDataImages = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                "InterdisciplinairProject",
-                                "Images"
-                            );
-
-                            fixture.ImagePath = Path.Combine(appDataImages, fileName);
+                            fixture.ImageBase64 = ImageCompressionHelpers.DecompressBase64(fixture.ImageBase64);
                         }
 
-                            allFixtures.Add(fixture);
+                        allFixtures.Add(fixture);
                     }
                 }
                 catch (Exception ex)
@@ -135,21 +141,35 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 mg.RefreshFilteredFixtures(SearchText);
                 ManufacturerGroups.Add(mg);
             }
+
+            ApplySearch();
         }
 
-        // ------------------------------------------------------------
-        // INotifyPropertyChanged
-        // ------------------------------------------------------------
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        private void ApplySearch()
+        {
+            if (SelectedSearchMode == SearchMode.Fixture)
+            {
+                foreach (var group in ManufacturerGroups)
+                {
+                    group.RefreshFilteredFixtures(SearchText);
+                    group.IsVisible = group.FilteredFixtures.Count > 0;
+                }
+            }
+            else // Manufacturer search
+            {
+                foreach (var group in ManufacturerGroups)
+                {
+                    group.IsVisible = string.IsNullOrWhiteSpace(SearchText)
+                        || group.Manufacturer.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
 
-        // ------------------------------------------------------------
-        // OPEN
-        // ------------------------------------------------------------
+                    group.RefreshFilteredFixtures(""); // show all fixtures in visible groups
+                }
+            }
+        }
+
         private void OpenFixture()
         {
-            if (SelectedFixture == null)
-                return;
+            if (SelectedFixture == null) return;
 
             string filePath = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
             if (!File.Exists(filePath))
@@ -169,15 +189,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ------------------------------------------------------------
-        // MANAGEMENT
-        // ------------------------------------------------------------
-        private bool FixturesExists(string name) =>
-            Fixtures.Any(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        // ------------------------------------------------------------
-        // WATCHER
-        // ------------------------------------------------------------
         private void StartWatchingDataFolder()
         {
             if (!Directory.Exists(_fixturesFolder)) return;
@@ -194,12 +205,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (!FixturesExists(fileName))
-                        Fixtures.Add(new Fixture(fileName));
+                    if (!ManufacturerGroups.SelectMany(g => g.Fixtures).Any(f => f.Name == fileName))
+                        ReloadFixturesFromFiles();
                 });
             };
 
             _watcher.EnableRaisingEvents = true;
         }
+
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

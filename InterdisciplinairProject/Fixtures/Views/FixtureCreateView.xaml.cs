@@ -1,14 +1,18 @@
-﻿using InterdisciplinairProject.Fixtures.ViewModels;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows;
 using System.Windows.Media;
+using InterdisciplinairProject.Fixtures.ViewModels;
+using static InterdisciplinairProject.Fixtures.ViewModels.FixtureCreateViewModel;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
     public partial class FixtureCreateView : UserControl
     {
-        private ChannelViewModel? _selectedChannel; // Veld om de geselecteerde staat bij te houden
+
+        private ChannelItem? _selectedChannel; // Veld om de geselecteerde staat bij te houden
+        private Point _dragStartPoint;  //needed for drag drop functionality for reordering channels
+
 
         public FixtureCreateView()
         {
@@ -17,7 +21,7 @@ namespace InterdisciplinairProject.Fixtures.Views
 
         private void ChannelsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count > 0 && e.AddedItems[0] is ChannelViewModel newSelection)
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] is ChannelItem newSelection)
             {
                 // Sluit het eerder geselecteerde kanaal
                 if (_selectedChannel != null && _selectedChannel != newSelection)
@@ -41,7 +45,7 @@ namespace InterdisciplinairProject.Fixtures.Views
         private void ChannelsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             // Start de bewerkingsmodus bij dubbelklik
-            if (ChannelsListBox.SelectedItem is ChannelViewModel selected)
+            if (ChannelsListBox.SelectedItem is ChannelItem selected)
             {
                 selected.IsEditing = true;
             }
@@ -51,7 +55,7 @@ namespace InterdisciplinairProject.Fixtures.Views
         {
             if (e.Key == Key.Enter)
             {
-                if (((System.Windows.FrameworkElement)sender).DataContext is ChannelViewModel channelVm)
+                if (((System.Windows.FrameworkElement)sender).DataContext is ChannelItem channelVm)
                 {
                     channelVm.IsEditing = false; // Stop de bewerking
 
@@ -85,5 +89,61 @@ namespace InterdisciplinairProject.Fixtures.Views
                 return FindParent<T>(parentObject);
             }
         }
+
+        // start of drag drop functionality for reordering channels 
+        private void ChannelsListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _dragStartPoint = e.GetPosition(null);
+        }
+
+        private void ChannelsListBox_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            Point mousePos = e.GetPosition(null);
+            Vector diff = _dragStartPoint - mousePos;
+
+            if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+            {
+                if (sender is not ListBox listBox || listBox.SelectedItem == null) return;
+
+                DragDrop.DoDragDrop(listBox, listBox.SelectedItem, DragDropEffects.Move);
+            }
+        }
+
+        private void ChannelsListBox_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Move;
+        }
+
+        private void ChannelsListBox_Drop(object sender, DragEventArgs e)
+        {
+            if (sender is not ListBox listBox) return;
+
+            var source = e.Data.GetData(typeof(ChannelItem)) as ChannelItem;
+            if (source == null) return;
+
+            var target = GetNearestContainer(listBox, e.GetPosition(listBox))?.DataContext as ChannelItem;
+            if (target == null || ReferenceEquals(source, target)) return;
+
+            if (DataContext is not FixtureCreateViewModel vm) return;
+
+            int oldIndex = vm.Channels.IndexOf(source);
+            int newIndex = vm.Channels.IndexOf(target);
+
+            if (oldIndex != newIndex)
+                vm.Channels.Move(oldIndex, newIndex);
+        }
+
+        private ListBoxItem GetNearestContainer(ListBox listBox, Point position)
+        {
+            var element = listBox.InputHitTest(position) as DependencyObject;
+            while (element != null && element is not ListBoxItem)
+                element = VisualTreeHelper.GetParent(element);
+            return element as ListBoxItem;
+        }
+
+        // end of drag drop functionality for reordering channels 
     }
 }
