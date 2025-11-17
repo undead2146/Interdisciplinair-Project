@@ -262,7 +262,7 @@ public partial class ScenebuilderViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Fout bij importeren van scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Fout bij importeren van scene(s): {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
