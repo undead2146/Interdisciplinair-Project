@@ -12,27 +12,23 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <!-- Scene naam en opslaan knop -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
             <TextBlock Text="Scène Naam:" VerticalAlignment="Center" Margin="0,0,5,0"/>
             <TextBox Text="{Binding Scene.Name}" Width="200" Margin="0,0,10,0"/>
             <Button Content="Opslaan" Command="{Binding SaveSceneCommand}" Padding="10,5"/>
         </StackPanel>
-
         <!-- Fixture toevoegen knop -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
             <Button Content="Fixture Toevoegen" Command="{Binding AddFixtureCommand}" Padding="10,5"/>
         </StackPanel>
-
         <!-- Hoofd content: Fixture lijst links, settings rechts -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <!-- Fixture lijst -->
+            <!-- Fixture lijst MET DELETE KNOP -->
             <Border Grid.Column="0" 
                     BorderBrush="#FFE0E0E0" 
                     BorderThickness="1" 
@@ -44,13 +40,34 @@
                          Margin="5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Fixture.Name}" Padding="5"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" 
+                                           Text="{Binding Fixture.Name}" 
+                                           Padding="5" 
+                                           VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" 
+                                        Content="X" 
+                                        Foreground="Red" 
+                                        FontWeight="Bold" 
+                                        Width="20" 
+                                        Height="20" 
+                                        Padding="0"
+                                        HorizontalAlignment="Right" 
+                                        VerticalAlignment="Center"
+                                        ToolTip="Verwijder deze fixture"
+                                        Command="{Binding DataContext.RemoveFixtureCommand, 
+                                                  RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
+                                        CommandParameter="{Binding}"/>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
-
-            <!-- Fixture settings view - AANGEPAST -->
+            <!-- Fixture settings view -->
             <Border Grid.Column="1"
                     BorderBrush="#FFE0E0E0" 
                     BorderThickness="1" 
