@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using System.Windows;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Features.Show;
 using InterdisciplinairProject.Views;
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -167,6 +168,7 @@ public partial class ScenebuilderViewModel : ObservableObject
         }
     }
 
+
     private async Task LoadScenesAsync()
     {
         try
@@ -182,6 +184,85 @@ public partial class ScenebuilderViewModel : ObservableObject
         catch (Exception ex)
         {
             MessageBox.Show($"Error loading scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Imports scenes from JSON files.
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportScene()
+    {
+        try
+        {
+            // Open file dialog om JSON bestanden te selecteren
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Selecteer scene bestanden om te importeren",
+                Filter = "JSON bestanden (*.json)|*.json|Alle bestanden (*.*)|*.*",
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                int successCount = 0;
+                int failCount = 0;
+                var errorMessages = new System.Collections.Generic.List<string>();
+
+                foreach (var filePath in openFileDialog.FileNames)
+                {
+                    try
+                    {
+                        // Extract scene uit JSON bestand
+                        var importedScene = SceneExtractor.ExtractScene(filePath);
+
+                        // Genereer nieuwe ID voor de geïmporteerde scene
+                        importedScene.Id = Guid.NewGuid().ToString();
+
+                        // Sla de scene op via repository
+                        await _sceneRepository.SaveSceneAsync(importedScene);
+
+                        // Voeg toe aan de lijst
+                        Scenes.Add(importedScene);
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        failCount++;
+                        errorMessages.Add($"{System.IO.Path.GetFileName(filePath)}: {ex.Message}");
+                    }
+                }
+
+                // Toon resultaat
+                if (successCount > 0 && failCount == 0)
+                {
+                    MessageBox.Show(
+                        $"{successCount} scene(s) succesvol geïmporteerd!",
+                        "Import succesvol",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else if (successCount > 0 && failCount > 0)
+                {
+                    MessageBox.Show(
+                        $"{successCount} scene(s) geïmporteerd, {failCount} gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
+                        "Import gedeeltelijk succesvol",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                else if (failCount > 0)
+                {
+                    MessageBox.Show(
+                        $"Alle imports gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
+                        "Import gefaald",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij importeren van scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
