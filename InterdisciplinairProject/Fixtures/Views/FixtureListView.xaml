@@ -14,12 +14,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0"
-                 Height="28"
-                 Padding="4"
-                 Margin="0,0,0,8"
-                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+        <!-- SEARCH + DROPDOWN -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="160" />
+            </Grid.ColumnDefinitions>
 
+            <!-- Search bar -->
+            <TextBox Grid.Column="0"
+                     Height="28"
+                     Padding="4"
+                     Margin="0,0,8,0"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Filter dropdown -->
+            <ComboBox Grid.Column="1"
+                      Height="28"
+                      SelectedItem="{Binding SelectedFilterMode}"
+                      ItemsSource="{Binding FilterModes}"
+                      VerticalContentAlignment="Center"/>
+        </Grid>
+
+        <!-- FIXTURE LIST -->
         <Border Grid.Row="1" Padding="10">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding ManufacturerGroups}">
@@ -51,6 +68,7 @@
                                         </Border>
                                     </DataTemplate>
                                 </Expander.HeaderTemplate>
+
                                 <ListBox ItemsSource="{Binding FilteredFixtures}"
                                          SelectedItem="{Binding DataContext.SelectedFixture, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                          BorderThickness="0"
