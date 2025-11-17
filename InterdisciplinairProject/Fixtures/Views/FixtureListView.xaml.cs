@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.Views
@@ -20,5 +21,17 @@ namespace InterdisciplinairProject.Fixtures.Views
                 vm.OpenFixtureCommand.Execute(null);
             }
         }
+        private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+            {
+                RoutedEvent = UIElement.MouseWheelEvent,
+                Source = sender
+            };
+            var parent = ((Control)sender).Parent as UIElement;
+            parent?.RaiseEvent(eventArg);
+            e.Handled = true;
+        }
+
     }
 }

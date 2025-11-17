@@ -4,19 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+             xmlns:viewmodels="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewmodels:FixtureCreateViewModel}">
     <Grid Margin="10,10,10,6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <!-- content area -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <Label Content="Fixture Naam:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+            <Label Content="Fixture name:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
             <TextBox x:Name="FixtureNameTextBox"
                      Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
                      TextWrapping="Wrap"
@@ -25,7 +25,47 @@
                      Padding="3"/>
         </StackPanel>
 
-        <Button Grid.Row="1"
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,10">
+
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Content="Manufacturer:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding AvailableManufacturers}"
+                          SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
+                          VerticalAlignment="Center"
+                          Padding="3"/>
+
+                <Button Grid.Column="2" 
+                        Content="Register new manufacturer" 
+                        Command="{Binding RegisterManufacturerCommand}"
+                        VerticalAlignment="Center"
+                        Padding="5,3"
+                        Margin="10,0,0,0"
+                        Background="#FF9800"
+                        Foreground="White"
+                        FontWeight="Bold"/>
+                
+                <Button Grid.Column="3" 
+                Content="Add Image" 
+                Command="{Binding AddImageCommand}"
+                VerticalAlignment="Center"
+                Padding="5,3"
+                Margin="45,0,178,0"
+                Background="#77DD11"
+                Foreground="White"
+                FontWeight="Bold"/>
+                
+            </Grid>
+
+            <Button 
                 Content="+ Add channel" 
                 Padding="10"
                 Margin="0,0,0,10" 
@@ -33,8 +73,7 @@
                 Background="#1E90FF"
                 Foreground="White"
                 FontWeight="Bold"/>
-
-        <!-- NEW: inner grid to keep buttons under the list -->
+        </StackPanel>
 
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
@@ -42,7 +81,6 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- List -->
             <ListBox x:Name="ChannelsListBox" 
                      Grid.Row="0"
                      ItemsSource="{Binding Channels}"
@@ -70,7 +108,6 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Editable text box -->
                                     <TextBox x:Name="EditTextBox" 
                                              Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
                                              Visibility="Collapsed" 
@@ -79,13 +116,13 @@
                                              KeyDown="EditTextBox_KeyDown" 
                                              FocusManager.IsFocusScope="True"/>
 
-                                    <!-- Normal display -->
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
+
+                                        
                                 </Grid>
 
-                                <!-- Dropdown panel (shown when IsExpanded = true) -->
                                 <Border x:Name="OptionsPanel" 
                                         Visibility="Collapsed" 
                                         Margin="0,6,0,0" 
@@ -100,7 +137,6 @@
                                                   SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                   Width="180"/>
 
-                                        <!-- Slider for Rood/Groen/Blauw/Wit -->
                                         <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <Slider Minimum="0" Maximum="255"
@@ -109,30 +145,40 @@
                                             <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
 
-                                        <!-- Text input for Lamp/Ster/Klok/Ventilator -->
                                         <StackPanel x:Name="TypeInputPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Input value" FontWeight="SemiBold" Margin="0,0,0,4"/>
                                             <TextBox x:Name="inputValue" Text="{Binding Parameter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
                                         </StackPanel>
+
+                                        
                                     </StackPanel>
                                 </Border>
+                                <!-- NEW: Delete button shown only while editing -->
+                                <Button x:Name="DeleteButton"
+                                            Grid.Column="1"
+                                            Content="Delete"
+                                            Padding="6,2"
+                                            Margin="0,10,0,10"
+                                            Visibility="Collapsed"
+                                            Command="{Binding DataContext.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                            CommandParameter="{Binding .}"/>
                             </StackPanel>
                         </Border>
 
                         <DataTemplate.Triggers>
-                            <!-- Show textbox when editing -->
                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                                
+
                             </DataTrigger>
 
-                            <!-- Show dropdown area when expanded -->
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                 <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="DeleteButton" Property="Visibility" Value="Visible" />
                             </DataTrigger>
 
-                            <!-- Show RGBW slider when SelectedType is one of Rood/Groen/Blauw/Wit -->
                             <DataTrigger Binding="{Binding SelectedType}" Value="Rood">
                                 <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
@@ -150,7 +196,6 @@
                                 <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
 
-                            <!-- Show text input when SelectedType is one of Lamp/Ster/Klok/Ventilator -->
                             <DataTrigger Binding="{Binding SelectedType}" Value="Lamp">
                                 <Setter TargetName="TypeInputPanel" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
@@ -172,7 +217,6 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <!-- Bottom button bar -->
             <StackPanel Grid.Row="1"
                         Orientation="Horizontal"
                         HorizontalAlignment="Right"
