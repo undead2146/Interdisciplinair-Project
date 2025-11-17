@@ -104,12 +104,12 @@ public partial class SceneEditorViewModel : ObservableObject
             // Open the ImportFixturesView window
             var importView = new ImportFixturesView();
             var viewModel = importView.ViewModel;
-            
+
             // Pass the current scene to the import view model
             viewModel.CurrentScene = Scene;
-            
+
             // Subscribe to the CloseRequested event to know when fixtures were actually added
-            viewModel.CloseRequested += async (s, e) => 
+            viewModel.CloseRequested += async (s, e) =>
             {
                 Debug.WriteLine("[DEBUG] SceneEditorViewModel: CloseRequested event received - refreshing scene");
                 await RefreshSceneFromRepository();
@@ -142,7 +142,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
             // Reload the scene from repository to get the updated version
             var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
-            
+
             if (updatedScene != null)
             {
                 LoadScene(updatedScene);
@@ -196,5 +196,61 @@ public partial class SceneEditorViewModel : ObservableObject
         }
 
         return maxChannel + 1;
+    }
+
+    /// <summary>
+    /// Removes a fixture from the scene.
+    /// </summary>
+    [RelayCommand]
+    private async Task RemoveFixture(SceneFixture? fixtureToRemove)
+    {
+        if (fixtureToRemove == null)
+        {
+            Debug.WriteLine("[WARNING] RemoveFixtureCommand called without parameter.");
+            return;
+        }
+
+        var result = MessageBox.Show(
+            $"Weet je zeker dat je de fixture '{fixtureToRemove.Fixture.Name}' wilt verwijderen?",
+            "Bevestig Verwijdering",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.No)
+        {
+            return;
+        }
+
+        try
+        {
+            Debug.WriteLine($"[DEBUG] Removing fixture '{fixtureToRemove.Fixture.Name}' from scene '{Scene.Name}'.");
+
+            SceneFixtures.Remove(fixtureToRemove);
+
+            await _sceneRepository.RemoveFixtureAsync(Scene.Id, fixtureToRemove.Fixture);
+
+            if (Scene.Fixtures != null)
+            {
+                Scene.Fixtures.Remove(fixtureToRemove.Fixture);
+            }
+
+            if (SelectedFixture == fixtureToRemove)
+            {
+                SelectedFixture = null;
+            }
+
+            Debug.WriteLine($"[DEBUG] Fixture successfully removed and scene saved.");
+
+            MessageBox.Show(
+                $"Fixture '{fixtureToRemove.Fixture.Name}' succesvol verwijderd.",
+                "Succes",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error removing fixture: {ex.Message}");
+            MessageBox.Show($"Fout bij verwijderen van fixture: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
