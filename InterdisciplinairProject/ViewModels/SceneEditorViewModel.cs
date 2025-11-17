@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
@@ -6,6 +6,12 @@ using InterdisciplinairProject.Views;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using InterdisciplinairProject.Fixtures.Views;
+using InterdisciplinairProject.Fixtures.ViewModels;
+using System.Linq; // Nodig voor ToList()
+using System.Collections.Generic;
+using System.Text.Json;
+using InterdisciplinairProject.Fixtures.Models; // Nodig voor Fixture deserialisatie
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -76,6 +82,16 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         try
         {
+            // ⭐️ 1. IMPLEMENTATIE: Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
+            Scene.Fixtures ??= new List<InterdisciplinairProject.Core.Models.Fixture>();
+            Scene.Fixtures.Clear();
+
+            // Kopieer de huidige listbox inhoud naar het Core Scene object
+            foreach (var sf in SceneFixtures)
+            {
+                Scene.Fixtures.Add(sf.Fixture);
+            }
+
             Debug.WriteLine($"[DEBUG] Saving scene '{Scene.Name}' with {Scene.Fixtures?.Count ?? 0} fixtures");
 
             // Sla de complete scene op via repository
@@ -99,31 +115,95 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         try
         {
-            Debug.WriteLine("[DEBUG] SceneEditorViewModel: AddFixture called - opening ImportFixturesView");
+            var fixtureListViewModel = new FixtureListViewModel();
 
-            // Open the ImportFixturesView window
-            var importView = new ImportFixturesView();
-            var viewModel = importView.ViewModel;
-            
-            // Pass the current scene to the import view model
-            viewModel.CurrentScene = Scene;
-            
-            // Subscribe to the CloseRequested event to know when fixtures were actually added
-            viewModel.CloseRequested += async (s, e) => 
+            // ⭐️ 2. IMPLEMENTATIE: Abonneren op het FixtureSelected event
+            fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
+
+            CurrentView = new FixtureListView
             {
-                Debug.WriteLine("[DEBUG] SceneEditorViewModel: CloseRequested event received - refreshing scene");
-                await RefreshSceneFromRepository();
+                DataContext = fixtureListViewModel
             };
-
-            importView.ShowDialog();
-
-            Debug.WriteLine("[DEBUG] SceneEditorViewModel: ImportFixturesView closed");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[ERROR] Error opening import view: {ex.Message}");
-            Debug.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
-            MessageBox.Show($"Error opening fixture import: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Debug.WriteLine($"[ERROR] Error opening fixture list view: {ex.Message}");
+            MessageBox.Show($"Error opening fixture list: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ⭐️ 3. IMPLEMENTATIE: Event handler om de geselecteerde fixture toe te voegen
+    private void FixtureListViewModel_FixtureSelected(object? sender, string json)
+    {
+        // Sluit de FixtureListView af
+        CurrentView = null;
+
+        if (sender is FixtureListViewModel vm)
+        {
+            vm.FixtureSelected -= FixtureListViewModel_FixtureSelected;
+        }
+
+        try
+        {
+            // Deserialiseer de JSON naar het Fixtures.Models.Fixture type
+            var tempFixture = JsonSerializer.Deserialize<InterdisciplinairProject.Fixtures.Models.Fixture>(json);
+
+            if (tempFixture != null)
+            {
+                // ⭐️ NIEUW: Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
+                // Dictionary<string, byte?> en Dictionary<string, string> die Core.Models.Fixture verwacht.
+
+                var channelDictionary = new Dictionary<string, byte?>();
+                var descriptionDictionary = new Dictionary<string, string>();
+
+                int channelIndex = 1;
+                foreach (var channel in tempFixture.Channels)
+                {
+                    string channelKey = $"Ch{channelIndex}";
+
+                    // Voeg toe aan de channels dictionary (met default DMX waarde 0)
+                    // We negeren de "value" uit de JSON, want de Core Fixture beheert de *huidige* DMX waarde (byte?).
+                    channelDictionary.Add(channelKey, 0);
+
+                    // Creëer de beschrijving (bijv. "Ch1: Dimmer - General intensity")
+                    // De 'Type' is een string in de JSON (bijv. "Klok").
+                    string description = $"{channelKey}: {channel.Type} - {channel.Name}";
+                    descriptionDictionary.Add(channelKey, description);
+
+                    channelIndex++;
+                }
+
+                // Maak de Core Fixture aan
+                var newCoreFixture = new InterdisciplinairProject.Core.Models.Fixture
+                {
+                    Name = tempFixture.Name,
+                    Manufacturer = tempFixture.Manufacturer,
+
+                    // Wijs de geconverteerde dictionaries toe
+                    Channels = channelDictionary,
+                    ChannelDescriptions = descriptionDictionary,
+
+                    // Zorg ervoor dat Id uniek is voor de instance.
+                    InstanceId = Guid.NewGuid().ToString(),
+                    // De Id van de Fixture Type is hetzelfde als de Name in dit geval (aanname)
+                    Id = tempFixture.Name
+                };
+
+                // Voeg de nieuwe fixture toe aan de scene
+                var nextChannel = GetNextAvailableChannel();
+                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = nextChannel };
+
+                SceneFixtures.Add(sceneFixture);
+                SelectedFixture = sceneFixture;
+
+                Debug.WriteLine($"[DEBUG] Added fixture '{newCoreFixture.Name}' to scene at channel {nextChannel}");
+                MessageBox.Show($"Fixture '{newCoreFixture.Name}' succesvol toegevoegd aan de lijst!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error processing selected fixture: {ex.Message}");
+            MessageBox.Show($"Fout bij het verwerken van fixture-data: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -142,7 +222,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
             // Reload the scene from repository to get the updated version
             var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
-            
+
             if (updatedScene != null)
             {
                 LoadScene(updatedScene);
@@ -188,7 +268,9 @@ public partial class SceneEditorViewModel : ObservableObject
         var maxChannel = 0;
         foreach (var sf in SceneFixtures)
         {
-            var endChannel = sf.StartChannel + sf.Fixture.Channels.Count - 1;
+            // We controleren op null om crashes te voorkomen
+            int channelCount = sf.Fixture.Channels?.Count ?? 0;
+            var endChannel = sf.StartChannel + channelCount - 1;
             if (endChannel > maxChannel)
             {
                 maxChannel = endChannel;
