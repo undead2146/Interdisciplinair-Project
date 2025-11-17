@@ -30,7 +30,10 @@
         <Grid>
             <!-- small toggle in the top-right corner (keeps current toggle) -->
             <ToggleButton x:Name="PART_TopToggle" Width="20" Height="20"
-                          HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,54,0">
+              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,54,0"
+              IsChecked="{Binding IsActive, Mode=OneWay}"
+              Command="{Binding RequestToggleCommand}"
+              IsEnabled="{Binding IsActive}">
                 <ToggleButton.Style>
                     <Style TargetType="{x:Type ToggleButton}">
                         <Setter Property="Template">
@@ -81,7 +84,7 @@
             <Button Height="20" Width="20" VerticalAlignment="Top"
                     Margin="54,0,0,0"
                     Command="{Binding DataContext.DeleteSceneCommand, RelativeSource={RelativeSource AncestorType={x:Type local:ShowbuilderView}}}"
-                    CommandParameter="{Binding}"
+                    CommandParameter="{Binding SceneModel}"
                     ToolTip="Delete scene">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
@@ -186,15 +189,14 @@
                             </Border>
                         </Border>
 
-                        <Slider x:Name="PART_DimmerSlider" 
-                                Orientation="Vertical" 
-                                Minimum="0" 
+                        <Slider x:Name="PART_DimmerSlider"
+                                Orientation="Vertical"
+                                Minimum="0"
                                 Maximum="100"
-                                Value="{Binding Dimmer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                HorizontalAlignment="Center" 
+                                HorizontalAlignment="Center"
                                 VerticalAlignment="Stretch"
                                 Margin="0"
-                                Background="Transparent">
+                                Value="{Binding Dimmer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <Slider.Style>
                                 <Style TargetType="{x:Type Slider}">
                                     <Setter Property="Template">
@@ -261,9 +263,10 @@
                                                                                 </Rectangle.Effect>
                                                                             </Rectangle>
 
-                                                                            <!-- Percentage label bound to Slider.Value -->
+                                                                            <!-- Percentage label bound to Slider.Value via RelativeSource -->
                                                                             <Border Background="#66000000" CornerRadius="3" Padding="2" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-22,0,0">
-                                                                                <TextBlock Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center" Text="{Binding Value, StringFormat=\{0:0\}%}"/>
+                                                                                <TextBlock Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center"
+                                                                                           Text="{Binding Value, RelativeSource={RelativeSource AncestorType=Slider}, StringFormat={}{0:0}%}"/>
                                                                             </Border>
                                                                         </Grid>
                                                                     </ControlTemplate>

@@ -1,22 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
 using Show;
 using Show.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
-using InterdisciplinairProject.Views;
-using System.Diagnostics;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
+
         private Shows _show = new Shows();
         private string? _currentShowPath;
 
@@ -33,82 +34,6 @@ namespace InterdisciplinairProject.ViewModels
 
         [ObservableProperty]
         private string? message;
-
-        // ============================================================
-        // EVENT: OnSceneChanged
-        // ============================================================
-        /// <summary>
-        /// Event that is triggered when a scene is modified, added, or deleted.
-        /// </summary>
-        public event EventHandler<SceneChangedEventArgs>? OnSceneChanged;
-
-        /// <summary>
-        /// Raises the OnSceneChanged event.
-        /// </summary>
-        /// <param name="scene">The scene that was changed.</param>
-        /// <param name="changeType">The type of change that occurred.</param>
-        protected virtual void RaiseSceneChanged(Scene? scene, SceneChangeType changeType)
-        {
-            OnSceneChanged?.Invoke(this, new SceneChangedEventArgs(scene, changeType));
-            // Added console logging
-            Debug.WriteLine($"[SceneChanged] Scene: '{scene?.Name}', Type: {changeType}");
-        }
-
-        // ============================================================
-        // EXPORT SCENE (was SaveSceneParameters)
-        // ============================================================
-        /// <summary>
-        /// Exports a specific scene to a JSON file with the correct wrapper format.
-        /// This allows the scene to be imported later via ImportScenes.
-        /// </summary>
-        [RelayCommand]
-        private void ExportScene(Scene? scene)
-        {
-            if (scene == null)
-            {
-                MessageBox.Show("Geen scene geselecteerd om te exporteren.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Debug.WriteLine("[ExportScene] Geen scene geselecteerd om te exporteren.");
-                return;
-            }
-
-            try
-            {
-                var saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                {
-                    Title = "Scene Exporteren",
-                    Filter = "JSON files (*.json)|*.json",
-                    DefaultExt = ".json",
-                    FileName = $"{scene.Name}.json",
-                    AddExtension = true
-                };
-
-                if (saveFileDialog.ShowDialog() == true)
-                {
-                    // Wrap scene in "scene" object for compatibility with SceneExtractor
-                    var wrapper = new { scene = scene };
-                    
-                    var options = new JsonSerializerOptions 
-                    { 
-                        WriteIndented = true,
-                        PropertyNamingPolicy = null, // Don't convert property names to camelCase
-                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never
-                    };
-                    string json = JsonSerializer.Serialize(wrapper, options);
-                    File.WriteAllText(saveFileDialog.FileName, json, Encoding.UTF8);
-
-                    Message = $"Scene '{scene.Name}' geëxporteerd naar '{saveFileDialog.FileName}'";
-                    MessageBox.Show($"Scene succesvol geëxporteerd!\nDimmer waarde: {scene.Dimmer}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                    Debug.WriteLine($"[ExportScene] Scene '{scene.Name}' exported to '{saveFileDialog.FileName}'");
-
-                    RaiseSceneChanged(scene, SceneChangeType.Exported);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fout bij exporteren scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine($"[ExportScene][Error] {ex}");
-            }
-        }
 
         // ============================================================
         // CREATE SHOW
@@ -136,7 +61,6 @@ namespace InterdisciplinairProject.ViewModels
                 _currentShowPath = null;
 
                 Message = $"Nieuwe show '{vm.ShowName}' aangemaakt!";
-                Debug.WriteLine($"[CreateShow] Nieuwe show '{vm.ShowName}' aangemaakt.");
             }
         }
 
@@ -165,16 +89,11 @@ namespace InterdisciplinairProject.ViewModels
                         // ensure imported scene slider starts at 0
                         scene.Dimmer = 0;
                         Scenes.Add(scene);
-                        Message = $"Scene '{scene.Name}' geïmporteerd!";
-                        Debug.WriteLine($"[ImportScenes] Scene '{scene.Name}' imported from '{selectedScenePath}'");
-
-                        RaiseSceneChanged(scene, SceneChangeType.Added);
+                        Message = $"Scene '{scene.Name}' imported successfully!";
                     }
                     else
                     {
-                        Message = "Deze scene is al geïmporteerd.";
-                        MessageBox.Show("Deze scene bestaat al in de huidige show.", "Scene Bestaat Al", MessageBoxButton.OK, MessageBoxImage.Information);
-                        Debug.WriteLine($"[ImportScenes] Scene '{scene.Name}' already exists in the current show.");
+                        Message = "This scene has already been imported.";
                     }
                 }
             }
@@ -182,7 +101,6 @@ namespace InterdisciplinairProject.ViewModels
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine($"[ImportScenes][Error] {ex}");
             }
         }
 
@@ -193,7 +111,6 @@ namespace InterdisciplinairProject.ViewModels
         private void SceneSelectionChanged(Scene selectedScene)
         {
             SelectedScene = selectedScene;
-            RaiseSceneChanged(selectedScene, SceneChangeType.Selected);
         }
 
         // ============================================================
@@ -221,17 +138,15 @@ namespace InterdisciplinairProject.ViewModels
                 {
                     string path = saveFileDialog.FileName;
                     SaveShowToPath(path);
-                    _currentShowPath = path;      
+                    _currentShowPath = path;
                     MessageBox.Show($"Show saved to '{path}'",
                         "Save As", MessageBoxButton.OK, MessageBoxImage.Information);
-                    Debug.WriteLine($"[SaveAs] Show saved to '{path}'");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine($"[SaveAs][Error] {ex}");
             }
         }
 
@@ -252,13 +167,11 @@ namespace InterdisciplinairProject.ViewModels
                 SaveShowToPath(_currentShowPath);
                 MessageBox.Show($"Show saved to '{_currentShowPath}'",
                     "Save", MessageBoxButton.OK, MessageBoxImage.Information);
-                Debug.WriteLine($"[Save] Show saved to '{_currentShowPath}'");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine($"[Save][Error] {ex}");
             }
         }
 
@@ -284,7 +197,6 @@ namespace InterdisciplinairProject.ViewModels
                     if (!doc.RootElement.TryGetProperty("show", out var showElement))
                     {
                         Message = "Het geselecteerde bestand bevat geen geldige 'show'-structuur.";
-                        Debug.WriteLine("[OpenShow] Invalid show structure in selected file.");
                         return;
                     }
 
@@ -292,7 +204,6 @@ namespace InterdisciplinairProject.ViewModels
                     if (loadedShow == null)
                     {
                         Message = "Kon show niet deserialiseren. Bestand mogelijk corrupt.";
-                        Debug.WriteLine("[OpenShow] Could not deserialize show. Possibly corrupted file.");
                         return;
                     }
 
@@ -314,18 +225,15 @@ namespace InterdisciplinairProject.ViewModels
                     }
 
                     Message = $"Show '{_show.Name}' succesvol geopend!";
-                    Debug.WriteLine($"[OpenShow] Show '{_show.Name}' opened from '{selectedPath}'");
                 }
             }
             catch (JsonException)
             {
                 Message = "Het geselecteerde bestand bevat ongeldige JSON.";
-                Debug.WriteLine("[OpenShow] Invalid JSON file.");
             }
             catch (Exception ex)
             {
                 Message = $"Er is een fout opgetreden bij het openen van de show:\n{ex.Message}";
-                Debug.WriteLine($"[OpenShow][Error] {ex}");
             }
         }
 
@@ -346,7 +254,6 @@ namespace InterdisciplinairProject.ViewModels
 
             string json = JsonSerializer.Serialize(wrapper, options);
             File.WriteAllText(path, json, Encoding.UTF8);
-            Debug.WriteLine($"[SaveShowToPath] Show '{_show.Name}' written to '{path}'");
         }
 
         private string GenerateRandomId()
@@ -385,38 +292,78 @@ namespace InterdisciplinairProject.ViewModels
                 _show.Scenes.Remove(scene);
 
             Message = $"Scene '{scene.Name}' verwijderd.";
-            Debug.WriteLine($"[DeleteScene] Scene '{scene.Name}' deleted.");
-            RaiseSceneChanged(scene, SceneChangeType.Deleted);
         }
-    }
 
-    // ============================================================
-    // SCENE CHANGE EVENT ARGS
-    // ============================================================
-    /// <summary>
-    /// Event arguments for scene change events.
-    /// </summary>
-    public class SceneChangedEventArgs : EventArgs
-    {
-        public Scene? Scene { get; }
-        public SceneChangeType ChangeType { get; }
-
-        public SceneChangedEventArgs(Scene? scene, SceneChangeType changeType)
+        public void UpdateSceneDimmer(Scene scene, int dimmer)
         {
-            Scene = scene;
-            ChangeType = changeType;
-        }
-    }
+            if (scene == null)
+                return;
 
-    /// <summary>
-    /// Enum representing the type of scene change.
-    /// </summary>
-    public enum SceneChangeType
-    {
-        Added,
-        Deleted,
-        Modified,
-        Selected,
-        Exported
+            dimmer = Math.Max(0, Math.Min(100, dimmer));
+
+            // if we're turning this scene on (dimmer > 0), immediately turn all other scenes off.
+            if (dimmer > 0)
+            {
+                foreach (var other in Scenes.ToList())
+                {
+                    if (!ReferenceEquals(other, scene) && other.Dimmer > 0)
+                    {
+                        other.Dimmer = 0;
+
+                        // update other scene fixtures to 0
+                        if (other.Fixtures != null)
+                        {
+                            foreach (var fixture in other.Fixtures)
+                            {
+                                try
+                                {
+                                    // set observable property if available
+                                    fixture.Dimmer = 0;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"[DEBUG] Error zeroing fixture dimmer: {ex.Message}");
+                                }
+                            }
+                        }
+
+                        // refresh the Scenes collection item so UI updates if needed
+                        var idx = Scenes.IndexOf(other);
+                        if (idx >= 0) Scenes[idx] = other;
+                    }
+                }
+            }
+
+            // update model for the requested scene
+            scene.Dimmer = dimmer;
+
+            // update fixture channels for the requested scene
+            if (scene.Fixtures != null)
+            {
+                byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
+                foreach (var fixture in scene.Fixtures)
+                {
+                    try
+                    {
+                        fixture.Dimmer = channelValue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[DEBUG] Error updating fixture channels/dimmer: {ex.Message}");
+                    }
+                }
+            }
+
+            // Ensure UI reflects changes
+            if (SelectedScene == scene)
+            {
+                OnPropertyChanged(nameof(SelectedScene));
+            }
+            else
+            {
+                var idx = Scenes.IndexOf(scene);
+                if (idx >= 0) Scenes[idx] = scene;
+            }
+        }
     }
 }
