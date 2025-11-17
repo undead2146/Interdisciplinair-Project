@@ -107,7 +107,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         foreach (var channel in fixture.Channels)
         {
-            var channelVm = new ChannelViewModel(channel.Key, channel.Value ?? 0);
+            var type = fixture.ChannelTypes.TryGetValue(channel.Key, out var channelType) ? channelType : ChannelType.Unknown;
+            var channelVm = new ChannelViewModel(channel.Key, channel.Value ?? 0, type);
             Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Key} = {channel.Value ?? 0}");
 
             // Subscribe to channel value changes

@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.Services;
+using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Features.Fixture;
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -45,7 +45,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand RegisterManufacturerCommand { get; }
         public ICommand AddImageCommand { get; }
 
-        private Fixture _currentFixture = new Fixture();
+        private InterdisciplinairProject.Fixtures.Models.Fixture _currentFixture = new InterdisciplinairProject.Fixtures.Models.Fixture();
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
@@ -66,7 +66,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+            AddImageCommand = new RelayCommand<InterdisciplinairProject.Fixtures.Models.Fixture>(AddImage);
 
             if (existing != null)
             {
@@ -133,7 +133,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void SaveFixture()
         {
-            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
+            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || ch.SelectedType == ChannelType.Unknown))
             {
                 MessageBox.Show("Please fill in the following (Name Fixture, Name channel, Channel type).", "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -161,7 +161,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 var channelObj = new JsonObject
                 {
                     ["Name"] = ch.Name,
-                    ["Type"] = ch.SelectedType,
+                    ["Type"] = ChannelTypeHelper.GetDisplayName(ch.SelectedType),
                     ["value"] = ch.Parameter,
                 };
                 channelsArray.Add(channelObj);
@@ -208,7 +208,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             var newModel = new Channel
             {
                 Name = $"New Channel {Channels.Count + 1}",
-                Type = "Lamp",
+                Type = ChannelTypeHelper.GetDisplayName(ChannelType.Dimmer),
                 Value = "0"
             };
             Channels.Add(new ChannelViewModel(newModel));
@@ -243,7 +243,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             return Regex.Replace(name, invalidRegex, "_");
         }
 
-        private void AddImage(Fixture fixture)
+        private void AddImage(InterdisciplinairProject.Fixtures.Models.Fixture fixture)
         {
             string imagesDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

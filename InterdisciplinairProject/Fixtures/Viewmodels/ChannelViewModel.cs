@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Features.Fixture;
 using System.Linq;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
@@ -35,13 +37,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // --- TYPE SELECTIE & WAARDE EIGENSCHAPPEN ---
 
         [ObservableProperty]
-        private ObservableCollection<string> availableTypes = new()
+        private ObservableCollection<ChannelType> availableTypes = new()
         {
-            "Lamp", "Ster", "Klok", "Tilt", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
+            ChannelType.Dimmer, ChannelType.Red, ChannelType.Green, ChannelType.Blue, ChannelType.White,
+            ChannelType.Amber, ChannelType.Strobe, ChannelType.Pan, ChannelType.Tilt,
+            ChannelType.ColorTemperature, ChannelType.Gobo, ChannelType.Color, ChannelType.Speed,
+            ChannelType.Pattern, ChannelType.Power, ChannelType.Rate, ChannelType.Brightness
         };
 
         [ObservableProperty]
-        private string selectedType; // Bindt aan de ComboBox
+        private ChannelType selectedType; // Bindt aan de ComboBox
 
         [ObservableProperty]
         private int level = 0; // Bindt aan de Slider (0-255)
@@ -50,7 +55,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ChannelViewModel(Channel model)
         {
             _model = model;
-            selectedType = _model.Type;
+            selectedType = ChannelTypeHelper.GetChannelTypeFromName(_model.Type);
 
             // Initialisatie van Level op basis van modelwaarde
             if (int.TryParse(_model.Value, out int currentLevel))
@@ -62,13 +67,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // --- MVVM SYNCHRONISATIE METHODEN ---
 
         // Wordt automatisch aangeroepen wanneer SelectedType wijzigt
-        partial void OnSelectedTypeChanged(string value)
+        partial void OnSelectedTypeChanged(ChannelType value)
         {
-            _model.Type = value;
+            _model.Type = ChannelTypeHelper.GetDisplayName(value);
             Level = 0; // Reset level bij typeverandering
 
             // Forceer Level om de Parameter/Value te schrijven als het een 'level' type is
-            if (new[] { "Rood", "Groen", "Blauw", "Wit" }.Contains(value))
+            if (new[] { ChannelType.Red, ChannelType.Green, ChannelType.Blue, ChannelType.White }.Contains(value))
             {
                 OnLevelChanged(Level);
             }

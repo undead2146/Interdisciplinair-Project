@@ -12,6 +12,7 @@ using System.Linq; // Nodig voor ToList()
 using System.Collections.Generic;
 using System.Text.Json;
 using InterdisciplinairProject.Fixtures.Models; // Nodig voor Fixture deserialisatie
+using InterdisciplinairProject.Features.Fixture; // For ChannelTypeHelper
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -155,6 +156,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
                 var channelDictionary = new Dictionary<string, byte?>();
                 var descriptionDictionary = new Dictionary<string, string>();
+                var channelTypes = new Dictionary<string, ChannelType>();
 
                 int channelIndex = 1;
                 foreach (var channel in tempFixture.Channels)
@@ -170,6 +172,9 @@ public partial class SceneEditorViewModel : ObservableObject
                     string description = $"{channelKey}: {channel.Type} - {channel.Name}";
                     descriptionDictionary.Add(channelKey, description);
 
+                    // Set the channel type
+                    channelTypes[channelKey] = ChannelTypeHelper.GetChannelTypeFromName(channel.Type);
+
                     channelIndex++;
                 }
 
@@ -182,6 +187,7 @@ public partial class SceneEditorViewModel : ObservableObject
                     // Wijs de geconverteerde dictionaries toe
                     Channels = channelDictionary,
                     ChannelDescriptions = descriptionDictionary,
+                    ChannelTypes = channelTypes,
 
                     // Zorg ervoor dat Id uniek is voor de instance.
                     InstanceId = Guid.NewGuid().ToString(),

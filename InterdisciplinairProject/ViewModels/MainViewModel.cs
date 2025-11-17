@@ -65,7 +65,7 @@ public partial class MainViewModel : ObservableObject
             var fixturesPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
-                "fixtures.json");
+                "Fixtures");
             Debug.WriteLine($"[DEBUG] Fixtures path: {fixturesPath}");
             _fixtureRepository = new FixtureRepository(fixturesPath);
             Debug.WriteLine("[DEBUG] FixtureRepository initialized");
