@@ -254,7 +254,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var newModel = new Channel
             {
-                Name = $"New Channel {Channels.Count + 1}",
+                Name = "Lamp",
                 Type = "Lamp",
                 Value = "0"
             };
@@ -338,16 +338,24 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
             }
+            private bool _isNameManuallyEdited = false;
 
-            // Name <-> model
-            private string _name = "";
+            private string _name = "Lamp";
             public string Name
             {
                 get => _name;
-                set { if (SetProperty(ref _name, value)) _model.Name = value; }
+                set
+                {
+                    if (SetProperty(ref _name, value))
+                    {
+                        _model.Name = value;
+
+                        // mark as manually edited if it's different from the type
+                        _isNameManuallyEdited = value != _selectedType;
+                    }
+                }
             }
 
-            // SelectedType drives panels
             private string _selectedType = "Lamp";
             public string SelectedType
             {
@@ -359,9 +367,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         _model.Type = value;
                         ApplyTypeSpec(value);
                         if (IsSliderType) Level = Level; // re-snap
+
+                        // update Name only if the user hasn't manually edited it
+                        if (!_isNameManuallyEdited)
+                            Name = value;
                     }
                 }
             }
+
+
 
             // Slider level <-> model.Value
             private int _level;

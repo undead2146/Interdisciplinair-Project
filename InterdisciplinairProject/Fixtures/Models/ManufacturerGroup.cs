@@ -1,25 +1,47 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using InterdisciplinairProject.Fixtures.Models;
 
-public class ManufacturerGroup
+namespace InterdisciplinairProject.Fixtures.ViewModels
 {
-    public string Manufacturer { get; set; }
-    public ObservableCollection<Fixture> Fixtures { get; set; } = new();
-    public ObservableCollection<Fixture> FilteredFixtures { get; set; } = new();
-
-    public void RefreshFilteredFixtures(string searchText)
+    public class ManufacturerGroup : INotifyPropertyChanged
     {
-        FilteredFixtures.Clear();
+        public string Manufacturer { get; set; } = "";
+        public ObservableCollection<Fixture> Fixtures { get; set; } = new();
+        public ObservableCollection<Fixture> FilteredFixtures { get; set; } = new();
 
-        IEnumerable<Fixture> filtered;
-        if (string.IsNullOrWhiteSpace(searchText))
-            filtered = Fixtures;
-        else
-            filtered = Fixtures
-                .Where(f => f.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        private bool _isVisible = true;
+        public bool IsVisible
+        {
+            get => _isVisible;
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsVisible)));
+                }
+            }
+        }
 
-        foreach (var f in filtered)
-            FilteredFixtures.Add(f);
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void RefreshFilteredFixtures(string searchText)
+        {
+            FilteredFixtures.Clear();
+            IEnumerable<Fixture> filtered;
+
+            if (string.IsNullOrWhiteSpace(searchText))
+                filtered = Fixtures;
+            else
+                filtered = Fixtures
+                    .Where(f => f.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+            foreach (var f in filtered)
+                FilteredFixtures.Add(f);
+        }
     }
 }
-
