@@ -23,6 +23,11 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("imageBase64")]
         public string ImageBase64 { get; set; } = string.Empty;
 
+        // Property voor het aantal DMX-divisies (voor slider stapgrootte).
+
+        [JsonPropertyName("dmxDivisions")]
+        public int DmxDivisions { get; set; } = 255; // Standaard 255 (stap van 1)
+
         public Fixture(string name)
         {
             Name = name;

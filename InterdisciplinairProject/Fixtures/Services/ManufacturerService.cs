@@ -71,5 +71,75 @@ namespace InterdisciplinairProject.Fixtures.Services
                 return false;
             }
         }
+        // ---------------------------------------------------------------------
+        // 🟢 NIEUWE METHODE (met correcte LocalApplicationData padlogica)
+        // ---------------------------------------------------------------------
+        /// <summary>
+                /// Bepaalt het correcte LocalApplicationData pad en probeert de map te verwijderen.
+                /// </summary>
+        public bool TryDeleteManufacturerFolder(string manufacturerName)
+        {
+            // 1. Correcte Pad Bepalen (LocalApplicationData)
+            string correctRootDirectory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "InterdisciplinairProject",
+        "Fixtures"
+      );
+
+            string safeName = SanitizeFileName(manufacturerName);
+            string manufacturerDir = Path.Combine(correctRootDirectory, safeName);
+
+            if (!Directory.Exists(manufacturerDir))
+            {
+                return true;
+            }
+
+            // 2. Probeer te verwijderen (alleen als de map leeg is)
+            try
+            {
+                Directory.Delete(manufacturerDir, recursive: false);
+                return true;
+            }
+            catch (IOException)
+            {
+                // De map is NIET LEEG.
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // 🔴 ORIGINELE DELETE METHODE (AANGEPAST om de nieuwe logica aan te roepen)
+        // ---------------------------------------------------------------------
+        /// <summary>
+        /// Verwijdert een fabrikant map. Dit is enkel mogelijk als de map leeg is.
+        /// </summary>
+        public bool DeleteManufacturer(string manufacturerName)
+        {
+            // Roep de nieuwe methode aan met de juiste padlogica
+            return TryDeleteManufacturerFolder(manufacturerName);
+        }
+        // ---------------------------------------------------------------------
+
+        // Helper methode om de naam veilig te maken voor het bestandssysteem
+        public string SanitizeFileName(string input)
+        {
+            // Lijst van ongeldige karakters voor zowel bestands- als padnamen
+            char[] invalidChars = Path.GetInvalidFileNameChars().Union(Path.GetInvalidPathChars()).ToArray();
+
+            string cleanedName = input;
+
+            // Vervang ongeldige karakters door een lege string
+            foreach (char c in invalidChars)
+            {
+                cleanedName = cleanedName.Replace(c.ToString(), string.Empty);
+            }
+
+            // Verwijder spaties aan het begin en einde voor een schone mapnaam
+            return cleanedName.Trim();
+        }
     }
 }

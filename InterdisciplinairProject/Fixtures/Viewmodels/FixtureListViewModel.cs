@@ -24,6 +24,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
     public class FixtureListViewModel : INotifyPropertyChanged
     {
+        // Private instantie van de service
+        private readonly InterdisciplinairProject.Fixtures.Services.ManufacturerService _manufacturerService = new();
+
+        // Command property voor het verwijderen van een fabrikant
+        public ICommand DeleteManufacturerCommand { get; }
+
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
         public Array SearchModes => Enum.GetValues(typeof(SearchMode));
@@ -93,6 +99,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             ReloadFixturesFromFiles();
             StartWatchingDataFolder();
+            // 🔴 Initialisatie voor Fabrikant Verwijderen Command
+            DeleteManufacturerCommand = new RelayCommand<string>(
+                ExecuteDeleteManufacturer,
+                CanExecuteDeleteManufacturer
+            );
         }
 
         public void ReloadFixturesFromFiles()
@@ -215,5 +226,53 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        // --- LOGICA VOOR FABRIKANT VERWIJDEREN COMMAND ---
+
+        private bool CanExecuteDeleteManufacturer(string? manufacturerName)
+        {
+            // Het command kan alleen worden uitgevoerd als de naam niet leeg is.
+            return !string.IsNullOrWhiteSpace(manufacturerName);
+        }
+
+        // Locatie: In de FixtureListViewModel.cs klasse
+
+        private void ExecuteDeleteManufacturer(string? manufacturerName)
+        {
+            if (string.IsNullOrWhiteSpace(manufacturerName)) return;
+
+            // 1. Bevestigingspopup
+               MessageBoxResult result = MessageBox.Show(
+               "Are you sure you want to delete the manufacturer '{manufacturerName}'? This is only possible if no fixtures exist under it.",
+               "Delete Manufacturer",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (result != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            // 2. Roep de Service aan (deze methode regelt nu het SanitizeFileName en Directory.Delete)
+            bool success = _manufacturerService.DeleteManufacturer(manufacturerName);
+
+            // 3. Afhandeling van het resultaat
+            if (success)
+            {
+                MessageBox.Show($"Manufacturer '{manufacturerName}' successfully deleted.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                ReloadFixturesFromFiles(); 
+            }
+            else
+            {
+                // Foutmelding
+                MessageBox.Show(
+                "Manufacturer '{manufacturerName}' could **NOT** be deleted. Make sure no fixtures (files) exist under this manufacturer.",
+                "Deletion Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
     }
 }

@@ -15,6 +15,10 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -25,6 +29,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
         private readonly ManufacturerService _manufacturerService;
+
+        //TOEGEVOEGD: CancellationTokenSource voor het beheren van de debounce-timer
+
+        private CancellationTokenSource? _debounceCts;
+
 
         [ObservableProperty]
         private ChannelItem? selectedChannel;
@@ -43,6 +52,18 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         [ObservableProperty]
         private string? _selectedManufacturer;
+
+        // ObservableProperty voor de string-invoer van de TextBox
+        [ObservableProperty]
+        private string _dmxDivisionsInput = "255";
+
+        // Interne opslag voor de gevalideerde DMX waarde
+        private int _dmxDivisions = 255;
+
+        // ObservableProperty om de validatiestatus bij te houden
+        [ObservableProperty]
+        private bool _isDmxDivisionsValid = true;
+
 
         public event EventHandler? BackRequested;
 
@@ -65,6 +86,85 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand AddTypeBtn { get; }
 
         private Fixture _currentFixture = new Fixture();
+
+        // Berekent de stapgrootte (TickFrequency)
+        public double DmxStepSize
+        {
+            get
+            {
+                int safeDivisions = Math.Max(2, Math.Min(255, _dmxDivisions));
+                // Vereist: stappen van 255/N
+                return 255.0 / safeDivisions;
+            }
+        }
+
+        // ✅ VERVANGEN: Implementatie met 3 seconden debouncing
+        partial void OnDmxDivisionsInputChanged(string value)
+        {
+            // Annuleer een lopende timer als de gebruiker opnieuw typt
+            _debounceCts?.Cancel();
+            _debounceCts = new CancellationTokenSource();
+
+            // Start een nieuwe taak met een vertraging van 3 seconden
+            Task.Delay(TimeSpan.FromSeconds(3), _debounceCts.Token)
+                .ContinueWith(t =>
+                {
+                    if (t.IsCanceled) return; // Stop als de taak geannuleerd is
+
+                    // Voer de validatie uit in de UI-thread
+                    Application.Current.Dispatcher.Invoke(() => ValidateDmxDivisions(value));
+
+                }, TaskScheduler.Default);
+        }
+
+        // ✅ NIEUW: Validatiemethode
+        private void ValidateDmxDivisions(string value)
+        {
+            bool wasValid = IsDmxDivisionsValid;
+
+            if (int.TryParse(value, out int result))
+            {
+                if (result >= 2 && result <= 255)
+                {
+                    _dmxDivisions = result;
+                    IsDmxDivisionsValid = true;
+                    OnPropertyChanged(nameof(DmxStepSize));
+                }
+                else
+                {
+                    // Fout: getal buiten bereik (2-255)
+                    IsDmxDivisionsValid = false;
+
+                    // Toon de MessageBox alleen als de status net ongeldig is geworden
+                    if (wasValid != IsDmxDivisionsValid)
+                    {
+                        MessageBox.Show(
+                            "The DMX divisions must be a number between 2 and 255.",
+                            "Input Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                // Fout: geen getal
+                IsDmxDivisionsValid = false;
+
+                // Toon de MessageBox alleen als de status net ongeldig is geworden
+                if (wasValid != IsDmxDivisionsValid)
+                {
+                    MessageBox.Show(
+                        "The DMX divisions must be a number between 2 and 255.",
+                        "Input Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+
+            (SaveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
         public Fixture CurrentFixture
         {
             get => _currentFixture;
