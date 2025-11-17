@@ -126,19 +126,34 @@
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
+                                    <Path Grid.Column="0"
+                                          Data="M2,3 L4,3 L4,5 L2,5 Z 
+                                                M6,3 L8,3 L8,5 L6,5 Z
+                                                M2,7 L4,7 L4,9 L2,9 Z 
+                                                M6,7 L8,7 L8,9 L6,9 Z
+                                                M2,11 L4,11 L4,13 L2,13 Z 
+                                                M6,11 L8,11 L8,13 L6,13 Z"
+                                          Fill="Gray"
+                                          Width="10" Height="16"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,8,0"
+                                          Cursor="SizeAll"
+                                          MouseLeftButtonDown="DragHandle_MouseLeftButtonDown"/>
+
                                     <TextBox x:Name="EditTextBox"
 										 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
 										 Visibility="Collapsed"
-										 Grid.Column="0"
+										 Grid.Column="1"
 										 Style="{StaticResource EditingTextBoxStyle}"
 										 KeyDown="EditTextBox_KeyDown"
 										 FocusManager.IsFocusScope="True"/>
 
-                                    <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="0">
+                                    <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="1">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
 

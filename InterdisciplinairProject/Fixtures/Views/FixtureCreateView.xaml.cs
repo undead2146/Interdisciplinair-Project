@@ -12,6 +12,7 @@ namespace InterdisciplinairProject.Fixtures.Views
 
         private ChannelItem? _selectedChannel; // Veld om de geselecteerde staat bij te houden
         private Point _dragStartPoint;  //needed for drag drop functionality for reordering channels
+        private bool _dragInitiatedFromHandle; // << toegevoegd
 
 
         public FixtureCreateView()
@@ -93,11 +94,13 @@ namespace InterdisciplinairProject.Fixtures.Views
         // start of drag drop functionality for reordering channels 
         private void ChannelsListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            _dragInitiatedFromHandle = false; // << toegevoegd
             _dragStartPoint = e.GetPosition(null);
         }
 
         private void ChannelsListBox_PreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (!_dragInitiatedFromHandle) return; // << toegevoegd
             if (e.LeftButton != MouseButtonState.Pressed) return;
 
             Point mousePos = e.GetPosition(null);
@@ -144,6 +147,26 @@ namespace InterdisciplinairProject.Fixtures.Views
             return element as ListBoxItem;
         }
 
+        private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) // << toegevoegd
+        {
+            _dragInitiatedFromHandle = true;
+            _dragStartPoint = e.GetPosition(null);
+
+            if (sender is DependencyObject d)
+            {
+                var item = FindParent<ListBoxItem>(d);
+                if (item != null)
+                {
+                    item.IsSelected = true;
+                    item.Focus();
+                }
+            }
+        }
+
+        private void ChannelsListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) // << toegevoegd
+        {
+            _dragInitiatedFromHandle = false;
+        }
         // end of drag drop functionality for reordering channels 
     }
 }
