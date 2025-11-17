@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Windows;
 using InterdisciplinairProject.Views;
+using System.Diagnostics;
 
 namespace InterdisciplinairProject.ViewModels
 {
@@ -49,6 +50,8 @@ namespace InterdisciplinairProject.ViewModels
         protected virtual void RaiseSceneChanged(Scene? scene, SceneChangeType changeType)
         {
             OnSceneChanged?.Invoke(this, new SceneChangedEventArgs(scene, changeType));
+            // Added console logging
+            Debug.WriteLine($"[SceneChanged] Scene: '{scene?.Name}', Type: {changeType}");
         }
 
         // ============================================================
@@ -64,6 +67,7 @@ namespace InterdisciplinairProject.ViewModels
             if (scene == null)
             {
                 MessageBox.Show("Geen scene geselecteerd om te exporteren.", "Fout", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Debug.WriteLine("[ExportScene] Geen scene geselecteerd om te exporteren.");
                 return;
             }
 
@@ -94,6 +98,7 @@ namespace InterdisciplinairProject.ViewModels
 
                     Message = $"Scene '{scene.Name}' geëxporteerd naar '{saveFileDialog.FileName}'";
                     MessageBox.Show($"Scene succesvol geëxporteerd!\nDimmer waarde: {scene.Dimmer}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Debug.WriteLine($"[ExportScene] Scene '{scene.Name}' exported to '{saveFileDialog.FileName}'");
 
                     RaiseSceneChanged(scene, SceneChangeType.Exported);
                 }
@@ -101,6 +106,7 @@ namespace InterdisciplinairProject.ViewModels
             catch (Exception ex)
             {
                 MessageBox.Show($"Fout bij exporteren scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"[ExportScene][Error] {ex}");
             }
         }
 
@@ -130,6 +136,7 @@ namespace InterdisciplinairProject.ViewModels
                 _currentShowPath = null;
 
                 Message = $"Nieuwe show '{vm.ShowName}' aangemaakt!";
+                Debug.WriteLine($"[CreateShow] Nieuwe show '{vm.ShowName}' aangemaakt.");
             }
         }
 
@@ -159,6 +166,7 @@ namespace InterdisciplinairProject.ViewModels
                         scene.Dimmer = 0;
                         Scenes.Add(scene);
                         Message = $"Scene '{scene.Name}' geïmporteerd!";
+                        Debug.WriteLine($"[ImportScenes] Scene '{scene.Name}' imported from '{selectedScenePath}'");
 
                         RaiseSceneChanged(scene, SceneChangeType.Added);
                     }
@@ -166,6 +174,7 @@ namespace InterdisciplinairProject.ViewModels
                     {
                         Message = "Deze scene is al geïmporteerd.";
                         MessageBox.Show("Deze scene bestaat al in de huidige show.", "Scene Bestaat Al", MessageBoxButton.OK, MessageBoxImage.Information);
+                        Debug.WriteLine($"[ImportScenes] Scene '{scene.Name}' already exists in the current show.");
                     }
                 }
             }
@@ -173,6 +182,7 @@ namespace InterdisciplinairProject.ViewModels
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"[ImportScenes][Error] {ex}");
             }
         }
 
@@ -214,12 +224,14 @@ namespace InterdisciplinairProject.ViewModels
                     _currentShowPath = path;      
                     MessageBox.Show($"Show saved to '{path}'",
                         "Save As", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Debug.WriteLine($"[SaveAs] Show saved to '{path}'");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"[SaveAs][Error] {ex}");
             }
         }
 
@@ -240,11 +252,13 @@ namespace InterdisciplinairProject.ViewModels
                 SaveShowToPath(_currentShowPath);
                 MessageBox.Show($"Show saved to '{_currentShowPath}'",
                     "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+                Debug.WriteLine($"[Save] Show saved to '{_currentShowPath}'");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine($"[Save][Error] {ex}");
             }
         }
 
@@ -270,6 +284,7 @@ namespace InterdisciplinairProject.ViewModels
                     if (!doc.RootElement.TryGetProperty("show", out var showElement))
                     {
                         Message = "Het geselecteerde bestand bevat geen geldige 'show'-structuur.";
+                        Debug.WriteLine("[OpenShow] Invalid show structure in selected file.");
                         return;
                     }
 
@@ -277,6 +292,7 @@ namespace InterdisciplinairProject.ViewModels
                     if (loadedShow == null)
                     {
                         Message = "Kon show niet deserialiseren. Bestand mogelijk corrupt.";
+                        Debug.WriteLine("[OpenShow] Could not deserialize show. Possibly corrupted file.");
                         return;
                     }
 
@@ -298,15 +314,18 @@ namespace InterdisciplinairProject.ViewModels
                     }
 
                     Message = $"Show '{_show.Name}' succesvol geopend!";
+                    Debug.WriteLine($"[OpenShow] Show '{_show.Name}' opened from '{selectedPath}'");
                 }
             }
             catch (JsonException)
             {
                 Message = "Het geselecteerde bestand bevat ongeldige JSON.";
+                Debug.WriteLine("[OpenShow] Invalid JSON file.");
             }
             catch (Exception ex)
             {
                 Message = $"Er is een fout opgetreden bij het openen van de show:\n{ex.Message}";
+                Debug.WriteLine($"[OpenShow][Error] {ex}");
             }
         }
 
@@ -327,6 +346,7 @@ namespace InterdisciplinairProject.ViewModels
 
             string json = JsonSerializer.Serialize(wrapper, options);
             File.WriteAllText(path, json, Encoding.UTF8);
+            Debug.WriteLine($"[SaveShowToPath] Show '{_show.Name}' written to '{path}'");
         }
 
         private string GenerateRandomId()
@@ -365,6 +385,7 @@ namespace InterdisciplinairProject.ViewModels
                 _show.Scenes.Remove(scene);
 
             Message = $"Scene '{scene.Name}' verwijderd.";
+            Debug.WriteLine($"[DeleteScene] Scene '{scene.Name}' deleted.");
             RaiseSceneChanged(scene, SceneChangeType.Deleted);
         }
     }
