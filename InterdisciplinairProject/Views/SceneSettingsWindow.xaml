@@ -2,34 +2,135 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Scene Settings"
-        Width="360"
-        Height="260"
+        Width="440"
+        Height="480"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False">
-    <Grid Margin="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        ShowInTaskbar="False"
+        Background="#F5F5F5">
+    
+    <Window.Resources>
+        <!-- TextBox Style -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#999999"/>
+                </Trigger>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#0078D4"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+                <Trigger Property="IsReadOnly" Value="True">
+                    <Setter Property="Background" Value="#F0F0F0"/>
+                    <Setter Property="Foreground" Value="#666666"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
-            <TextBlock Text="Scene ID" FontWeight="SemiBold"/>
-            <TextBox Text="{Binding SceneModel.Id, Mode=OneWay}" IsReadOnly="True" />
+        <!-- Label Style -->
+        <Style x:Key="ModernLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
 
-            <TextBlock Text="Name" FontWeight="SemiBold" Margin="0,8,0,0"/>
-            <!-- Make Name read-only so it cannot be changed in this dialog -->
-            <TextBox Text="{Binding SceneModel.Name, Mode=OneWay}" IsReadOnly="True" />
+        <!-- Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#0078D4"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#004578"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
-            <TextBlock Text="Fade In Time (ms)" FontWeight="SemiBold" Margin="0,8,0,0"/>
-            <TextBox Text="{Binding FadeInMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    <Border Background="White" 
+            CornerRadius="0" 
+            Margin="0"
+            Padding="24">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="10" 
+                            ShadowDepth="2" 
+                            Opacity="0.3" 
+                            Color="#000000"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <TextBlock Text="Fade Out Time (ms)" FontWeight="SemiBold" Margin="0,8,0,0"/>
-            <TextBox Text="{Binding FadeOutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-        </StackPanel>
+            <!-- Header -->
+            <TextBlock Text="Scene Settings" 
+                       FontSize="20" 
+                       FontWeight="Bold" 
+                       Foreground="#222222"
+                       Margin="0,0,0,20"/>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Margin="0,12,0,0">
-            <Button Content="Close" Width="80" Margin="8,0,0,0" Click="Close_Click"/>
-        </StackPanel>
-    </Grid>
+            <!-- Form Fields -->
+            <StackPanel Grid.Row="1" Orientation="Vertical">
+                <TextBlock Text="Scene ID" Style="{StaticResource ModernLabel}"/>
+                <TextBox Text="{Binding SceneModel.Id, Mode=OneWay}" 
+                         IsReadOnly="True" 
+                         Style="{StaticResource ModernTextBox}"
+                         Margin="0,0,0,16"/>
+
+                <TextBlock Text="Name" Style="{StaticResource ModernLabel}"/>
+                <TextBox Text="{Binding SceneModel.Name, Mode=OneWay}" 
+                         IsReadOnly="True" 
+                         Style="{StaticResource ModernTextBox}"
+                         Margin="0,0,0,16"/>
+
+                <TextBlock Text="Fade In Time (ms)" Style="{StaticResource ModernLabel}"/>
+                <TextBox Text="{Binding FadeInMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         Style="{StaticResource ModernTextBox}"
+                         Margin="0,0,0,16"/>
+
+                <TextBlock Text="Fade Out Time (ms)" Style="{StaticResource ModernLabel}"/>
+                <TextBox Text="{Binding FadeOutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         Style="{StaticResource ModernTextBox}"/>
+            </StackPanel>
+
+            <!-- Footer -->
+            <StackPanel Grid.Row="2" 
+                       Orientation="Horizontal" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,20,0,0">
+                <Button Content="Close" 
+                        Width="100" 
+                        Style="{StaticResource ModernButton}"
+                        Click="Close_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>
