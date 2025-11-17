@@ -7,8 +7,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class ChannelViewModel : ObservableObject
     {
-        // Stores the last name generated automatically based on type
-        private string? _lastAutoName;
 
         // --- INTERACTIE EIGENSCHAPPEN (Gebruikt door FixtureCreateView.xaml.cs) ---
         [ObservableProperty]
@@ -39,8 +37,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> availableTypes = new()
         {
-            "Lamp", "Ster", "Klok", "Tilt", "Ventilator",
-            "Rood", "Groen", "Blauw", "Wit",
+            "Lamp", "Ster", "Klok", "Tilt", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
         };
 
         [ObservableProperty]
@@ -54,8 +51,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             _model = model;
             selectedType = _model.Type;
-
-            _lastAutoName = Name;
 
             // Initialisatie van Level op basis van modelwaarde
             if (int.TryParse(_model.Value, out int currentLevel))
@@ -71,12 +66,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             _model.Type = value;
             Level = 0; // Reset level bij typeverandering
-
-            if (Name == _lastAutoName)
-            {
-                Name = value;
-                _lastAutoName = value;
-            }
 
             // Forceer Level om de Parameter/Value te schrijven als het een 'level' type is
             if (new[] { "Rood", "Groen", "Blauw", "Wit" }.Contains(value))

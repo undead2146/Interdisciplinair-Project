@@ -326,7 +326,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // ... (AddChannel logica) ...
             var newModel = new Channel
             {
-                Name = "Lamp",
+                Name = $"Nieuw Kanaal {Channels.Count + 1}",
                 Type = "Lamp",
                 Value = "0"
             };

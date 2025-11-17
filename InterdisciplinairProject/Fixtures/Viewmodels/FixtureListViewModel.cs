@@ -17,15 +17,13 @@ using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
-    public enum FilterMode
-    {
-        Fixture,
-        Manufacturer
-    }
-
     public class FixtureListViewModel : INotifyPropertyChanged
     {
+        // Private instantie van de service
         private readonly InterdisciplinairProject.Fixtures.Services.ManufacturerService _manufacturerService = new();
+
+        // Command property voor het verwijderen van een fabrikant
+        public ICommand DeleteManufacturerCommand { get; }
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
 
@@ -34,13 +32,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ObservableCollection<Fixture> Fixtures { get; } = new();
         public ObservableCollection<ManufacturerGroup> ManufacturerGroups { get; set; } = new();
-
-        // Master list to preserve all groups for search filtering
-        private ObservableCollection<ManufacturerGroup> _allGroups = new();
-
-        // NEW: expose FilterModes for the dropdown
-        public ObservableCollection<FilterMode> FilterModes { get; } =
-            new ObservableCollection<FilterMode>((FilterMode[])Enum.GetValues(typeof(FilterMode)));
 
         private string _searchText = "";
         public string SearchText
@@ -52,22 +43,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     _searchText = value;
                     OnPropertyChanged(nameof(SearchText));
-                    ApplySearch();
-                }
-            }
-        }
-
-        private FilterMode _selectedFilterMode = FilterMode.Fixture;
-        public FilterMode SelectedFilterMode
-        {
-            get => _selectedFilterMode;
-            set
-            {
-                if (_selectedFilterMode != value)
-                {
-                    _selectedFilterMode = value;
-                    OnPropertyChanged(nameof(SelectedFilterMode));
-                    ApplySearch();
+                    foreach (var group in ManufacturerGroups)
+                        group.RefreshFilteredFixtures(_searchText);
                 }
             }
         }
@@ -87,7 +64,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         public ICommand OpenFixtureCommand { get; }
-        public ICommand DeleteManufacturerCommand { get; }
 
         public FixtureListViewModel()
         {
@@ -102,17 +78,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             ReloadFixturesFromFiles();
             StartWatchingDataFolder();
+            // Locatie: Aan het einde van de constructor FixtureListViewModel()
 
+            // 🔴 Initialisatie voor Fabrikant Verwijderen Command
             DeleteManufacturerCommand = new RelayCommand<string>(
                 ExecuteDeleteManufacturer,
                 CanExecuteDeleteManufacturer
             );
         }
-
         public void ReloadFixturesFromFiles()
         {
             ManufacturerGroups.Clear();
-            _allGroups.Clear();
 
             if (!Directory.Exists(_fixturesFolder))
                 return;
@@ -135,20 +111,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                         if (string.IsNullOrEmpty(fixture.ImagePath))
                         {
-                            fixture.ImagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
+                            fixture.ImagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Views", "defaultFixturePng.png");
                         }
-                        else
+                        else 
                         {
+                            // Get just the file name ("test.png") from "Images/test.png"
                             string fileName = Path.GetFileName(fixture.ImagePath);
+
                             string appDataImages = Path.Combine(
                                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                 "InterdisciplinairProject",
                                 "Images"
                             );
+
                             fixture.ImagePath = Path.Combine(appDataImages, fileName);
                         }
 
-                        allFixtures.Add(fixture);
+                            allFixtures.Add(fixture);
                     }
                 }
                 catch (Exception ex)
@@ -164,27 +143,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     Manufacturer = group.Key,
                     Fixtures = new ObservableCollection<Fixture>(group.OrderBy(f => f.Name))
                 };
-                mg.RefreshFilteredFixtures(SearchText, SelectedFilterMode);
+                mg.RefreshFilteredFixtures(SearchText);
                 ManufacturerGroups.Add(mg);
-                _allGroups.Add(mg); // preserve master copy
             }
         }
 
-        private void ApplySearch()
-        {
-            ManufacturerGroups.Clear();
-
-            foreach (var group in _allGroups)
-            {
-                group.RefreshFilteredFixtures(SearchText, SelectedFilterMode);
-                if (group.FilteredFixtures.Count > 0)
-                    ManufacturerGroups.Add(group);
-            }
-        }
-
+        // ------------------------------------------------------------
+        // INotifyPropertyChanged
+        // ------------------------------------------------------------
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        // ------------------------------------------------------------
+        // OPEN
+        // ------------------------------------------------------------
         private void OpenFixture()
         {
             if (SelectedFixture == null)
@@ -208,9 +180,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        // ------------------------------------------------------------
+        // MANAGEMENT
+        // ------------------------------------------------------------
         private bool FixturesExists(string name) =>
             Fixtures.Any(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
+        // ------------------------------------------------------------
+        // WATCHER
+        // ------------------------------------------------------------
         private void StartWatchingDataFolder()
         {
             if (!Directory.Exists(_fixturesFolder)) return;
@@ -234,16 +212,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             _watcher.EnableRaisingEvents = true;
         }
+        // --- LOGICA VOOR FABRIKANT VERWIJDEREN COMMAND ---
 
         private bool CanExecuteDeleteManufacturer(string? manufacturerName)
         {
+            // Het command kan alleen worden uitgevoerd als de naam niet leeg is.
             return !string.IsNullOrWhiteSpace(manufacturerName);
         }
+
+        // Locatie: In de FixtureListViewModel.cs klasse
 
         private void ExecuteDeleteManufacturer(string? manufacturerName)
         {
             if (string.IsNullOrWhiteSpace(manufacturerName)) return;
 
+            // 1. Bevestigingspopup
             MessageBoxResult result = MessageBox.Show(
                 $"Weet u zeker dat u de fabrikant '{manufacturerName}' wilt verwijderen? Dit is enkel mogelijk als er geen fixtures onder bestaan.",
                 "Fabrikant verwijderen",
@@ -252,17 +235,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             );
 
             if (result != MessageBoxResult.Yes)
+            {
                 return;
+            }
 
+            // 2. Roep de Service aan (deze methode regelt nu het SanitizeFileName en Directory.Delete)
             bool success = _manufacturerService.DeleteManufacturer(manufacturerName);
 
+            // 3. Afhandeling van het resultaat
             if (success)
             {
                 MessageBox.Show($"Fabrikant '{manufacturerName}' succesvol verwijderd.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                ReloadFixturesFromFiles();
+                ReloadFixturesFromFiles(); // Zorgt dat de map uit de lijst verdwijnt
             }
             else
             {
+                // Foutmelding
                 MessageBox.Show(
                     $"Fabrikant '{manufacturerName}' kon NIET worden verwijderd. Zorg ervoor dat er geen fixtures (bestanden) onder deze fabrikant bestaan.",
                     "Fout bij verwijderen",
