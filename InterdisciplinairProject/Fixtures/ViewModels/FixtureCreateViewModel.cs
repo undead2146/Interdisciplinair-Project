@@ -15,6 +15,15 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+<<<<<<< Updated upstream
+=======
+using System;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
+// ✅ TOEGEVOEGD: Nodig voor debouncing (Task.Delay en CancellationToken)
+using System.Threading.Tasks;
+using System.Threading;
+>>>>>>> Stashed changes
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -25,6 +34,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
         private readonly ManufacturerService _manufacturerService;
+
+        // ✅ TOEGEVOEGD: CancellationTokenSource voor het beheren van de debounce-timer
+        private CancellationTokenSource? _debounceCts;
 
         [ObservableProperty]
         private ChannelItem? selectedChannel;
@@ -44,6 +56,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
+        // ObservableProperty voor de string-invoer van de TextBox
+        [ObservableProperty]
+        private string _dmxDivisionsInput = "255";
+
+        // Interne opslag voor de gevalideerde DMX waarde
+        private int _dmxDivisions = 255;
+
+        // ObservableProperty om de validatiestatus bij te houden
+        [ObservableProperty]
+        private bool _isDmxDivisionsValid = true;
+
+        [ObservableProperty]
+        private Fixture currentFixture = new Fixture();
+
         public event EventHandler? BackRequested;
 
         public event EventHandler? FixtureSaved;
@@ -62,6 +88,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddImageCommand { get; }
 
+<<<<<<< Updated upstream
         public ICommand AddTypeBtn { get; }
 
         private Fixture _currentFixture = new Fixture();
@@ -89,10 +116,41 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     OnPropertyChanged(); // als je INotifyPropertyChanged gebruikt
                 }
             }
+=======
+        // Berekent de stapgrootte (TickFrequency)
+        public double DmxStepSize
+        {
+            get
+            {
+                int safeDivisions = Math.Max(2, Math.Min(255, _dmxDivisions));
+                // Vereist: stappen van 255/N
+                return 255.0 / safeDivisions;
+            }
+        }
+
+        // ✅ VERVANGEN: Implementatie met 3 seconden debouncing
+        partial void OnDmxDivisionsInputChanged(string value)
+        {
+            // Annuleer een lopende timer als de gebruiker opnieuw typt
+            _debounceCts?.Cancel();
+            _debounceCts = new CancellationTokenSource();
+
+            // Start een nieuwe taak met een vertraging van 3 seconden
+            Task.Delay(TimeSpan.FromSeconds(3), _debounceCts.Token)
+                .ContinueWith(t =>
+                {
+                    if (t.IsCanceled) return; // Stop als de taak geannuleerd is
+
+                    // Voer de validatie uit in de UI-thread
+                    Application.Current.Dispatcher.Invoke(() => ValidateDmxDivisions(value));
+
+                }, TaskScheduler.Default);
+>>>>>>> Stashed changes
         }
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
+            // ... (Constructor logica) ...
             _manufacturerService = new ManufacturerService();
             _dataDir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -106,11 +164,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
+<<<<<<< Updated upstream
             DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
             SaveCommand = new RelayCommand(SaveFixture);
+=======
+            DeleteChannelCommand = new RelayCommand<ChannelViewModel>(DeleteChannel, CanDeleteChannel);
+            SaveCommand = new RelayCommand(SaveFixture, CanSaveFixture);
+>>>>>>> Stashed changes
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+            AddImageCommand = new RelayCommand(() => AddImage(CurrentFixture));
 
             if (existing != null)
             {
@@ -120,14 +183,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 _originalManufacturer = existing.Manufacturer ?? "Unknown";
                 _originalFixtureName = existing.Name ?? string.Empty;
 
+                // Zet de divisies van de bestaande fixture om
+                _dmxDivisions = existing.DmxDivisions > 1 ? existing.DmxDivisions : 255;
+                DmxDivisionsInput = _dmxDivisions.ToString();
+
                 Channels.Clear();
                 foreach (var ch in existing.Channels)
                     Channels.Add(new ChannelItem(ch));
 
+<<<<<<< Updated upstream
                 _currentFixture.Name = FixtureName;
                 _currentFixture.Manufacturer = SelectedManufacturer!;
 
                 ImageBase64 = ImageCompressionHelpers.DecompressBase64(existing.ImageBase64 ?? string.Empty);
+=======
+                CurrentFixture.Name = FixtureName;
+                CurrentFixture.Manufacturer = SelectedManufacturer!;
+>>>>>>> Stashed changes
             }
             else
             {
@@ -135,14 +207,150 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 SelectedManufacturer = AvailableManufacturers.FirstOrDefault();
                 AddChannel();
             }
+
+            (SaveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
+        // ✅ NIEUW: Validatiemethode
+        private void ValidateDmxDivisions(string value)
+        {
+            bool wasValid = IsDmxDivisionsValid;
+
+            if (int.TryParse(value, out int result))
+            {
+                if (result >= 2 && result <= 255)
+                {
+                    _dmxDivisions = result;
+                    IsDmxDivisionsValid = true;
+                    OnPropertyChanged(nameof(DmxStepSize));
+                }
+                else
+                {
+                    // Fout: getal buiten bereik (2-255)
+                    IsDmxDivisionsValid = false;
+
+                    // Toon de MessageBox alleen als de status net ongeldig is geworden
+                    if (wasValid != IsDmxDivisionsValid)
+                    {
+                        MessageBox.Show(
+                            "The DMX divisions must be a number between 2 and 255.",
+                            "Input Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                // Fout: geen getal
+                IsDmxDivisionsValid = false;
+
+                // Toon de MessageBox alleen als de status net ongeldig is geworden
+                if (wasValid != IsDmxDivisionsValid)
+                {
+                    MessageBox.Show(
+                        "The DMX divisions must be a number between 2 and 255.",
+                        "Input Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+
+            (SaveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+        }
+
+        private bool CanSaveFixture()
+        {
+            return IsDmxDivisionsValid;
+        }
+
+        private void SaveFixture()
+        {
+            // ... (Save logica is correct) ...
+            if (!IsDmxDivisionsValid)
+            {
+                MessageBox.Show("De slider divisies zijn ongeldig. Los de fout op voordat u opslaat.", "Validatiefout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
+            {
+                MessageBox.Show("Vul de volgende velden in (Fixture naam, Kanaal naam, Kanaal type).", "Validatiefout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string manufacturer = SelectedManufacturer ?? "Unknown";
+            string safeManufacturerName = SanitizeFileName(manufacturer);
+            string safeFixtureName = SanitizeFileName(FixtureName);
+
+            string manufacturerDir = Path.Combine(_dataDir, safeManufacturerName);
+            if (!Directory.Exists(manufacturerDir))
+                Directory.CreateDirectory(manufacturerDir);
+
+            string newFilePath = Path.Combine(manufacturerDir, $"{safeFixtureName}.json");
+
+            if (!_isEditing && File.Exists(newFilePath))
+            {
+                MessageBox.Show($"Er bestaat al een fixture met de naam: '{FixtureName}' bij '{manufacturer}'. Kies een andere naam.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var channelsArray = new JsonArray();
+            foreach (var ch in Channels)
+            {
+                var channelObj = new JsonObject
+                {
+                    ["Name"] = ch.Name,
+                    ["Type"] = ch.SelectedType,
+                    ["value"] = ch.Parameter,
+                };
+                channelsArray.Add(channelObj);
+            }
+
+            var root = new JsonObject
+            {
+                ["name"] = FixtureName,
+                ["manufacturer"] = manufacturer,
+                ["dmxDivisions"] = _dmxDivisions,
+                ["channels"] = channelsArray,
+                ["imagePath"] = CurrentFixture.ImagePath
+            };
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = root.ToJsonString(options);
+
+            try
+            {
+                if (_isEditing && (_originalFixtureName != FixtureName || _originalManufacturer != manufacturer))
+                {
+                    string safeOriginalManufacturerName = SanitizeFileName(_originalManufacturer!);
+                    string safeOriginalFixtureName = SanitizeFileName(_originalFixtureName!);
+                    string oldFilePath = Path.Combine(_dataDir, safeOriginalManufacturerName, $"{safeOriginalFixtureName}.json");
+                    if (File.Exists(oldFilePath))
+                        File.Delete(oldFilePath);
+                }
+
+                File.WriteAllText(newFilePath, json);
+                MessageBox.Show($"Fixture '{FixtureName}' is succesvol opgeslagen in de map '{manufacturer}'.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                LoadManufacturers();
+
+                FixtureSaved?.Invoke(this, EventArgs.Empty);
+                BackRequested?.Invoke(this, EventArgs.Empty);
+            }
+            catch (IOException ioEx)
+            {
+                MessageBox.Show($"Fout bij het opslaan van de fixture: {ioEx.Message}", "Opslagfout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void LoadManufacturers()
         {
+            // ... (LoadManufacturers logica) ...
             var directoryInfo = new DirectoryInfo(_dataDir);
             var currentManufacturers = directoryInfo.GetDirectories()
-                                                    .Select(d => d.Name)
-                                                    .ToList();
+                                                 .Select(d => d.Name)
+                                                 .ToList();
             currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
             var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
             var finalManufacturerList = new List<string> { "Unknown" };
@@ -152,6 +360,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void ExecuteRegisterManufacturer()
         {
+            // ... (RegisterManufacturer logica) ...
             var registerWindow = new RegisterManufacturerWindow();
             if (Application.Current.MainWindow != null)
                 registerWindow.Owner = Application.Current.MainWindow;
@@ -177,6 +386,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+<<<<<<< Updated upstream
         private void SaveFixture()
         {
             if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
@@ -250,11 +460,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+=======
+>>>>>>> Stashed changes
         private void AddChannel()
         {
+            // ... (AddChannel logica) ...
             var newModel = new Channel
             {
-                Name = $"New Channel {Channels.Count + 1}",
+                Name = $"Nieuw Kanaal {Channels.Count + 1}",
                 Type = "Lamp",
                 Value = "0"
             };
@@ -278,7 +491,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void Cancel()
         {
-            var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var result = MessageBox.Show("Weet je zeker dat je het aanmaken van deze fixture wilt annuleren?", "Bevestigen & verlaten", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
@@ -317,7 +530,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public partial class ChannelItem : ObservableObject
         {
+<<<<<<< Updated upstream
             private readonly Channel _model;
+=======
+            // ... (AddImage logica) ...
+            string imagesDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "InterdisciplinairProject",
+                "Images");
+>>>>>>> Stashed changes
 
             [ObservableProperty]
             private bool isEditing;
@@ -327,7 +548,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             public ChannelItem(Channel model)
             {
+<<<<<<< Updated upstream
                 _model = model;
+=======
+                Title = "Selecteer een afbeelding",
+                Filter = "Afbeeldingen (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg",
+                Multiselect = false,
+                InitialDirectory = imagesDir
+            };
+>>>>>>> Stashed changes
 
                 Name = _model.Name;
                 SelectedType = string.IsNullOrWhiteSpace(_model.Type) ? "Lamp" : _model.Type!;
@@ -356,10 +585,26 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     if (SetProperty(ref _selectedType, value))
                     {
+<<<<<<< Updated upstream
                         _model.Type = value;
                         ApplyTypeSpec(value);
                         if (IsSliderType) Level = Level; // re-snap
                     }
+=======
+                        File.Copy(selectedFile, destPath);
+                        MessageBox.Show($"Afbeelding gekopieerd naar:\n{destPath}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Pad toegevoegd aan fixture.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                    fixture.ImagePath = $"Images/{safeFileName}";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Kan de afbeelding niet kopiëren:\n{ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+>>>>>>> Stashed changes
                 }
             }
 

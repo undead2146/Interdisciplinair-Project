@@ -17,6 +17,13 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("manufacturer")]
         public string Manufacturer { get; set; } = string.Empty;
 
+<<<<<<< Updated upstream
+=======
+        // 🟢 TOEGEVOEGD: Property voor het aantal DMX-divisies (voor slider stapgrootte).
+        [JsonPropertyName("dmxDivisions")]
+        public int DmxDivisions { get; set; } = 255; // Standaard 255 (stap van 1)
+
+>>>>>>> Stashed changes
         [JsonPropertyName("channels")]
         public ObservableCollection<Channel> Channels { get; set; } = new ObservableCollection<Channel>();
 
