@@ -8,11 +8,10 @@ using System.Diagnostics;
 using System.Windows;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.ViewModels;
-using System.Linq; // Nodig voor ToList()
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
-using InterdisciplinairProject.Fixtures.Models; // Nodig voor Fixture deserialisatie
-using InterdisciplinairProject.Features.Fixture; // For ChannelTypeHelper
+using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -83,7 +82,7 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         try
         {
-            // ⭐️ 1. IMPLEMENTATIE: Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
+            // Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
             Scene.Fixtures ??= new List<InterdisciplinairProject.Core.Models.Fixture>();
             Scene.Fixtures.Clear();
 
@@ -118,7 +117,7 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             var fixtureListViewModel = new FixtureListViewModel();
 
-            // ⭐️ 2. IMPLEMENTATIE: Abonneren op het FixtureSelected event
+            // Abonneren op het FixtureSelected event
             fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
 
             CurrentView = new FixtureListView
@@ -133,7 +132,9 @@ public partial class SceneEditorViewModel : ObservableObject
         }
     }
 
-    // ⭐️ 3. IMPLEMENTATIE: Event handler om de geselecteerde fixture toe te voegen
+    /// <summary>
+    /// Event handler om de geselecteerde fixture toe te voegen
+    /// </summary>
     private void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
         // Sluit de FixtureListView af
@@ -151,12 +152,11 @@ public partial class SceneEditorViewModel : ObservableObject
 
             if (tempFixture != null)
             {
-                // ⭐️ NIEUW: Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
+                // Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
                 // Dictionary<string, byte?> en Dictionary<string, string> die Core.Models.Fixture verwacht.
 
                 var channelDictionary = new Dictionary<string, byte?>();
                 var descriptionDictionary = new Dictionary<string, string>();
-                var channelTypes = new Dictionary<string, ChannelType>();
 
                 int channelIndex = 1;
                 foreach (var channel in tempFixture.Channels)
@@ -164,16 +164,11 @@ public partial class SceneEditorViewModel : ObservableObject
                     string channelKey = $"Ch{channelIndex}";
 
                     // Voeg toe aan de channels dictionary (met default DMX waarde 0)
-                    // We negeren de "value" uit de JSON, want de Core Fixture beheert de *huidige* DMX waarde (byte?).
                     channelDictionary.Add(channelKey, 0);
 
                     // Creëer de beschrijving (bijv. "Ch1: Dimmer - General intensity")
-                    // De 'Type' is een string in de JSON (bijv. "Klok").
                     string description = $"{channelKey}: {channel.Type} - {channel.Name}";
                     descriptionDictionary.Add(channelKey, description);
-
-                    // Set the channel type
-                    channelTypes[channelKey] = ChannelTypeHelper.GetChannelTypeFromName(channel.Type);
 
                     channelIndex++;
                 }
@@ -187,7 +182,6 @@ public partial class SceneEditorViewModel : ObservableObject
                     // Wijs de geconverteerde dictionaries toe
                     Channels = channelDictionary,
                     ChannelDescriptions = descriptionDictionary,
-                    ChannelTypes = channelTypes,
 
                     // Zorg ervoor dat Id uniek is voor de instance.
                     InstanceId = Guid.NewGuid().ToString(),
@@ -284,5 +278,69 @@ public partial class SceneEditorViewModel : ObservableObject
         }
 
         return maxChannel + 1;
+    }
+
+    /// <summary>
+    /// Removes a fixture from the scene.
+    /// </summary>
+    [RelayCommand]
+    private async Task RemoveFixture(SceneFixture? fixtureToRemove)
+    {
+        if (fixtureToRemove == null)
+        {
+            Debug.WriteLine("[WARNING] RemoveFixtureCommand called without parameter.");
+            return;
+        }
+
+        // Check if Scene.Id is valid
+        if (string.IsNullOrEmpty(Scene.Id))
+        {
+            Debug.WriteLine("[ERROR] Scene has no ID, cannot remove fixture.");
+            MessageBox.Show("Scene heeft geen geldig ID. Sla eerst de scene op.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        var result = MessageBox.Show(
+            $"Weet je zeker dat je de fixture '{fixtureToRemove.Fixture.Name}' wilt verwijderen?",
+            "Bevestig Verwijdering",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.No)
+        {
+            return;
+        }
+
+        try
+        {
+            Debug.WriteLine($"[DEBUG] Removing fixture '{fixtureToRemove.Fixture.Name}' from scene '{Scene.Name}'.");
+
+            SceneFixtures.Remove(fixtureToRemove);
+
+            await _sceneRepository.RemoveFixtureAsync(Scene.Id, fixtureToRemove.Fixture);
+
+            if (Scene.Fixtures != null)
+            {
+                Scene.Fixtures.Remove(fixtureToRemove.Fixture);
+            }
+
+            if (SelectedFixture == fixtureToRemove)
+            {
+                SelectedFixture = null;
+            }
+
+            Debug.WriteLine($"[DEBUG] Fixture successfully removed and scene saved.");
+
+            MessageBox.Show(
+                $"Fixture '{fixtureToRemove.Fixture.Name}' succesvol verwijderd.",
+                "Succes",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error removing fixture: {ex.Message}");
+            MessageBox.Show($"Fout bij verwijderen van fixture: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
