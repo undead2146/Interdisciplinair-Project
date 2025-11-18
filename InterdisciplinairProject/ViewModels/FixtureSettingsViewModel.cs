@@ -15,6 +15,9 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     private readonly IHardwareConnection _hardwareConnection;
     private Fixture? _currentFixture;
 
+    // NIEUW: Houdt de laatst opgeslagen waarden bij voor de Cancel-functionaliteit.
+    private Dictionary<string, byte?> _initialChannelValues = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FixtureSettingsViewModel"/> class.
     /// </summary>
@@ -59,13 +62,17 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         Debug.WriteLine($"[DEBUG] LoadFixture called for: {fixture.Name}");
         _currentFixture = fixture;
+
+        // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
+        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels);
+
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
         OnPropertyChanged(nameof(CurrentFixture));
     }
 
     /// <summary>
-    /// Gets the current channel values from the fixture.
+    /// Gets the current channel values from the fixture (from the temporary slider state).
     /// </summary>
     /// <returns>A dictionary of channel names and their values.</returns>
     public Dictionary<string, byte?> GetCurrentChannelValues()
@@ -75,7 +82,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             return new Dictionary<string, byte?>();
         }
 
-        // Update fixture channels met de huidige slider waardes
+        // Update fixture channels met de huidige slider waardes (deze waarden zijn de TIJDELIJKE 'werk'-waarden)
         foreach (var channelVm in Channels)
         {
             _currentFixture.Channels[channelVm.Name] = channelVm.Value;
@@ -83,6 +90,45 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         return _currentFixture.Channels;
     }
+
+    /// <summary>
+    /// NIEUW: Resets the Channel ViewModels and the current fixture's channels to the initial loaded values.
+    /// </summary>
+    public void CancelChanges()
+    {
+        if (_currentFixture == null)
+        {
+            return;
+        }
+
+        Debug.WriteLine($"[DEBUG] CancelChanges called. Restoring initial values for {_currentFixture.Name}");
+
+        // 1. Herstel de _currentFixture.Channels naar de oorspronkelijke (opgeslagen) waarden
+        _currentFixture.Channels = new Dictionary<string, byte?>(_initialChannelValues);
+
+        // 2. Herlaad de Channel ViewModels om de sliders te updaten (dit stuurt ook de herstelde waarden live naar de hardware)
+        LoadChannelsFromFixture(_currentFixture);
+    }
+
+    /// <summary>
+    /// NIEUW: Confirms the current Channel values as the new initial state (the new 'saved' state).
+    /// </summary>
+    public void ConfirmSave()
+    {
+        if (_currentFixture == null)
+        {
+            return;
+        }
+
+        // Zorg ervoor dat de _currentFixture de meest recente sliderwaarden heeft
+        GetCurrentChannelValues();
+
+        // Maak een nieuwe kopie van de HUIDIGE waarden van de _currentFixture en stel deze in als de nieuwe 'initial state'
+        _initialChannelValues = new Dictionary<string, byte?>(_currentFixture.Channels);
+
+        Debug.WriteLine($"[DEBUG] ConfirmSave called. New initial values stored for {_currentFixture.Name}");
+    }
+
 
     /// <summary>
     /// Raises the <see cref="PropertyChanged"/> event.
@@ -119,19 +165,20 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] LoadChannelsFromFixture complete. Total channels loaded: {Channels.Count}");
     }
 
+    // Deze methode blijft verantwoordelijk voor de LIVE update naar de hardware
     private async void ChannelViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ChannelViewModel.Value) && sender is ChannelViewModel channelVm)
         {
             Debug.WriteLine($"[DEBUG] Channel value changed: {channelVm.Name} = {channelVm.Value}");
 
-            // Update the fixture model
+            // Update the fixture model (tijdelijk)
             if (_currentFixture != null)
             {
                 _currentFixture.Channels[channelVm.Name] = channelVm.Value;
                 Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
 
-                // Send to hardware connection
+                // Send to hardware connection (LIVE)
                 var result = await _hardwareConnection.SetChannelValueAsync(
                     _currentFixture.InstanceId,
                     channelVm.Name,
