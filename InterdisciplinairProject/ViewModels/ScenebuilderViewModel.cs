@@ -44,11 +44,6 @@ public partial class ScenebuilderViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Event fired when a scene is selected for editing.
-    /// </summary>
-    public event Action<Scene>? SceneSelected;
-
-    /// <summary>
     /// Gets the collection of scenes.
     /// </summary>
     public ObservableCollection<Scene> Scenes { get; } = new();
@@ -168,7 +163,6 @@ public partial class ScenebuilderViewModel : ObservableObject
         }
     }
 
-
     private async Task LoadScenesAsync()
     {
         try
@@ -191,7 +185,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// Imports scenes from JSON files.
     /// </summary>
     [RelayCommand]
-    private async Task ImportScene()
+    private async Task ImportScenes()
     {
         try
         {
@@ -262,7 +256,7 @@ public partial class ScenebuilderViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Fout bij importeren van scene(s): {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Fout bij importeren van scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

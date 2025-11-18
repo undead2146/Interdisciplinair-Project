@@ -38,15 +38,15 @@
             <!-- Kleine spacer -->
             <Border Grid.Row="1"/>
 
-            <!-- Import Scene button -->
-            <Button x:Name="ImportSceneButton"
+            <!-- Import Scenes button -->
+            <Button x:Name="ImportScenesButton"
                     Grid.Row="2"
-                    Content="Import Scene"
+                    Content="Import Scenes"
                     FontSize="16"
                     Padding="12,8"
                     HorizontalAlignment="Left"
                     Width="180"
-                    Command="{Binding ImportSceneCommand}"
+                    Command="{Binding ImportScenesCommand}"
                     Background="#FF4CAF50"
                     Foreground="White"
                     BorderThickness="0"/>

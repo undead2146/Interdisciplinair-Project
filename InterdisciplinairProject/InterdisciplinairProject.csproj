@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fixtures\Views\defaultFixturePng.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Fixtures\Views\defaultFixturePng.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
     <PackageReference Include="StyleCop.Analyzers">
@@ -22,6 +32,12 @@
     <ProjectReference Include="..\InterdisciplinairProject.Features\Fixture\Fixture.csproj" />
     <ProjectReference Include="..\InterdisciplinairProject.Features\Scene\Scene.csproj" />
     <ProjectReference Include="..\InterdisciplinairProject.Features\Show\Show.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="data\fixtures.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
