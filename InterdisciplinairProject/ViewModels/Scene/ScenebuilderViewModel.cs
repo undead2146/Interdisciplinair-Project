@@ -1,13 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Show;
 using InterdisciplinairProject.Views;
-using System;
+using Show;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Windows;
+
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -73,6 +72,12 @@ public partial class ScenebuilderViewModel : ObservableObject
 
                 sceneEditorViewModel.LoadScene(fullScene);
 
+                // Subscribe to SceneUpdated event to refresh the list
+                sceneEditorViewModel.SceneUpdated += (s, updatedScene) =>
+                {
+                    RefreshSceneInList(updatedScene);
+                };
+
                 // Toon SceneEditorView IN de SceneBuilder
                 CurrentView = new SceneEditorView
                 {
@@ -94,7 +99,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     {
         try
         {
-            var dlg = new InterdisciplinairProject.Views.InputDialog("Nieuwe scène", "Geef een naam voor de scène:");
+            var dlg = new SceneNameDialog("Nieuwe scène", "Geef een naam voor de scène:");
             if (dlg.ShowDialog() == true)
             {
                 var name = dlg.InputText?.Trim();
@@ -207,11 +212,17 @@ public partial class ScenebuilderViewModel : ObservableObject
                 {
                     try
                     {
-                        // Extract scene uit JSON bestand
-                        var importedScene = SceneExtractor.ExtractScene(filePath);
+                        // Extract scene uit JSON bestand (Show.Model.Scene)
+                        var showModelScene = Show.SceneExtractor.ExtractScene(filePath);
 
-                        // Genereer nieuwe ID voor de geïmporteerde scene
-                        importedScene.Id = Guid.NewGuid().ToString();
+                        // MAP naar InterdisciplinairProject.Core.Models.Scene
+                        var importedScene = new InterdisciplinairProject.Core.Models.Scene
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Name = showModelScene.Name,
+                            Dimmer = showModelScene.Dimmer,
+                            Fixtures = new System.Collections.Generic.List<InterdisciplinairProject.Core.Models.Fixture>()
+                        };
 
                         // Sla de scene op via repository
                         await _sceneRepository.SaveSceneAsync(importedScene);
@@ -257,6 +268,38 @@ public partial class ScenebuilderViewModel : ObservableObject
         catch (Exception ex)
         {
             MessageBox.Show($"Fout bij importeren van scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes a specific scene in the list after it has been updated.
+    /// </summary>
+    /// <param name="updatedScene">The updated scene.</param>
+    private void RefreshSceneInList(Scene updatedScene)
+    {
+        try
+        {
+            if (updatedScene != null && !string.IsNullOrEmpty(updatedScene.Id))
+            {
+                var existingScene = Scenes.FirstOrDefault(s => s.Id == updatedScene.Id);
+                if (existingScene != null)
+                {
+                    var index = Scenes.IndexOf(existingScene);
+                    // Remove and re-add to trigger ObservableCollection change notification
+                    Scenes.RemoveAt(index);
+                    Scenes.Insert(index, updatedScene);
+                    // Update SelectedScene reference if it's the same scene
+                    if (SelectedScene?.Id == updatedScene.Id)
+                    {
+                        SelectedScene = updatedScene;
+                    }
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Updated scene '{updatedScene.Name}' in list at index {index}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ERROR] Error refreshing scene in list: {ex.Message}");
         }
     }
 }

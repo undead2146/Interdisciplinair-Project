@@ -77,6 +77,9 @@ public static class ChannelTypeHelper
             "power" => ChannelType.Power,
             "rate" => ChannelType.Rate,
             "brightness" => ChannelType.Brightness,
+            // Handle generic channel names like Ch1, Ch2, etc. as Dimmer
+            var name when name.StartsWith("ch") && int.TryParse(name[2..], out _) => ChannelType.Dimmer,
+            var name when name.StartsWith("channel") && int.TryParse(name[7..], out _) => ChannelType.Dimmer,
             _ => ChannelType.Unknown,
         };
     }
