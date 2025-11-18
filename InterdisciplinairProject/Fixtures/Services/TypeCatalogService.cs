@@ -24,10 +24,10 @@ namespace InterdisciplinairProject.Fixtures.Services
             new TypeSpecification{ name="Klok", input="slider", divisions=255},
             new TypeSpecification{ name="Tilt", input = "slider", divisions = 255},
             new TypeSpecification{ name="Ventilator", input = "slider", divisions = 255},
-            new TypeSpecification{ name="Rood", input="slider", divisions=255},
-            new TypeSpecification{ name="Groen", input="slider", divisions=255},
-            new TypeSpecification{ name="Blauw", input="slider", divisions=255},
-            new TypeSpecification{ name="Wit", input="slider", divisions=255},
+            new TypeSpecification{ name="Red", input="slider", divisions=255},
+            new TypeSpecification{ name="Green", input="slider", divisions=255},
+            new TypeSpecification{ name="Blue", input="slider", divisions=255},
+            new TypeSpecification{ name="White", input="slider", divisions=255},
         };
 
         public static void EnsureLoaded()
