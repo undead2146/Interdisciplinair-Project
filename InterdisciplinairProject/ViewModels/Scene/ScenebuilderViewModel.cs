@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -72,6 +73,12 @@ public partial class ScenebuilderViewModel : ObservableObject
 
                 sceneEditorViewModel.LoadScene(fullScene);
 
+                // Subscribe to SceneUpdated event to refresh the list
+                sceneEditorViewModel.SceneUpdated += (s, updatedScene) =>
+                {
+                    RefreshSceneInList(updatedScene);
+                };
+
                 // Toon SceneEditorView IN de SceneBuilder
                 CurrentView = new SceneEditorView
                 {
@@ -93,7 +100,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     {
         try
         {
-            var dlg = new InterdisciplinairProject.Views.InputDialog("Nieuwe scène", "Geef een naam voor de scène:");
+            var dlg = new SceneNameDialog("Nieuwe scène", "Geef een naam voor de scène:");
             if (dlg.ShowDialog() == true)
             {
                 var name = dlg.InputText?.Trim();
@@ -177,6 +184,41 @@ public partial class ScenebuilderViewModel : ObservableObject
         catch (Exception ex)
         {
             MessageBox.Show($"Error loading scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes a specific scene in the list after it has been updated.
+    /// </summary>
+    /// <param name="updatedScene">The updated scene.</param>
+    private void RefreshSceneInList(Scene updatedScene)
+    {
+        try
+        {
+            if (updatedScene != null && !string.IsNullOrEmpty(updatedScene.Id))
+            {
+                var existingScene = Scenes.FirstOrDefault(s => s.Id == updatedScene.Id);
+                if (existingScene != null)
+                {
+                    var index = Scenes.IndexOf(existingScene);
+                    
+                    // Remove and re-add to trigger ObservableCollection change notification
+                    Scenes.RemoveAt(index);
+                    Scenes.Insert(index, updatedScene);
+                    
+                    // Update SelectedScene reference if it's the same scene
+                    if (SelectedScene?.Id == updatedScene.Id)
+                    {
+                        SelectedScene = updatedScene;
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Updated scene '{updatedScene.Name}' in list at index {index}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ERROR] Error refreshing scene in list: {ex.Message}");
         }
     }
 }

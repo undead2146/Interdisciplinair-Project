@@ -12,23 +12,57 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Scene naam en opslaan knop -->
+
+        <!-- Scene naam -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
             <TextBlock Text="Scène Naam:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Scene.Name}" Width="200" Margin="0,0,10,0"/>
+            <TextBox Text="{Binding Scene.Name}" Width="200" Margin="0,0,10,0" IsReadOnly="True"/>
             <Button Content="Opslaan" Command="{Binding SaveSceneCommand}" Padding="10,5"/>
+            <Button Command="{Binding EditSceneNameCommand}" 
+                    Padding="8,5" 
+                    Margin="0,0,10,0"
+                    ToolTip="Scène naam bewerken"
+                    Background="#007ACC"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <TextBlock Text="✏" 
+                                       FontSize="16" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#005A9E"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#004578"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </StackPanel>
+
         <!-- Fixture toevoegen knop -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
             <Button Content="Fixture Toevoegen" Command="{Binding AddFixtureCommand}" Padding="10,5"/>
         </StackPanel>
+
         <!-- Hoofd content: Fixture lijst links, settings rechts -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <!-- Fixture lijst MET DELETE KNOP -->
+
+            <!-- Fixture lijst -->
             <Border Grid.Column="0" 
                     BorderBrush="#FFE0E0E0" 
                     BorderThickness="1" 
@@ -67,7 +101,8 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
-            <!-- Fixture settings view -->
+
+            <!-- Fixture settings view - AANGEPAST -->
             <Border Grid.Column="1"
                     BorderBrush="#FFE0E0E0" 
                     BorderThickness="1" 
