@@ -32,6 +32,11 @@ public partial class SceneEditorViewModel : ObservableObject
 
     [ObservableProperty]
     private SceneFixture? _selectedFixture;
+    
+    /// <summary>
+    /// Event raised when the scene has been updated.
+    /// </summary>
+    public event EventHandler<Scene>? SceneUpdated;
 
     [ObservableProperty]
     private object? _currentView;
@@ -108,6 +113,46 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Edits the scene name.
+    /// </summary>
+    [RelayCommand]
+    private async Task EditSceneName()
+    {
+        try
+        {
+            var dialog = new SceneNameDialog(
+                "Scène naam bewerken",
+                "Geef een nieuwe naam voor de scène:",
+                Scene.Name ?? string.Empty);
+
+            if (dialog.ShowDialog() == true)
+            {
+                var newName = dialog.InputText?.Trim();
+                if (!string.IsNullOrEmpty(newName) && newName != Scene.Name)
+                {
+                    Scene.Name = newName;
+                    Debug.WriteLine($"[DEBUG] Scene name changed to '{newName}'");
+
+                    // Trigger property change notification for UI update
+                    OnPropertyChanged(nameof(Scene));
+
+                    // Automatically save the scene
+                    await _sceneRepository.SaveSceneAsync(Scene);
+                    Debug.WriteLine($"[DEBUG] Scene '{newName}' automatically saved");
+
+                    // Raise event to notify parent (ScenebuilderViewModel) with the updated scene
+                    SceneUpdated?.Invoke(this, Scene);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error editing scene name: {ex.Message}");
+            MessageBox.Show($"Error editing scene name: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
     /// Adds a new fixture to the scene.
     /// </summary>
     [RelayCommand]
@@ -116,7 +161,7 @@ public partial class SceneEditorViewModel : ObservableObject
         try
         {
             var fixtureListViewModel = new FixtureListViewModel();
-
+            
             // Abonneren op het FixtureSelected event
             fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
 
@@ -222,7 +267,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
             // Reload the scene from repository to get the updated version
             var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
-
+            
             if (updatedScene != null)
             {
                 LoadScene(updatedScene);

@@ -141,7 +141,24 @@ public class SceneRepository : ISceneRepository
 
     private async Task SaveToFileAsync()
     {
-        var json = JsonSerializer.Serialize(_scenes, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(_scenesFilePath, json);
+        try
+        {
+            // Ensure the directory exists
+            var directory = Path.GetDirectoryName(_scenesFilePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] SceneRepository: Created directory: {directory}");
+            }
+
+            var json = JsonSerializer.Serialize(_scenes, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(_scenesFilePath, json);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] SceneRepository: Saved {_scenes.Count} scenes to {_scenesFilePath}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ERROR] SceneRepository: Error saving scenes: {ex.Message}");
+            throw;
+        }
     }
 }
