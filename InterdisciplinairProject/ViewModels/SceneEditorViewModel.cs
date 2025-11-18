@@ -8,10 +8,10 @@ using System.Diagnostics;
 using System.Windows;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.ViewModels;
-using System.Linq; // Nodig voor ToList()
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
-using InterdisciplinairProject.Fixtures.Models; // Nodig voor Fixture deserialisatie
+using InterdisciplinairProject.Fixtures.Models;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -82,7 +82,7 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         try
         {
-            // ⭐️ 1. IMPLEMENTATIE: Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
+            // Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
             Scene.Fixtures ??= new List<InterdisciplinairProject.Core.Models.Fixture>();
             Scene.Fixtures.Clear();
 
@@ -117,22 +117,10 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             var fixtureListViewModel = new FixtureListViewModel();
 
-<<<<<<< HEAD
-            // Open the ImportFixturesView window
-            var importView = new ImportFixturesView();
-            var viewModel = importView.ViewModel;
-
-            // Pass the current scene to the import view model
-            viewModel.CurrentScene = Scene;
-
-            // Subscribe to the CloseRequested event to know when fixtures were actually added
-            viewModel.CloseRequested += async (s, e) =>
-=======
-            // ⭐️ 2. IMPLEMENTATIE: Abonneren op het FixtureSelected event
+            // Abonneren op het FixtureSelected event
             fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
 
             CurrentView = new FixtureListView
->>>>>>> origin/sprint3/importfixtures
             {
                 DataContext = fixtureListViewModel
             };
@@ -144,7 +132,7 @@ public partial class SceneEditorViewModel : ObservableObject
         }
     }
 
-    // ⭐️ 3. IMPLEMENTATIE: Event handler om de geselecteerde fixture toe te voegen
+    // Event handler om de geselecteerde fixture toe te voegen
     private void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
         // Sluit de FixtureListView af
@@ -162,7 +150,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
             if (tempFixture != null)
             {
-                // ⭐️ NIEUW: Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
+                // Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
                 // Dictionary<string, byte?> en Dictionary<string, string> die Core.Models.Fixture verwacht.
 
                 var channelDictionary = new Dictionary<string, byte?>();
@@ -174,11 +162,9 @@ public partial class SceneEditorViewModel : ObservableObject
                     string channelKey = $"Ch{channelIndex}";
 
                     // Voeg toe aan de channels dictionary (met default DMX waarde 0)
-                    // We negeren de "value" uit de JSON, want de Core Fixture beheert de *huidige* DMX waarde (byte?).
                     channelDictionary.Add(channelKey, 0);
 
                     // Creëer de beschrijving (bijv. "Ch1: Dimmer - General intensity")
-                    // De 'Type' is een string in de JSON (bijv. "Klok").
                     string description = $"{channelKey}: {channel.Type} - {channel.Name}";
                     descriptionDictionary.Add(channelKey, description);
 
@@ -216,38 +202,6 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             Debug.WriteLine($"[ERROR] Error processing selected fixture: {ex.Message}");
             MessageBox.Show($"Fout bij het verwerken van fixture-data: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    /// <summary>
-    /// Refreshes the scene data from the repository.
-    /// </summary>
-    private async Task RefreshSceneFromRepository()
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(Scene.Id))
-            {
-                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Scene has no ID, cannot refresh from repository");
-                return;
-            }
-
-            // Reload the scene from repository to get the updated version
-            var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
-
-            if (updatedScene != null)
-            {
-                LoadScene(updatedScene);
-                Debug.WriteLine($"[DEBUG] SceneEditorViewModel: Refreshed scene '{updatedScene.Name}' with {updatedScene.Fixtures?.Count ?? 0} fixtures from repository");
-            }
-            else
-            {
-                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Could not reload scene '{Scene.Id}' from repository");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[ERROR] SceneEditorViewModel: Error refreshing scene from repository: {ex.Message}");
         }
     }
 
@@ -291,7 +245,6 @@ public partial class SceneEditorViewModel : ObservableObject
 
         return maxChannel + 1;
     }
-<<<<<<< HEAD
 
     /// <summary>
     /// Removes a fixture from the scene.
@@ -302,6 +255,14 @@ public partial class SceneEditorViewModel : ObservableObject
         if (fixtureToRemove == null)
         {
             Debug.WriteLine("[WARNING] RemoveFixtureCommand called without parameter.");
+            return;
+        }
+
+        // Check if Scene.Id is valid
+        if (string.IsNullOrEmpty(Scene.Id))
+        {
+            Debug.WriteLine("[ERROR] Scene has no ID, cannot remove fixture.");
+            MessageBox.Show("Scene heeft geen geldig ID. Sla eerst de scene op.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -348,6 +309,4 @@ public partial class SceneEditorViewModel : ObservableObject
             MessageBox.Show($"Fout bij verwijderen van fixture: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
-=======
->>>>>>> origin/sprint3/importfixtures
 }
