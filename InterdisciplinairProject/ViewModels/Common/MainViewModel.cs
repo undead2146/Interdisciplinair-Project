@@ -13,9 +13,18 @@ namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
 /// Main ViewModel for the InterdisciplinairProject application.
+/// <remarks>
+/// This ViewModel manages the state and commands for the main window, serving as the entry point for MVVM pattern.
+/// It inherits from <see cref="ObservableObject" /> to enable property change notifications.
+/// Properties and commands here can bind to UI elements in <see cref="MainWindow" />.
+/// Future extensions will include navigation to feature ViewModels (e.g., FixtureViewModel from Features).
+/// </remarks>
+/// <seealso cref="ObservableObject" />
+/// <seealso cref="MainWindow" />
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
+    private readonly ShowbuilderViewModel _showbuilderViewModel;
     private readonly ISceneRepository _sceneRepository = null!;
     private readonly IFixtureRepository _fixtureRepository = null!;
     private readonly IHardwareConnection _hardwareConnection = null!;
@@ -31,8 +40,6 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private UserControl? currentView;
-
-    
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -56,7 +63,7 @@ public partial class MainViewModel : ObservableObject
             var fixturesPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "InterdisciplinairProject",
-                "fixtures.json");
+                "Fixtures");
             Debug.WriteLine($"[DEBUG] Fixtures path: {fixturesPath}");
             _fixtureRepository = new FixtureRepository(fixturesPath);
             Debug.WriteLine("[DEBUG] FixtureRepository initialized");
@@ -78,16 +85,28 @@ public partial class MainViewModel : ObservableObject
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+
         // Initialize ViewModel, e.g., load services from DI if injected
-        OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
-        
+        _showbuilderViewModel = new ShowbuilderViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
+
+        // Show welcome view by default
+        CurrentView = new WelcomeView { DataContext = this };
+        Debug.WriteLine("[DEBUG] WelcomeView set as default view");
     }
 
     /// <summary>
     /// Gets the command to open the fixture settings view.
     /// </summary>
     public RelayCommand OpenFixtureSettingsCommand { get; private set; } = null!;
+
+    /// <summary>
+    /// Saves and closes the show.
+    /// </summary>
+    public void SaveCloseForShow()
+    {
+        _showbuilderViewModel.SaveCommand.Execute(CurrentView);
+    }
 
     /// <summary>
     /// Opens the fixture settings view window.
@@ -100,8 +119,11 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenFixtureBuilder() => CurrentView = new MainWindowFixtures();
-
+    private void OpenFixtureBuilder()
+    {
+        CurrentView = new MainWindowFixtures();
+        Title = "InterdisciplinairProject - Fixture Builder";
+    }
 
     /// <summary>
     /// Opens the show builder view.
@@ -109,7 +131,8 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenShowBuilder()
     {
-        CurrentView = new ShowbuilderView();
+        CurrentView = new ShowbuilderView(_showbuilderViewModel);
+        Title = "InterdisciplinairProject - Showbuilder";
     }
 
     /// <summary>
@@ -135,6 +158,7 @@ public partial class MainViewModel : ObservableObject
             // Toon de SceneBuilderView in het MainWindow
             // SceneBuilderViewModel handelt zijn eigen interne navigatie af naar SceneEditorView
             CurrentView = sceneBuilderView;
+            Title = "InterdisciplinairProject - Scene Builder";
         }
         catch (Exception ex)
         {

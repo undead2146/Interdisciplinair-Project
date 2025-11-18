@@ -1,7 +1,8 @@
-using System.IO;
+using InterdisciplinairProject.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
-namespace InterdisciplinairProject;
+namespace InterdiscplinairProject;
 
 /// <summary>
 /// Interaction logic for <see cref="App.xaml"/>.
@@ -18,50 +19,32 @@ namespace InterdisciplinairProject;
 /// </summary>
 public partial class App : Application
 {
-    /// <summary>
-    /// Called when the application starts.
-    /// </summary>
-    /// <param name="e">The startup event arguments.</param>
+    public static IServiceProvider Services { get; private set; }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        // Initialiseer data directories
-        string appDataDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InterdisciplinairProject");
+        var services = new ServiceCollection();
 
-        if (!Directory.Exists(appDataDir))
-        {
-            Directory.CreateDirectory(appDataDir);
-        }
+        // 🔹 Hier registreer je al je services en viewmodels
+        ConfigureServices(services);
 
-        // Kopieer fixtures.json als deze nog niet bestaat
-        string fixturesDestPath = Path.Combine(appDataDir, "fixtures.json");
-        if (!File.Exists(fixturesDestPath))
-        {
-            // Probeer het uit verschillende locaties te kopiëren
-            string[] possibleSourcePaths = new[]
-            {
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "fixtures.json"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "InterdisciplinairProject.Features", "Scene", "data", "fixtures.json"),
-                Path.Combine(Directory.GetCurrentDirectory(), "InterdisciplinairProject.Features", "Scene", "data", "fixtures.json"),
-            };
+        Services = services.BuildServiceProvider();
 
-            foreach (var sourcePath in possibleSourcePaths)
-            {
-                if (File.Exists(sourcePath))
-                {
-                    File.Copy(sourcePath, fixturesDestPath);
-                    break;
-                }
-            }
+        // Start de hoofdwindow via DI
+        var mainWindow = Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+    }
 
-            // Als geen bestand gevonden, maak een leeg fixtures bestand aan
-            if (!File.Exists(fixturesDestPath))
-            {
-                File.WriteAllText(fixturesDestPath, "{\"fixtures\":[]}");
-            }
-        }
+    private void ConfigureServices(ServiceCollection services)
+    {
+        // 🧠 ViewModels
+        services.AddSingleton<MainViewModel>();     // singleton ViewModel
+        services.AddSingleton<ShowbuilderViewModel>();     // singleton ViewModel
+
+
+        // 🪟 Views
+        services.AddTransient<MainWindow>();
     }
 }

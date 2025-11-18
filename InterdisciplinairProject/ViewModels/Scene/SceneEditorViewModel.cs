@@ -132,7 +132,9 @@ public partial class SceneEditorViewModel : ObservableObject
         }
     }
 
-    // Event handler om de geselecteerde fixture toe te voegen
+    /// <summary>
+    /// Event handler om de geselecteerde fixture toe te voegen
+    /// </summary>
     private void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
         // Sluit de FixtureListView af
@@ -202,6 +204,38 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             Debug.WriteLine($"[ERROR] Error processing selected fixture: {ex.Message}");
             MessageBox.Show($"Fout bij het verwerken van fixture-data: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the scene data from the repository.
+    /// </summary>
+    private async Task RefreshSceneFromRepository()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Scene.Id))
+            {
+                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Scene has no ID, cannot refresh from repository");
+                return;
+            }
+
+            // Reload the scene from repository to get the updated version
+            var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
+
+            if (updatedScene != null)
+            {
+                LoadScene(updatedScene);
+                Debug.WriteLine($"[DEBUG] SceneEditorViewModel: Refreshed scene '{updatedScene.Name}' with {updatedScene.Fixtures?.Count ?? 0} fixtures from repository");
+            }
+            else
+            {
+                Debug.WriteLine($"[WARNING] SceneEditorViewModel: Could not reload scene '{Scene.Id}' from repository");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] SceneEditorViewModel: Error refreshing scene from repository: {ex.Message}");
         }
     }
 
