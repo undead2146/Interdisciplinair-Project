@@ -26,15 +26,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
     {
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
+
         public Array SearchModes => Enum.GetValues(typeof(SearchMode));
 
-
         public event EventHandler<string>? FixtureSelected;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<ManufacturerGroup> ManufacturerGroups { get; set; } = new();
 
-        private string _searchText = "";
+        private string _searchText = string.Empty;
+
         public string SearchText
         {
             get => _searchText;
@@ -50,6 +52,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         private SearchMode _selectedSearchMode = SearchMode.Fixture;
+
         public SearchMode SelectedSearchMode
         {
             get => _selectedSearchMode;
@@ -65,6 +68,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         private Fixture? _selectedFixture;
+
         public Fixture? SelectedFixture
         {
             get => _selectedFixture;

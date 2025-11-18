@@ -20,7 +20,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureCreateViewModel : ObservableObject
     {
-        private readonly string _dataDir;
+        private readonly string _dataDir = Path.Combine(
+                                           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                           "InterdisciplinairProject",
+                                           "Fixtures");
         private readonly bool _isEditing;
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
@@ -65,6 +68,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand AddTypeBtn { get; }
 
         private Fixture _currentFixture = new Fixture();
+
         public Fixture CurrentFixture
         {
             get => _currentFixture;
@@ -94,10 +98,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-            _dataDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Fixtures");
+
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
@@ -167,6 +168,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     LoadManufacturers();
                     SelectedManufacturer = newManufacturerName;
+                    SaveManufacturersToJson();
 
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -174,6 +176,29 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+
+        private void SaveManufacturersToJson() 
+        {
+            try
+            {
+                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
+
+                Directory.CreateDirectory(_dataDir);
+
+                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                });
+
+                File.WriteAllText(jsonPath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to save manufacturers JSON:\n{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

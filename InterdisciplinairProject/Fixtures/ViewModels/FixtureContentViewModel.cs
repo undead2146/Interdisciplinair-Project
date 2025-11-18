@@ -20,7 +20,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private string? _comPort;
 
         public event EventHandler? DeleteRequested;
+
         public event EventHandler? BackRequested;
+
         public event EventHandler<FixtureContentViewModel>? EditRequested;
 
         public string? Name { get => _name; set => SetProperty(ref _name, value); }
@@ -34,8 +36,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ObservableCollection<Channel> Channels { get; set; } = new();
 
         public ICommand BackCommand { get; }
+
         public ICommand EditCommand { get; }
+
         public ICommand DeleteCommand { get; }
+
         public ICommand TestAllCommand { get; }
 
         public FixtureContentViewModel(string json)
