@@ -165,13 +165,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string newManufacturerName = registerWindow.ManufacturerName;
                 if (_manufacturerService.RegisterManufacturer(newManufacturerName))
                 {
-                    string manufacturerDir = Path.Combine(_dataDir, SanitizeFileName(newManufacturerName));
-                    if (!Directory.Exists(manufacturerDir))
-                        Directory.CreateDirectory(manufacturerDir);
-
                     LoadManufacturers();
                     SelectedManufacturer = newManufacturerName;
-                    SaveManufacturersToJson();
 
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -179,29 +174,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            }
-        }
-
-        private void SaveManufacturersToJson() 
-        {
-            try
-            {
-                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
-
-                Directory.CreateDirectory(_dataDir);
-
-                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                });
-
-                File.WriteAllText(jsonPath, json);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to save manufacturers JSON:\n{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
