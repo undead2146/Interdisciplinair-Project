@@ -4,7 +4,7 @@ using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.Services;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Fixture;
+using InterdisciplinairProject.Core.Models;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;

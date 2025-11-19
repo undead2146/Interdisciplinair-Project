@@ -1,29 +1,19 @@
-﻿using System.Windows.Controls;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace InterdisciplinairProject.Views;
 
 /// <summary>
-/// Interaction logic for SceneView.xaml
+/// Interaction logic for SceneSettingsWindow.xaml.
 /// </summary>
-public partial class SceneView : UserControl
+public partial class SceneSettingsWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for SceneSettingsWindow.xaml
-    /// </summary>
-    public partial class SceneSettingsWindow : Window
+    public SceneSettingsWindow()
     {
-        public SceneSettingsWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        private void Close_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }

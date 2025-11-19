@@ -231,7 +231,7 @@ public partial class SceneEditorViewModel : ObservableObject
                     // Zorg ervoor dat Id uniek is voor de instance.
                     InstanceId = Guid.NewGuid().ToString(),
                     // De Id van de Fixture Type is hetzelfde als de Name in dit geval (aanname)
-                    Id = tempFixture.Name
+                    FixtureId = tempFixture.Name
                 };
 
                 // Voeg de nieuwe fixture toe aan de scene

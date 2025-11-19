@@ -1,4 +1,4 @@
-﻿using Show.Model;
+﻿using InterdisciplinairProject.Core.Models;
 using System.Text.Json;
 
 namespace Show

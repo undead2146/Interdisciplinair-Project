@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
+using InterdisciplinairProject.Core.Models;
 using Show;
-using Show.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,13 +19,13 @@ namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
-        private Shows _show = new Shows();
+        private InterdisciplinairProject.Core.Models.Show _show = new InterdisciplinairProject.Core.Models.Show();
         private string? _currentShowPath;
 
-        public ObservableCollection<Scene> Scenes { get; } = new();
+        public ObservableCollection<ShowScene> Scenes { get; } = new();
 
         [ObservableProperty]
-        private Scene? selectedScene;
+        private ShowScene? selectedScene;
 
         [ObservableProperty]
         private string? currentShowId;
@@ -37,7 +37,7 @@ namespace InterdisciplinairProject.ViewModels
         private string? message;
 
         // new: per-scene fade cancellation tokens
-        private readonly Dictionary<Scene, CancellationTokenSource> _fadeCts = new();
+        private readonly Dictionary<ShowScene, CancellationTokenSource> _fadeCts = new();
 
         // ============================================================
         // CREATE SHOW
@@ -56,10 +56,10 @@ namespace InterdisciplinairProject.ViewModels
                 CurrentShowName = vm.ShowName;
                 Scenes.Clear();
 
-                _show = new Shows
+                _show = new InterdisciplinairProject.Core.Models.Show
                 {
                     Name = vm.ShowName,
-                    Scenes = new List<Scene>()
+                    Scenes = new List<ShowScene>()
                 };
 
                 _currentShowPath = null;
@@ -91,8 +91,22 @@ namespace InterdisciplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         // ensure imported scene slider starts at 0
-                        scene.Dimmer = 0;
-                        Scenes.Add(scene);
+                        var showScene = new ShowScene
+                        {
+                            Id = scene.Id,
+                            Name = scene.Name,
+                            Dimmer = 0,
+                            FadeInMs = scene.FadeInMs,
+                            FadeOutMs = scene.FadeOutMs,
+                            Fixtures = scene.Fixtures?.Select(f => new ShowFixture
+                            {
+                                Id = f.Id,
+                                InstanceId = f.Id, // Use fixture ID as instance ID for now
+                                Name = f.Name,
+                                Dimmer = 0
+                            }).ToList()
+                        };
+                        Scenes.Add(showScene);
                         Message = $"Scene '{scene.Name}' imported successfully!";
                     }
                     else
@@ -112,7 +126,7 @@ namespace InterdisciplinairProject.ViewModels
         // SCENE SELECTION
         // ============================================================
         [RelayCommand]
-        private void SceneSelectionChanged(Scene selectedScene)
+        private void SceneSelectionChanged(ShowScene selectedScene)
         {
             SelectedScene = selectedScene;
         }
@@ -204,7 +218,7 @@ namespace InterdisciplinairProject.ViewModels
                         return;
                     }
 
-                    var loadedShow = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
+                    var loadedShow = JsonSerializer.Deserialize<InterdisciplinairProject.Core.Models.Show>(showElement.GetRawText());
                     if (loadedShow == null)
                     {
                         Message = "Kon show niet deserialiseren. Bestand mogelijk corrupt.";
@@ -272,7 +286,7 @@ namespace InterdisciplinairProject.ViewModels
         // DELETE SCENE
         // ============================================================
         [RelayCommand]
-        private void DeleteScene(Scene? scene)
+        private void DeleteScene(ShowScene? scene)
         {
             if (scene == null)
                 return;
@@ -298,7 +312,7 @@ namespace InterdisciplinairProject.ViewModels
             Message = $"Scene '{scene.Name}' verwijderd.";
         }
 
-        public void UpdateSceneDimmer(Scene scene, int dimmer)
+        public void UpdateSceneDimmer(ShowScene scene, int dimmer)
         {
             if (scene == null)
                 return;
@@ -374,7 +388,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Cancels any running fade for the provided scene
-        private void CancelFadeForScene(Scene scene)
+        private void CancelFadeForScene(ShowScene scene)
         {
             if (scene == null) return;
 
@@ -391,7 +405,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Fade a single scene to target over durationMs, updating fixtures and Scenes on the UI thread.
-        private async Task FadeSceneAsync(Scene scene, int target, int durationMs, CancellationToken token)
+        private async Task FadeSceneAsync(ShowScene scene, int target, int durationMs, CancellationToken token)
         {
             if (scene == null) return;
 
@@ -446,7 +460,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Helper to update fixture dimmer channels for a scene on the caller thread (call from UI dispatcher)
-        private void UpdateFixturesForScene(Scene scene, int dimmer)
+        private void UpdateFixturesForScene(ShowScene scene, int dimmer)
         {
             if (scene?.Fixtures == null) return;
             byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
@@ -464,7 +478,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Public method used by SceneControlViewModel.PlayAsync to activate scene with fade orchestration.
-        public async Task FadeToAndActivateAsync(Scene targetScene, int targetDimmer)
+        public async Task FadeToAndActivateAsync(ShowScene targetScene, int targetDimmer)
         {
             if (targetScene == null) return;
 

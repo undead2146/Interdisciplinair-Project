@@ -1,5 +1,5 @@
 using InterdisciplinairProject.ViewModels;
-using Show.Model;
+using InterdisciplinairProject.Core.Models;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Controls;
@@ -28,10 +28,10 @@ namespace InterdisciplinairProject.Views
                 return;
             }
 
-            // If the DataContext provided by the ItemsControl is a Scene model,
+            // If the DataContext provided by the ItemsControl is a ShowScene model,
             // replace it with a SceneControlViewModel that wraps the model and
             // has a reference to the parent ShowbuilderViewModel.
-            if (DataContext is Scene sceneModel)
+            if (DataContext is ShowScene sceneModel)
             {
                 var parentShowVm = FindParentShowbuilderViewModel();
                 this.DataContext = new SceneControlViewModel(sceneModel, parentShowVm);

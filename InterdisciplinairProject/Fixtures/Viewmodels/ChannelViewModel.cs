@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Fixture;
+using InterdisciplinairProject.Core.Models;
 using System.Linq;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
@@ -31,7 +31,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public string? Parameter
         {
             get => _model.Value;
-            set => SetProperty(_model.Value, value, _model, (m, v) => m.Value = v);
+            set
+            {
+                if (_model.Value != value)
+                {
+                    _model.Value = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         // --- TYPE SELECTIE & WAARDE EIGENSCHAPPEN ---
@@ -58,7 +65,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             selectedType = ChannelTypeHelper.GetChannelTypeFromName(_model.Type);
 
             // Initialisatie van Level op basis van modelwaarde
-            if (int.TryParse(_model.Value, out int currentLevel))
+            if (int.TryParse(_model.Value ?? "0", out int currentLevel))
             {
                 Level = currentLevel;
             }
