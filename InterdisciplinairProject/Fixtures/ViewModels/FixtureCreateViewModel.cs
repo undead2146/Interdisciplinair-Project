@@ -15,6 +15,9 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -47,9 +50,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        public event EventHandler? BackRequested;
+        private Fixture _currentFixture = new Fixture();
 
         public event EventHandler? FixtureSaved;
+
+        public event EventHandler? BackRequested;
 
         public ObservableCollection<ChannelItem> Channels { get; } = new();
 
@@ -66,8 +71,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand AddImageCommand { get; }
 
         public ICommand AddTypeBtn { get; }
-
-        private Fixture _currentFixture = new Fixture();
 
         public Fixture CurrentFixture
         {

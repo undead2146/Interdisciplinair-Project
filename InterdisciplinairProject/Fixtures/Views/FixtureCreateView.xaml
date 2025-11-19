@@ -223,6 +223,8 @@
                                                 </Grid>
                                             </StackPanel>
                                         </StackPanel>
+
+                                        
                                     </StackPanel>
                                 </Border>
                                 <!-- NEW: Delete button shown only while editing -->
@@ -242,6 +244,8 @@
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                                
+
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">

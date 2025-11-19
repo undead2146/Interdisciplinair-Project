@@ -68,7 +68,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         private Fixture? _selectedFixture;
-
         public Fixture? SelectedFixture
         {
             get => _selectedFixture;
@@ -171,6 +170,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        // ------------------------------------------------------------
+        // OPEN
+        // ------------------------------------------------------------
         private void OpenFixture()
         {
             if (SelectedFixture == null) return;
@@ -217,7 +219,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _watcher.EnableRaisingEvents = true;
         }
 
+        // ------------------------------------------------------------
+        // INotifyPropertyChanged
+        // ------------------------------------------------------------
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
     }
 }

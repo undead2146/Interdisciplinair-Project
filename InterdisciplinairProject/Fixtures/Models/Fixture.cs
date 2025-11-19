@@ -19,6 +19,9 @@ namespace InterdisciplinairProject.Fixtures.Models
 
         public Fixture() { }
 
+        [JsonPropertyName("imagePath")]
+        public string ImagePath { get; set; } = string.Empty;
+
         public Fixture(string name)
         {
             Name = name;

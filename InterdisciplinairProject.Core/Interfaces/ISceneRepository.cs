@@ -33,4 +33,12 @@ public interface ISceneRepository
     /// <param name="id">The scene ID.</param>
     /// <returns>A task.</returns>
     Task DeleteSceneAsync(string id);
+
+    /// <summary>
+    /// Removes a fixture from a scene.
+    /// </summary>
+    /// <param name="sceneId">The scene ID.</param>
+    /// <param name="fixture">The fixture to remove.</param>
+    /// <returns>A task.</returns>
+    Task RemoveFixtureAsync(string sceneId, Fixture? fixture);
 }
