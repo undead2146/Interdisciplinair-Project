@@ -53,9 +53,4 @@
     "input": "slider",
     "divisions": 1
   },
-  {
-    "name": "TRET",
-    "input": "slider",
-    "divisions": 4
-  }
 ]
