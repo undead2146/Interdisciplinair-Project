@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Views;
+using Show;
+using System.Collections.ObjectModel;
+using System.Windows;
+
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -188,6 +187,91 @@ public partial class ScenebuilderViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Imports scenes from JSON files.
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportScenes()
+    {
+        try
+        {
+            // Open file dialog om JSON bestanden te selecteren
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Selecteer scene bestanden om te importeren",
+                Filter = "JSON bestanden (*.json)|*.json|Alle bestanden (*.*)|*.*",
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                int successCount = 0;
+                int failCount = 0;
+                var errorMessages = new System.Collections.Generic.List<string>();
+
+                foreach (var filePath in openFileDialog.FileNames)
+                {
+                    try
+                    {
+                        // Extract scene uit JSON bestand (Show.Model.Scene)
+                        var showModelScene = Show.SceneExtractor.ExtractScene(filePath);
+
+                        // MAP naar InterdisciplinairProject.Core.Models.Scene
+                        var importedScene = new InterdisciplinairProject.Core.Models.Scene
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            Name = showModelScene.Name,
+                            Dimmer = showModelScene.Dimmer,
+                            Fixtures = new System.Collections.Generic.List<InterdisciplinairProject.Core.Models.Fixture>()
+                        };
+
+                        // Sla de scene op via repository
+                        await _sceneRepository.SaveSceneAsync(importedScene);
+
+                        // Voeg toe aan de lijst
+                        Scenes.Add(importedScene);
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        failCount++;
+                        errorMessages.Add($"{System.IO.Path.GetFileName(filePath)}: {ex.Message}");
+                    }
+                }
+
+                // Toon resultaat
+                if (successCount > 0 && failCount == 0)
+                {
+                    MessageBox.Show(
+                        $"{successCount} scene(s) succesvol geïmporteerd!",
+                        "Import succesvol",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else if (successCount > 0 && failCount > 0)
+                {
+                    MessageBox.Show(
+                        $"{successCount} scene(s) geïmporteerd, {failCount} gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
+                        "Import gedeeltelijk succesvol",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                else if (failCount > 0)
+                {
+                    MessageBox.Show(
+                        $"Alle imports gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
+                        "Import gefaald",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij importeren van scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
     /// Refreshes a specific scene in the list after it has been updated.
     /// </summary>
     /// <param name="updatedScene">The updated scene.</param>
@@ -201,17 +285,14 @@ public partial class ScenebuilderViewModel : ObservableObject
                 if (existingScene != null)
                 {
                     var index = Scenes.IndexOf(existingScene);
-                    
                     // Remove and re-add to trigger ObservableCollection change notification
                     Scenes.RemoveAt(index);
                     Scenes.Insert(index, updatedScene);
-                    
                     // Update SelectedScene reference if it's the same scene
                     if (SelectedScene?.Id == updatedScene.Id)
                     {
                         SelectedScene = updatedScene;
                     }
-                    
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] Updated scene '{updatedScene.Name}' in list at index {index}");
                 }
             }
