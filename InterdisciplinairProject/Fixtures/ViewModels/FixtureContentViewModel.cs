@@ -1,82 +1,176 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows.Input;
-using System; // Toegevoegd voor EventHandler
+using System;
+using System.IO.Ports;
+using System.Windows;
+using System.Threading;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureContentViewModel : ObservableObject
     {
         private string? _name;
-        private string? _manufacturer; // NIEUW: Backing field voor de Fabrikant property
+        private string? _manufacturer;
         private string? _imagePath;
+        private string? _comPort;
+        private string? _selectedMethod = "DMX";
 
         public event EventHandler? DeleteRequested;
-
         public event EventHandler? BackRequested;
-
         public event EventHandler<FixtureContentViewModel>? EditRequested;
 
-        public string? Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
+        public string? Name { get => _name; set => SetProperty(ref _name, value); }
+        public string? Manufacturer { get => _manufacturer; set => SetProperty(ref _manufacturer, value); }
+        public string? ImagePath { get => _imagePath; set => SetProperty(ref _imagePath, value); }
+        public string? ImageBase64 { get; set; }
+        public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
 
-        // NIEUW: Publieke property voor Fabrikant (US 2, 3, 8)
-        public string? Manufacturer
-        {
-            get => _manufacturer;
-            set => SetProperty(ref _manufacturer, value);
-        }
+        public ObservableCollection<string> LampMethods { get; set; } = new() { "DMX", "ELO" };
+        public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
 
-        public string? ImagePath
-        {
-            get => _imagePath;
-            set => SetProperty(ref _imagePath, value);
-        }
-
+        public ObservableCollection<string> AvailablePorts { get; set; } = new();
         public ObservableCollection<Channel> Channels { get; set; } = new();
 
         public ICommand BackCommand { get; }
-
         public ICommand EditCommand { get; }
-
         public ICommand DeleteCommand { get; }
+        public ICommand TestAllCommand { get; }
 
         public FixtureContentViewModel(string json)
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
             DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
+            TestAllCommand = new RelayCommand(SendAllChannels);
 
             LoadFromJson(json);
+            RefreshAvailablePorts();
         }
 
         private void LoadFromJson(string json)
         {
-            if (string.IsNullOrWhiteSpace(json))
-                return;
+            if (string.IsNullOrWhiteSpace(json)) return;
 
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var parsed = JsonSerializer.Deserialize<Fixture>(json, options);
+            var parsed = JsonSerializer.Deserialize<Fixture>(json);
 
             if (parsed != null)
             {
-                Name = parsed.Name ?? string.Empty;
-
-                // NIEUW: Laad de fabrikant uit het geparsete model
-                Manufacturer = parsed.Manufacturer ?? "None";
+                Name = parsed.Name;
+                Manufacturer = parsed.Manufacturer;
+                ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                if (parsed.Channels != null)
+                foreach (var c in parsed.Channels)
                 {
-                    foreach (var c in parsed.Channels)
-                        Channels.Add(c);
+                    // FIX: capture local variable for correct TestCommand
+                    var channelCopy = c;
+                    channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
+                    Channels.Add(channelCopy);
                 }
+            }
+        }
+
+        private void RefreshAvailablePorts()
+        {
+            AvailablePorts.Clear();
+            foreach (var port in SerialPort.GetPortNames())
+            {
+                try
+                {
+                    using var sp = new SerialPort(port);
+                    sp.Open();
+                    sp.Close();
+                    AvailablePorts.Add(port);
+                }
+                catch { }
+            }
+        }
+
+        private bool ValidateChannel(Channel channel, out string error)
+        {
+            error = "";
+            if (channel.Parameter < 0 || channel.Parameter > 255)
+            {
+                error = channel.Name;
+                return false;
+            }
+            return true;
+        }
+
+        // ===========================
+        // SEND SINGLE CHANNEL
+        // ===========================
+        public void SendChannelValue(Channel channel)
+        {
+            if (ComPort == null)
+            {
+                MessageBox.Show("No COM port selected.");
+                return;
+            }
+
+            if (!ValidateChannel(channel, out string invalid))
+            {
+                MessageBox.Show($"Invalid value on channel '{invalid}'");
+                return;
+            }
+
+            int index = Channels.IndexOf(channel);
+            if (index < 0) return;
+
+            if (SelectedMethod == "DMX")
+            {
+                byte[] dmx = new byte[512];
+                dmx[index] = (byte)channel.Parameter;
+                DMXCommunication.SendDMXFrame(ComPort!, dmx);
+            }
+            else // ELO
+            {
+                // Only include the exact channel value
+                byte[] eloData = { (byte)channel.Parameter };
+                DMXCommunication.SendELOFrame(ComPort!, eloData);
+            }
+        }
+
+        // ===========================
+        // SEND ALL CHANNELS
+        // ===========================
+        private void SendAllChannels()
+        {
+            if (ComPort == null)
+            {
+                MessageBox.Show("No COM port selected.");
+                return;
+            }
+
+            foreach (var ch in Channels)
+            {
+                if (!ValidateChannel(ch, out string invalid))
+                {
+                    MessageBox.Show($"Invalid channel: {invalid}");
+                    return;
+                }
+            }
+
+            if (SelectedMethod == "DMX")
+            {
+                byte[] dmx = new byte[512];
+                for (int i = 0; i < Channels.Count && i < 512; i++)
+                    dmx[i] = (byte)Channels[i].Parameter;
+
+                DMXCommunication.SendDMXFrame(ComPort!, dmx);
+            }
+            else // ELO
+            {
+                byte[] eloData = new byte[Channels.Count];
+                for (int i = 0; i < Channels.Count; i++)
+                    eloData[i] = (byte)Channels[i].Parameter;
+
+                DMXCommunication.SendELOFrame(ComPort!, eloData);
             }
         }
     }
