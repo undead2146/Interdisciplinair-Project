@@ -26,11 +26,5 @@ namespace InterdisciplinairProject.Fixtures.Models
         {
             Name = name;
         }
-
-        // Optioneel: Een parameterloze constructor voor de JsonSerializer
-        public Fixture()
-        {
-            Name = string.Empty;
-        }
     }
 }

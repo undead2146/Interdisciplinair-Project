@@ -171,12 +171,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         // ------------------------------------------------------------
-        // INotifyPropertyChanged
-        // ------------------------------------------------------------
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        // ------------------------------------------------------------
         // OPEN
         // ------------------------------------------------------------
         private void OpenFixture()
@@ -225,7 +219,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _watcher.EnableRaisingEvents = true;
         }
 
+        // ------------------------------------------------------------
+        // INotifyPropertyChanged
+        // ------------------------------------------------------------
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
     }
 }

@@ -50,9 +50,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        private InterdisciplinairProject.Fixtures.Models.Fixture _currentFixture = new InterdisciplinairProject.Fixtures.Models.Fixture();
+        private Fixture _currentFixture = new Fixture();
 
         public event EventHandler? FixtureSaved;
+
+        public event EventHandler? BackRequested;
 
         public ObservableCollection<ChannelItem> Channels { get; } = new();
 
@@ -69,8 +71,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand AddImageCommand { get; }
 
         public ICommand AddTypeBtn { get; }
-
-        private Fixture _currentFixture = new Fixture();
 
         public Fixture CurrentFixture
         {
