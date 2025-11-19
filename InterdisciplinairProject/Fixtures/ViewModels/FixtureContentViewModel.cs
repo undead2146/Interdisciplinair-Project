@@ -1,12 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows.Input;
 using System;
 using System.IO.Ports;
-using System.Collections.Generic;
 using System.Windows;
 using System.Threading;
 
@@ -18,29 +18,27 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private string? _manufacturer;
         private string? _imagePath;
         private string? _comPort;
+        private string? _selectedMethod = "DMX";
 
         public event EventHandler? DeleteRequested;
-
         public event EventHandler? BackRequested;
-
         public event EventHandler<FixtureContentViewModel>? EditRequested;
 
         public string? Name { get => _name; set => SetProperty(ref _name, value); }
         public string? Manufacturer { get => _manufacturer; set => SetProperty(ref _manufacturer, value); }
         public string? ImagePath { get => _imagePath; set => SetProperty(ref _imagePath, value); }
         public string? ImageBase64 { get; set; }
-
         public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
+
+        public ObservableCollection<string> LampMethods { get; set; } = new() { "DMX", "ELO" };
+        public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
 
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
         public ObservableCollection<Channel> Channels { get; set; } = new();
 
         public ICommand BackCommand { get; }
-
         public ICommand EditCommand { get; }
-
         public ICommand DeleteCommand { get; }
-
         public ICommand TestAllCommand { get; }
 
         public FixtureContentViewModel(string json)
@@ -69,8 +67,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 Channels.Clear();
                 foreach (var c in parsed.Channels)
                 {
-                    c.TestCommand = new RelayCommand(() => SendChannelValue(c));
-                    Channels.Add(c);
+                    // FIX: capture local variable for correct TestCommand
+                    var channelCopy = c;
+                    channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
+                    Channels.Add(channelCopy);
                 }
             }
         }
@@ -103,7 +103,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
 
         // ===========================
-        //    SEND SINGLE CHANNEL
+        // SEND SINGLE CHANNEL
         // ===========================
         public void SendChannelValue(Channel channel)
         {
@@ -119,15 +119,25 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
-            byte[] dmx = new byte[512];
             int index = Channels.IndexOf(channel);
-            if (index >= 0) dmx[index] = (byte)channel.Parameter;
+            if (index < 0) return;
 
-            SendDMXFrame(dmx);
+            if (SelectedMethod == "DMX")
+            {
+                byte[] dmx = new byte[512];
+                dmx[index] = (byte)channel.Parameter;
+                DMXCommunication.SendDMXFrame(ComPort!, dmx);
+            }
+            else // ELO
+            {
+                // Only include the exact channel value
+                byte[] eloData = { (byte)channel.Parameter };
+                DMXCommunication.SendELOFrame(ComPort!, eloData);
+            }
         }
 
         // ===========================
-        //    SEND ALL CHANNELS
+        // SEND ALL CHANNELS
         // ===========================
         private void SendAllChannels()
         {
@@ -146,45 +156,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
 
-            byte[] dmx = new byte[512];
-            for (int i = 0; i < Channels.Count && i < 512; i++)
-                dmx[i] = (byte)Channels[i].Parameter;
-
-            SendDMXFrame(dmx, true);
-        }
-
-        // ===========================
-        //       TRUE DMX SIGNAL
-        // ===========================
-        private void SendDMXFrame(byte[] data, bool showMessage = false)
-        {
-            try
+            if (SelectedMethod == "DMX")
             {
-                using var sp = new SerialPort(ComPort!, 250000, Parity.None, 8, StopBits.Two);
-                sp.Open();
+                byte[] dmx = new byte[512];
+                for (int i = 0; i < Channels.Count && i < 512; i++)
+                    dmx[i] = (byte)Channels[i].Parameter;
 
-                // BREAK (min 88 µs)
-                sp.BreakState = true;
-                Thread.Sleep(1);
-                sp.BreakState = false;
-
-                // MAB (min 8 µs)
-                SpinWait.SpinUntil(() => false, TimeSpan.FromTicks(10));
-
-                // STARTCODE
-                sp.Write(new byte[] { 0x00 }, 0, 1);
-
-                // DATA (512 bytes)
-                sp.Write(data, 0, data.Length);
-
-                sp.Close();
-
-                if (showMessage)
-                    MessageBox.Show("DMX Frame sent (512 channels).");
+                DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            catch (Exception ex)
+            else // ELO
             {
-                MessageBox.Show("DMX ERROR: " + ex.Message);
+                byte[] eloData = new byte[Channels.Count];
+                for (int i = 0; i < Channels.Count; i++)
+                    eloData[i] = (byte)Channels[i].Parameter;
+
+                DMXCommunication.SendELOFrame(ComPort!, eloData);
             }
         }
     }
