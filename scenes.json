@@ -13,6 +13,30 @@
           "red": 255,
           "green": 75,
           "blue": 158
+        },
+        "channelEffects": {
+          "dimmer": [
+            {
+              "effectType": "FadeIn",
+              "time": 2000,
+              "min": 0,
+              "max": 255
+            }
+          ],
+          "red": [
+            {
+              "effectType": "FadeIn",
+              "time": 1500,
+              "min": 0,
+              "max": 255
+            },
+            {
+              "effectType": "FadeOut",
+              "time": 1500,
+              "min": 0,
+              "max": 255
+            }
+          ]
         }
       }
     ]
