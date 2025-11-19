@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.Models;
 
@@ -33,4 +34,20 @@ public class Channel
     /// </summary>
     [JsonPropertyName("value")]
     public string? Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets the test command for the channel.
+    /// </summary>
+    [JsonIgnore]
+    public ICommand? TestCommand { get; set; }
+
+    /// <summary>
+    /// Gets or sets the numeric parameter value.
+    /// </summary>
+    [JsonIgnore]
+    public int Parameter
+    {
+        get => int.TryParse(Value, out int val) ? val : 0;
+        set => Value = value.ToString();
+    }
 }

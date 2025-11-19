@@ -43,6 +43,8 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private UserControl? currentView;
 
+    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
     /// </summary>
