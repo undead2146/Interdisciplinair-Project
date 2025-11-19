@@ -1,51 +1,2130 @@
 {
-  "fixtures": [
-    {
-      "fixtureId": "led-spot-a",
-      "name": "Spotlight A",
-      "channels": {
-        "intensity": null,
-        "color_temperature": null,
-        "strobe": null
-      }
-    },
-    {
-      "fixtureId": "rgb-wash-b",
-      "name": "Wash Light C",
-      "channels": {
-        "red": null,
-        "green": null,
-        "blue": null,
-        "dimmer": null
-      }
-    },
-    {
-      "fixtureId": "moving-head-c",
-      "name": "Moving Head C",
-      "channels": {
-        "pan": null,
-        "tilt": null,
-        "gobo": null,
-        "color": null,
-        "intensity": null
-      }
-    },
-    {
-      "fixtureId": "laser-d",
-      "name": "Laser D",
-      "channels": {
-        "power": null,
-        "pattern": null,
-        "speed": null
-      }
-    },
-    {
-      "fixtureId": "strobe-e",
-      "name": "Strobe E",
-      "channels": {
-        "rate": null,
-        "brightness": null
-      }
-    }
-  ]
+    "fixtures": [
+        {
+            "fixtureId": "rgb-wash-b",
+            "name": "Wash Light B",
+            "manufacturer": "Chauvet",
+            "description": "RGB wash light with independent color mixing and dimmer",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red color intensity (0-255)",
+                "green": "Ch2: Green - Green color intensity (0-255)",
+                "blue": "Ch3: Blue - Blue color intensity (0-255)",
+                "dimmer": "Ch4: Dimmer - Master intensity control"
+            }
+        },
+        {
+            "fixtureId": "moving-head-c",
+            "name": "Moving Head C",
+            "manufacturer": "ADJ",
+            "description": "Professional moving head with pan/tilt, gobo, and color wheel. Advanced fixture requiring DMX knowledge.",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "gobo": null,
+                "color": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Horizontal movement (0-540\u00B0)",
+                "tilt": "Ch2: Tilt - Vertical movement (0-270\u00B0)",
+                "gobo": "Ch3: Gobo - Pattern selection (8 gobos \u002B open)",
+                "color": "Ch4: Color - Color wheel selection (7 colors \u002B white)",
+                "intensity": "Ch5: Intensity - Master dimmer control"
+            }
+        },
+        {
+            "fixtureId": "laser-d",
+            "name": "Laser D",
+            "manufacturer": "BeamZ",
+            "description": "Laser effect with pattern selection and speed control",
+            "channels": {
+                "power": null,
+                "pattern": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "power": "Ch1: Power - Laser output intensity",
+                "pattern": "Ch2: Pattern - Pattern/shape selection (20 patterns)",
+                "speed": "Ch3: Speed - Rotation/animation speed"
+            }
+        },
+        {
+            "fixtureId": "strobe-e",
+            "name": "Strobe E",
+            "manufacturer": "Martin",
+            "description": "High-power strobe light with variable rate and brightness",
+            "channels": {
+                "rate": null,
+                "brightness": null
+            },
+            "channelDescriptions": {
+                "rate": "Ch1: Rate - Flash frequency (0-20 Hz)",
+                "brightness": "Ch2: Brightness - Flash intensity"
+            }
+        },
+        {
+            "fixtureId": "par-led-1",
+            "name": "PAR LED 64 RGB",
+            "manufacturer": "Chauvet",
+            "description": "RGB LED PAR can with 64 LEDs for versatile lighting",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red intensity (0-255)",
+                "green": "Ch2: Green - Green intensity (0-255)",
+                "blue": "Ch3: Blue - Blue intensity (0-255)",
+                "dimmer": "Ch4: Dimmer - Master dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-head-2",
+            "name": "Mega Beam 3000",
+            "manufacturer": "ADJ",
+            "description": "High-powered moving head beam with advanced optics",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan movement (0-540°)",
+                "tilt": "Ch2: Tilt - Tilt movement (0-270°)",
+                "color": "Ch3: Color - Color wheel (8 colors + white)",
+                "gobo": "Ch4: Gobo - Gobo wheel (7 gobos + open)",
+                "intensity": "Ch5: Intensity - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe effect"
+            }
+        },
+        {
+            "fixtureId": "wash-light-3",
+            "name": "Colorado 1 Tour",
+            "manufacturer": "Clay Paky",
+            "description": "LED wash light with RGBW mixing and zoom",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "white": null,
+                "zoom": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red channel",
+                "green": "Ch2: Green - Green channel",
+                "blue": "Ch3: Blue - Blue channel",
+                "white": "Ch4: White - White channel",
+                "zoom": "Ch5: Zoom - Zoom control",
+                "dimmer": "Ch6: Dimmer - Intensity"
+            }
+        },
+        {
+            "fixtureId": "spot-light-4",
+            "name": "Profile 1500",
+            "manufacturer": "Robe",
+            "description": "LED profile spot with CMY color mixing and gobo wheel",
+            "channels": {
+                "cyan": null,
+                "magenta": null,
+                "yellow": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "cyan": "Ch1: Cyan - Cyan intensity",
+                "magenta": "Ch2: Magenta - Magenta intensity",
+                "yellow": "Ch3: Yellow - Yellow intensity",
+                "gobo": "Ch4: Gobo - Gobo selection",
+                "iris": "Ch5: Iris - Iris control",
+                "focus": "Ch6: Focus - Focus adjustment",
+                "dimmer": "Ch7: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "fog-machine-5",
+            "name": "Fog Fury 1000",
+            "manufacturer": "Chauvet",
+            "description": "High-output fog machine for atmospheric effects",
+            "channels": {
+                "fog": null,
+                "timer": null
+            },
+            "channelDescriptions": {
+                "fog": "Ch1: Fog - Fog output",
+                "timer": "Ch2: Timer - Timer control"
+            }
+        },
+        {
+            "fixtureId": "led-bar-6",
+            "name": "LED Bar 12",
+            "manufacturer": "BeamZ",
+            "description": "RGB LED bar with 12 segments",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red intensity",
+                "green": "Ch2: Green - Green intensity",
+                "blue": "Ch3: Blue - Blue intensity",
+                "strobe": "Ch4: Strobe - Strobe effect"
+            }
+        },
+        {
+            "fixtureId": "scanner-7",
+            "name": "Scanner 250",
+            "manufacturer": "ADJ",
+            "description": "Classic mirror scanner with color wheel",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan movement",
+                "tilt": "Ch2: Tilt - Tilt movement",
+                "color": "Ch3: Color - Color selection",
+                "intensity": "Ch4: Intensity - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "blinder-8",
+            "name": "Blinder 4x",
+            "manufacturer": "Martin",
+            "description": "LED blinder array with 4 heads",
+            "channels": {
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Brightness",
+                "strobe": "Ch2: Strobe - Strobe rate"
+            }
+        },
+        {
+            "fixtureId": "follow-spot-9",
+            "name": "Follow Spot 1200",
+            "manufacturer": "Robe",
+            "description": "Manual follow spot with zoom and iris",
+            "channels": {
+                "zoom": null,
+                "iris": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "zoom": "Ch1: Zoom - Zoom control",
+                "iris": "Ch2: Iris - Iris adjustment",
+                "dimmer": "Ch3: Dimmer - Intensity"
+            }
+        },
+        {
+            "fixtureId": "hazer-10",
+            "name": "Haze 1",
+            "manufacturer": "Chauvet",
+            "description": "Compact hazer for subtle atmospheric effects",
+            "channels": {
+                "haze": null,
+                "fan": null
+            },
+            "channelDescriptions": {
+                "haze": "Ch1: Haze - Haze output",
+                "fan": "Ch2: Fan - Fan speed"
+            }
+        },
+        {
+            "fixtureId": "led-matrix-11",
+            "name": "Matrix 4x4",
+            "manufacturer": "BeamZ",
+            "description": "RGB LED matrix panel with 16 pixels",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red intensity",
+                "green": "Ch2: Green - Green intensity",
+                "blue": "Ch3: Blue - Blue intensity",
+                "dimmer": "Ch4: Dimmer - Master dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-mirror-12",
+            "name": "Mirror Ball Motor",
+            "manufacturer": "ADJ",
+            "description": "Motorized mirror ball with speed control",
+            "channels": {
+                "speed": null
+            },
+            "channelDescriptions": {
+                "speed": "Ch1: Speed - Rotation speed"
+            }
+        },
+        {
+            "fixtureId": "uv-light-13",
+            "name": "UV Cannon",
+            "manufacturer": "Martin",
+            "description": "High-power UV blacklight for fluorescent effects",
+            "channels": {
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - UV output"
+            }
+        },
+        {
+            "fixtureId": "derby-14",
+            "name": "Derby X",
+            "manufacturer": "Chauvet",
+            "description": "RGB derby effect with rotating gobos",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red intensity",
+                "green": "Ch2: Green - Green intensity",
+                "blue": "Ch3: Blue - Blue intensity",
+                "speed": "Ch4: Speed - Rotation speed"
+            }
+        },
+        {
+            "fixtureId": "pin-spot-15",
+            "name": "Pin Spot 250",
+            "manufacturer": "Robe",
+            "description": "Compact LED pin spot for accent lighting",
+            "channels": {
+                "intensity": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Brightness",
+                "color": "Ch2: Color - Color temperature"
+            }
+        },
+        {
+            "fixtureId": "bubble-machine-16",
+            "name": "Bubble King",
+            "manufacturer": "BeamZ",
+            "description": "Bubble machine for party effects",
+            "channels": {
+                "bubbles": null
+            },
+            "channelDescriptions": {
+                "bubbles": "Ch1: Bubbles - Bubble output"
+            }
+        },
+        {
+            "fixtureId": "led-par-17",
+            "name": "PAR 64 LED",
+            "manufacturer": "ADJ",
+            "description": "LED PAR can with RGBA mixing",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "amber": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red intensity",
+                "green": "Ch2: Green - Green intensity",
+                "blue": "Ch3: Blue - Blue intensity",
+                "amber": "Ch4: Amber - Amber intensity",
+                "dimmer": "Ch5: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-head-18",
+            "name": "Sharpy",
+            "manufacturer": "Clay Paky",
+            "description": "Compact moving head beam with 189W discharge lamp",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null,
+                "focus": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan movement",
+                "tilt": "Ch2: Tilt - Tilt movement",
+                "color": "Ch3: Color - Color wheel",
+                "gobo": "Ch4: Gobo - Gobo wheel",
+                "intensity": "Ch5: Intensity - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe",
+                "focus": "Ch7: Focus - Focus"
+            }
+        },
+        {
+            "fixtureId": "wash-light-19",
+            "name": "Wash 600",
+            "manufacturer": "Martin",
+            "description": "LED wash light with zoom and CMY mixing",
+            "channels": {
+                "cyan": null,
+                "magenta": null,
+                "yellow": null,
+                "zoom": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "cyan": "Ch1: Cyan - Cyan",
+                "magenta": "Ch2: Magenta - Magenta",
+                "yellow": "Ch3: Yellow - Yellow",
+                "zoom": "Ch4: Zoom - Zoom",
+                "dimmer": "Ch5: Dimmer - Intensity"
+            }
+        },
+        {
+            "fixtureId": "spot-light-20",
+            "name": "Spot 575",
+            "manufacturer": "Robe",
+            "description": "Profile spot with 575W lamp and gobo wheel",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "laser-21",
+            "name": "Laser 3000",
+            "manufacturer": "BeamZ",
+            "description": "RGB laser with multiple patterns",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "pattern": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red laser",
+                "green": "Ch2: Green - Green laser",
+                "blue": "Ch3: Blue - Blue laser",
+                "pattern": "Ch4: Pattern - Pattern select",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "strobe-22",
+            "name": "Atomic Strobe",
+            "manufacturer": "Chauvet",
+            "description": "High-intensity strobe with sound activation",
+            "channels": {
+                "rate": null,
+                "brightness": null,
+                "sound": null
+            },
+            "channelDescriptions": {
+                "rate": "Ch1: Rate - Flash rate",
+                "brightness": "Ch2: Brightness - Brightness",
+                "sound": "Ch3: Sound - Sound sensitivity"
+            }
+        },
+        {
+            "fixtureId": "led-strip-23",
+            "name": "LED Strip 5m",
+            "manufacturer": "ADJ",
+            "description": "RGB LED strip for linear lighting",
+            "channels": {
+
+                "green": null,
+                "blue": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue"
+            }
+        },
+        {
+            "fixtureId": "moving-head-24",
+            "name": "Beam 230",
+            "manufacturer": "Martin",
+            "description": "Moving head beam with 230W LED",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "wash-light-25",
+            "name": "Wash 300",
+            "manufacturer": "Clay Paky",
+            "description": "LED wash with RGB mixing",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "spot-light-26",
+            "name": "Spot 250",
+            "manufacturer": "Robe",
+            "description": "LED spot with zoom and iris",
+            "channels": {
+                "zoom": null,
+                "iris": null,
+                "dimmer": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "zoom": "Ch1: Zoom - Zoom",
+                "iris": "Ch2: Iris - Iris",
+                "dimmer": "Ch3: Dimmer - Dimmer",
+                "color": "Ch4: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "fog-machine-27",
+            "name": "Fog Machine Pro",
+            "manufacturer": "BeamZ",
+            "description": "Professional fog machine with remote control",
+            "channels": {
+                "fog": null,
+                "timer": null
+            },
+            "channelDescriptions": {
+                "fog": "Ch1: Fog - Fog",
+                "timer": "Ch2: Timer - Timer"
+            }
+        },
+        {
+            "fixtureId": "led-bar-28",
+            "name": "LED Bar 8",
+            "manufacturer": "Chauvet",
+            "description": "RGBW LED bar with 8 segments",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "white": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "white": "Ch4: White - White",
+                "strobe": "Ch5: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "scanner-29",
+            "name": "Scanner 500",
+            "manufacturer": "ADJ",
+            "description": "High-power scanner with gobo wheel",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "blinder-30",
+            "name": "Blinder 6x",
+            "manufacturer": "Martin",
+            "description": "LED blinder with 6 heads",
+            "channels": {
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "strobe": "Ch2: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "follow-spot-31",
+            "name": "Follow Spot 1000",
+            "manufacturer": "Robe",
+            "description": "LED follow spot with color mixing",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "zoom": null,
+                "iris": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "zoom": "Ch4: Zoom - Zoom",
+                "iris": "Ch5: Iris - Iris",
+                "dimmer": "Ch6: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "hazer-32",
+            "name": "Haze Pro",
+            "manufacturer": "Chauvet",
+            "description": "Professional hazer with DMX control",
+            "channels": {
+                "haze": null,
+                "fan": null
+            },
+            "channelDescriptions": {
+                "haze": "Ch1: Haze - Haze",
+                "fan": "Ch2: Fan - Fan"
+            }
+        },
+        {
+            "fixtureId": "led-matrix-33",
+            "name": "Matrix 8x8",
+            "manufacturer": "BeamZ",
+            "description": "Large RGB LED matrix",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-mirror-34",
+            "name": "Mirror Ball Pro",
+            "manufacturer": "ADJ",
+            "description": "Professional mirror ball motor",
+            "channels": {
+                "speed": null,
+                "direction": null
+            },
+            "channelDescriptions": {
+                "speed": "Ch1: Speed - Speed",
+                "direction": "Ch2: Direction - Direction"
+            }
+        },
+        {
+            "fixtureId": "uv-light-35",
+            "name": "UV Flood",
+            "manufacturer": "Martin",
+            "description": "UV flood light for blacklight effects",
+            "channels": {
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "derby-36",
+            "name": "Derby Pro",
+            "manufacturer": "Chauvet",
+            "description": "Advanced derby with multiple effects",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "speed": null,
+                "pattern": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "speed": "Ch4: Speed - Speed",
+                "pattern": "Ch5: Pattern - Pattern"
+            }
+        },
+        {
+            "fixtureId": "pin-spot-37",
+            "name": "Pin Spot 100",
+            "manufacturer": "Robe",
+            "description": "Mini LED pin spot",
+            "channels": {
+                "intensity": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "color": "Ch2: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "bubble-machine-38",
+            "name": "Bubble Pro",
+            "manufacturer": "BeamZ",
+            "description": "Professional bubble machine",
+            "channels": {
+                "bubbles": null,
+                "fan": null
+            },
+            "channelDescriptions": {
+                "bubbles": "Ch1: Bubbles - Bubbles",
+                "fan": "Ch2: Fan - Fan"
+            }
+        },
+        {
+            "fixtureId": "led-par-39",
+            "name": "PAR 56 LED",
+            "manufacturer": "ADJ",
+            "description": "LED PAR with RGB mixing",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-head-40",
+            "name": "Beam 700",
+            "manufacturer": "Clay Paky",
+            "description": "Moving head beam with 700W lamp",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "wash-light-41",
+            "name": "Wash 1000",
+            "manufacturer": "Martin",
+            "description": "High-power LED wash",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "white": null,
+                "zoom": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "white": "Ch4: White - White",
+                "zoom": "Ch5: Zoom - Zoom",
+                "dimmer": "Ch6: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "spot-light-42",
+            "name": "Spot 1200",
+            "manufacturer": "Robe",
+            "description": "Profile spot with 1200W lamp",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "laser-43",
+            "name": "Laser 5000",
+            "manufacturer": "BeamZ",
+            "description": "High-power RGB laser",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "pattern": null,
+                "speed": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "pattern": "Ch4: Pattern - Pattern",
+                "speed": "Ch5: Speed - Speed",
+                "intensity": "Ch6: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "strobe-44",
+            "name": "Strobe Pro",
+            "manufacturer": "Chauvet",
+            "description": "Professional strobe with DMX",
+            "channels": {
+                "rate": null,
+                "brightness": null
+            },
+            "channelDescriptions": {
+                "rate": "Ch1: Rate - Rate",
+                "brightness": "Ch2: Brightness - Brightness"
+            }
+        },
+        {
+            "fixtureId": "led-strip-45",
+            "name": "LED Strip 10m",
+            "manufacturer": "ADJ",
+            "description": "Long RGB LED strip",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "moving-head-46",
+            "name": "Beam 150",
+            "manufacturer": "Martin",
+            "description": "Compact moving head beam",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "wash-light-47",
+            "name": "Wash 400",
+            "manufacturer": "Clay Paky",
+            "description": "LED wash with zoom",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "zoom": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "zoom": "Ch4: Zoom - Zoom",
+                "dimmer": "Ch5: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "spot-light-48",
+            "name": "Spot 300",
+            "manufacturer": "Robe",
+            "description": "LED spot with gobo wheel",
+            "channels": {
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "gobo": "Ch1: Gobo - Gobo",
+                "iris": "Ch2: Iris - Iris",
+                "focus": "Ch3: Focus - Focus",
+                "dimmer": "Ch4: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "fog-machine-49",
+            "name": "Fog 2000",
+            "manufacturer": "BeamZ",
+            "description": "High-output fog machine",
+            "channels": {
+                "fog": null,
+                "timer": null,
+                "volume": null
+            },
+            "channelDescriptions": {
+                "fog": "Ch1: Fog - Fog",
+                "timer": "Ch2: Timer - Timer",
+                "volume": "Ch3: Volume - Volume"
+            }
+        },
+        {
+            "fixtureId": "led-bar-50",
+            "name": "LED Bar 16",
+            "manufacturer": "Chauvet",
+            "description": "RGB LED bar with 16 segments",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "scanner-51",
+            "name": "Scanner 300",
+            "manufacturer": "ADJ",
+            "description": "Mirror scanner with color",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "intensity": "Ch4: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "blinder-52",
+            "name": "Blinder 8x",
+            "manufacturer": "Martin",
+            "description": "LED blinder array",
+            "channels": {
+                "intensity": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "strobe": "Ch2: Strobe - Strobe",
+                "speed": "Ch3: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "follow-spot-53",
+            "name": "Follow Spot 800",
+            "manufacturer": "Robe",
+            "description": "LED follow spot",
+            "channels": {
+                "zoom": null,
+                "iris": null,
+                "dimmer": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "zoom": "Ch1: Zoom - Zoom",
+                "iris": "Ch2: Iris - Iris",
+                "dimmer": "Ch3: Dimmer - Dimmer",
+                "color": "Ch4: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "hazer-54",
+            "name": "Haze 2000",
+            "manufacturer": "Chauvet",
+            "description": "High-output hazer",
+            "channels": {
+                "haze": null,
+                "fan": null,
+                "timer": null
+            },
+            "channelDescriptions": {
+                "haze": "Ch1: Haze - Haze",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer"
+            }
+        },
+        {
+            "fixtureId": "led-matrix-55",
+            "name": "Matrix 16x16",
+            "manufacturer": "BeamZ",
+            "description": "Large LED matrix panel",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer",
+                "strobe": "Ch5: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "moving-mirror-56",
+            "name": "Mirror Ball Deluxe",
+            "manufacturer": "ADJ",
+            "description": "Deluxe mirror ball motor",
+            "channels": {
+                "speed": null,
+                "direction": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "speed": "Ch1: Speed - Speed",
+                "direction": "Ch2: Direction - Direction",
+                "intensity": "Ch3: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "uv-light-57",
+            "name": "UV Spot",
+            "manufacturer": "Martin",
+            "description": "UV spot light",
+            "channels": {
+                "intensity": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "zoom": "Ch2: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "derby-58",
+            "name": "Derby Max",
+            "manufacturer": "Chauvet",
+            "description": "Max derby effect",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "speed": null,
+                "pattern": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "speed": "Ch4: Speed - Speed",
+                "pattern": "Ch5: Pattern - Pattern",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "pin-spot-59",
+            "name": "Pin Spot 50",
+            "manufacturer": "Robe",
+            "description": "Mini pin spot",
+            "channels": {
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "bubble-machine-60",
+            "name": "Bubble Deluxe",
+            "manufacturer": "BeamZ",
+            "description": "Deluxe bubble machine",
+            "channels": {
+                "bubbles": null,
+                "fan": null,
+                "timer": null
+            },
+            "channelDescriptions": {
+                "bubbles": "Ch1: Bubbles - Bubbles",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer"
+            }
+        },
+        {
+            "fixtureId": "led-par-61",
+            "name": "PAR 38 LED",
+            "manufacturer": "ADJ",
+            "description": "LED PAR with RGBA",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "amber": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "amber": "Ch4: Amber - Amber",
+                "dimmer": "Ch5: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "moving-head-62",
+            "name": "Beam 1000",
+            "manufacturer": "Clay Paky",
+            "description": "Moving head beam 1000W",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null,
+                "focus": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe",
+                "focus": "Ch7: Focus - Focus"
+            }
+        },
+        {
+            "fixtureId": "wash-light-63",
+            "name": "Wash 800",
+            "manufacturer": "Martin",
+            "description": "LED wash 800W",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "white": null,
+                "zoom": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "white": "Ch4: White - White",
+                "zoom": "Ch5: Zoom - Zoom",
+                "dimmer": "Ch6: Dimmer - Dimmer",
+                "strobe": "Ch7: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "spot-light-64",
+            "name": "Spot 800",
+            "manufacturer": "Robe",
+            "description": "Profile spot 800W",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer",
+                "strobe": "Ch8: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "laser-65",
+            "name": "Laser 10000",
+            "manufacturer": "BeamZ",
+            "description": "Ultra high-power laser",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "pattern": null,
+                "speed": null,
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "pattern": "Ch4: Pattern - Pattern",
+                "speed": "Ch5: Speed - Speed",
+                "intensity": "Ch6: Intensity - Intensity",
+                "strobe": "Ch7: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "strobe-66",
+            "name": "Strobe Max",
+            "manufacturer": "Chauvet",
+            "description": "Max strobe light",
+            "channels": {
+                "rate": null,
+                "brightness": null,
+                "sound": null
+            },
+            "channelDescriptions": {
+                "rate": "Ch1: Rate - Rate",
+                "brightness": "Ch2: Brightness - Brightness",
+                "sound": "Ch3: Sound - Sound"
+            }
+        },
+        {
+            "fixtureId": "led-strip-67",
+            "name": "LED Strip 20m",
+            "manufacturer": "ADJ",
+            "description": "Extra long LED strip",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "moving-head-68",
+            "name": "Beam 300",
+            "manufacturer": "Martin",
+            "description": "Moving head beam 300W",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "wash-light-69",
+            "name": "Wash 500",
+            "manufacturer": "Clay Paky",
+            "description": "LED wash 500W",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "zoom": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "zoom": "Ch4: Zoom - Zoom",
+                "dimmer": "Ch5: Dimmer - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "spot-light-70",
+            "name": "Spot 500",
+            "manufacturer": "Robe",
+            "description": "Profile spot 500W",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer"
+            }
+        },
+        {
+            "fixtureId": "fog-machine-71",
+            "name": "Fog 3000",
+            "manufacturer": "BeamZ",
+            "description": "Fog machine 3000",
+            "channels": {
+                "fog": null,
+                "timer": null,
+                "volume": null,
+                "fan": null
+            },
+            "channelDescriptions": {
+                "fog": "Ch1: Fog - Fog",
+                "timer": "Ch2: Timer - Timer",
+                "volume": "Ch3: Volume - Volume",
+                "fan": "Ch4: Fan - Fan"
+            }
+        },
+        {
+            "fixtureId": "led-bar-72",
+            "name": "LED Bar 24",
+            "manufacturer": "Chauvet",
+            "description": "LED bar 24 segments",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null,
+                "speed": null,
+                "pattern": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe",
+                "speed": "Ch5: Speed - Speed",
+                "pattern": "Ch6: Pattern - Pattern"
+            }
+        },
+        {
+            "fixtureId": "scanner-73",
+            "name": "Scanner 400",
+            "manufacturer": "ADJ",
+            "description": "Scanner 400",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "intensity": null,
+                "gobo": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "intensity": "Ch4: Intensity - Intensity",
+                "gobo": "Ch5: Gobo - Gobo"
+            }
+        },
+        {
+            "fixtureId": "blinder-74",
+            "name": "Blinder 10x",
+            "manufacturer": "Martin",
+            "description": "Blinder 10x",
+            "channels": {
+                "intensity": null,
+                "strobe": null,
+                "speed": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "strobe": "Ch2: Strobe - Strobe",
+                "speed": "Ch3: Speed - Speed",
+                "color": "Ch4: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "follow-spot-75",
+            "name": "Follow Spot 1500",
+            "manufacturer": "Robe",
+            "description": "Follow spot 1500",
+            "channels": {
+                "zoom": null,
+                "iris": null,
+                "dimmer": null,
+                "color": null,
+                "focus": null
+            },
+            "channelDescriptions": {
+                "zoom": "Ch1: Zoom - Zoom",
+                "iris": "Ch2: Iris - Iris",
+                "dimmer": "Ch3: Dimmer - Dimmer",
+                "color": "Ch4: Color - Color",
+                "focus": "Ch5: Focus - Focus"
+            }
+        },
+        {
+            "fixtureId": "hazer-76",
+            "name": "Haze 3000",
+            "manufacturer": "Chauvet",
+            "description": "Hazer 3000",
+            "channels": {
+                "haze": null,
+                "fan": null,
+                "timer": null,
+                "volume": null
+            },
+            "channelDescriptions": {
+                "haze": "Ch1: Haze - Haze",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer",
+                "volume": "Ch4: Volume - Volume"
+            }
+        },
+        {
+            "fixtureId": "led-matrix-77",
+            "name": "Matrix 32x32",
+            "manufacturer": "BeamZ",
+            "description": "Large matrix 32x32",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer",
+                "strobe": "Ch5: Strobe - Strobe",
+                "speed": "Ch6: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "moving-mirror-78",
+            "name": "Mirror Ball Ultra",
+            "manufacturer": "ADJ",
+            "description": "Ultra mirror ball",
+            "channels": {
+                "speed": null,
+                "direction": null,
+                "intensity": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "speed": "Ch1: Speed - Speed",
+                "direction": "Ch2: Direction - Direction",
+                "intensity": "Ch3: Intensity - Intensity",
+                "strobe": "Ch4: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "uv-light-79",
+            "name": "UV Wash",
+            "manufacturer": "Martin",
+            "description": "UV wash light",
+            "channels": {
+                "intensity": null,
+                "zoom": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "zoom": "Ch2: Zoom - Zoom",
+                "strobe": "Ch3: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "derby-80",
+            "name": "Derby Ultra",
+            "manufacturer": "Chauvet",
+            "description": "Ultra derby",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "speed": null,
+                "pattern": null,
+                "strobe": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "speed": "Ch4: Speed - Speed",
+                "pattern": "Ch5: Pattern - Pattern",
+                "strobe": "Ch6: Strobe - Strobe",
+                "intensity": "Ch7: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "pin-spot-81",
+            "name": "Pin Spot 75",
+            "manufacturer": "Robe",
+            "description": "Pin spot 75",
+            "channels": {
+                "intensity": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "color": "Ch2: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "bubble-machine-82",
+            "name": "Bubble Ultra",
+            "manufacturer": "BeamZ",
+            "description": "Ultra bubble machine",
+            "channels": {
+                "bubbles": null,
+                "fan": null,
+                "timer": null,
+                "volume": null
+            },
+            "channelDescriptions": {
+                "bubbles": "Ch1: Bubbles - Bubbles",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer",
+                "volume": "Ch4: Volume - Volume"
+            }
+        },
+        {
+            "fixtureId": "led-par-83",
+            "name": "PAR 46 LED",
+            "manufacturer": "ADJ",
+            "description": "PAR 46 LED",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "amber": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "amber": "Ch4: Amber - Amber",
+                "dimmer": "Ch5: Dimmer - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "moving-head-84",
+            "name": "Beam 1200",
+            "manufacturer": "Clay Paky",
+            "description": "Beam 1200",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null,
+                "focus": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe",
+                "focus": "Ch7: Focus - Focus",
+                "zoom": "Ch8: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "wash-light-85",
+            "name": "Wash 1200",
+            "manufacturer": "Martin",
+            "description": "Wash 1200",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "white": null,
+                "zoom": null,
+                "dimmer": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "white": "Ch4: White - White",
+                "zoom": "Ch5: Zoom - Zoom",
+                "dimmer": "Ch6: Dimmer - Dimmer",
+                "strobe": "Ch7: Strobe - Strobe",
+                "speed": "Ch8: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "spot-light-86",
+            "name": "Spot 1000",
+            "manufacturer": "Robe",
+            "description": "Spot 1000",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null,
+                "strobe": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer",
+                "strobe": "Ch8: Strobe - Strobe",
+                "zoom": "Ch9: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "laser-87",
+            "name": "Laser 15000",
+            "manufacturer": "BeamZ",
+            "description": "Laser 15000",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "pattern": null,
+                "speed": null,
+                "intensity": null,
+                "strobe": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "pattern": "Ch4: Pattern - Pattern",
+                "speed": "Ch5: Speed - Speed",
+                "intensity": "Ch6: Intensity - Intensity",
+                "strobe": "Ch7: Strobe - Strobe",
+                "zoom": "Ch8: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "strobe-88",
+            "name": "Strobe Ultra",
+            "manufacturer": "Chauvet",
+            "description": "Strobe Ultra",
+            "channels": {
+                "rate": null,
+                "brightness": null,
+                "sound": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "rate": "Ch1: Rate - Rate",
+                "brightness": "Ch2: Brightness - Brightness",
+                "sound": "Ch3: Sound - Sound",
+                "speed": "Ch4: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "led-strip-89",
+            "name": "LED Strip 30m",
+            "manufacturer": "ADJ",
+            "description": "LED Strip 30m",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null,
+                "speed": null,
+                "pattern": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe",
+                "speed": "Ch5: Speed - Speed",
+                "pattern": "Ch6: Pattern - Pattern"
+            }
+        },
+        {
+            "fixtureId": "moving-head-90",
+            "name": "Beam 400",
+            "manufacturer": "Martin",
+            "description": "Beam 400",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null,
+                "focus": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe",
+                "focus": "Ch7: Focus - Focus"
+            }
+        },
+        {
+            "fixtureId": "wash-light-91",
+            "name": "Wash 600",
+            "manufacturer": "Clay Paky",
+            "description": "Wash 600",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "zoom": null,
+                "dimmer": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "zoom": "Ch4: Zoom - Zoom",
+                "dimmer": "Ch5: Dimmer - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe",
+                "speed": "Ch7: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "spot-light-92",
+            "name": "Spot 600",
+            "manufacturer": "Robe",
+            "description": "Spot 600",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "iris": null,
+                "focus": null,
+                "dimmer": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "iris": "Ch5: Iris - Iris",
+                "focus": "Ch6: Focus - Focus",
+                "dimmer": "Ch7: Dimmer - Dimmer",
+                "strobe": "Ch8: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "fog-machine-93",
+            "name": "Fog 4000",
+            "manufacturer": "BeamZ",
+            "description": "Fog 4000",
+            "channels": {
+                "fog": null,
+                "timer": null,
+                "volume": null,
+                "fan": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "fog": "Ch1: Fog - Fog",
+                "timer": "Ch2: Timer - Timer",
+                "volume": "Ch3: Volume - Volume",
+                "fan": "Ch4: Fan - Fan",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "led-bar-94",
+            "name": "LED Bar 32",
+            "manufacturer": "Chauvet",
+            "description": "LED Bar 32",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "strobe": null,
+                "speed": null,
+                "pattern": null,
+                "intensity": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "strobe": "Ch4: Strobe - Strobe",
+                "speed": "Ch5: Speed - Speed",
+                "pattern": "Ch6: Pattern - Pattern",
+                "intensity": "Ch7: Intensity - Intensity"
+            }
+        },
+        {
+            "fixtureId": "scanner-95",
+            "name": "Scanner 600",
+            "manufacturer": "ADJ",
+            "description": "Scanner 600",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "intensity": null,
+                "gobo": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "intensity": "Ch4: Intensity - Intensity",
+                "gobo": "Ch5: Gobo - Gobo",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "blinder-96",
+            "name": "Blinder 12x",
+            "manufacturer": "Martin",
+            "description": "Blinder 12x",
+            "channels": {
+                "intensity": null,
+                "strobe": null,
+                "speed": null,
+                "color": null,
+                "pattern": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "strobe": "Ch2: Strobe - Strobe",
+                "speed": "Ch3: Speed - Speed",
+                "color": "Ch4: Color - Color",
+                "pattern": "Ch5: Pattern - Pattern"
+            }
+        },
+        {
+            "fixtureId": "follow-spot-97",
+            "name": "Follow Spot 2000",
+            "manufacturer": "Robe",
+            "description": "Follow Spot 2000",
+            "channels": {
+                "zoom": null,
+                "iris": null,
+                "dimmer": null,
+                "color": null,
+                "focus": null,
+                "strobe": null
+            },
+            "channelDescriptions": {
+                "zoom": "Ch1: Zoom - Zoom",
+                "iris": "Ch2: Iris - Iris",
+                "dimmer": "Ch3: Dimmer - Dimmer",
+                "color": "Ch4: Color - Color",
+                "focus": "Ch5: Focus - Focus",
+                "strobe": "Ch6: Strobe - Strobe"
+            }
+        },
+        {
+            "fixtureId": "hazer-98",
+            "name": "Haze 4000",
+            "manufacturer": "Chauvet",
+            "description": "Haze 4000",
+            "channels": {
+                "haze": null,
+                "fan": null,
+                "timer": null,
+                "volume": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "haze": "Ch1: Haze - Haze",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer",
+                "volume": "Ch4: Volume - Volume",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "led-matrix-99",
+            "name": "Matrix 64x64",
+            "manufacturer": "BeamZ",
+            "description": "Matrix 64x64",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "dimmer": null,
+                "strobe": null,
+                "speed": null,
+                "pattern": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "dimmer": "Ch4: Dimmer - Dimmer",
+                "strobe": "Ch5: Strobe - Strobe",
+                "speed": "Ch6: Speed - Speed",
+                "pattern": "Ch7: Pattern - Pattern"
+            }
+        },
+        {
+            "fixtureId": "moving-mirror-100",
+            "name": "Mirror Ball Supreme",
+            "manufacturer": "ADJ",
+            "description": "Mirror Ball Supreme",
+            "channels": {
+                "speed": null,
+                "direction": null,
+                "intensity": null,
+                "strobe": null,
+                "color": null
+            },
+            "channelDescriptions": {
+                "speed": "Ch1: Speed - Speed",
+                "direction": "Ch2: Direction - Direction",
+                "intensity": "Ch3: Intensity - Intensity",
+                "strobe": "Ch4: Strobe - Strobe",
+                "color": "Ch5: Color - Color"
+            }
+        },
+        {
+            "fixtureId": "uv-light-101",
+            "name": "UV Beam",
+            "manufacturer": "Martin",
+            "description": "UV Beam",
+            "channels": {
+                "intensity": null,
+                "zoom": null,
+                "strobe": null,
+                "pan": null,
+                "tilt": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "zoom": "Ch2: Zoom - Zoom",
+                "strobe": "Ch3: Strobe - Strobe",
+                "pan": "Ch4: Pan - Pan",
+                "tilt": "Ch5: Tilt - Tilt"
+            }
+        },
+        {
+            "fixtureId": "derby-102",
+            "name": "Derby Supreme",
+            "manufacturer": "Chauvet",
+            "description": "Derby Supreme",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "speed": null,
+                "pattern": null,
+                "strobe": null,
+                "intensity": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "speed": "Ch4: Speed - Speed",
+                "pattern": "Ch5: Pattern - Pattern",
+                "strobe": "Ch6: Strobe - Strobe",
+                "intensity": "Ch7: Intensity - Intensity",
+                "zoom": "Ch8: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "pin-spot-103",
+            "name": "Pin Spot 150",
+            "manufacturer": "Robe",
+            "description": "Pin Spot 150",
+            "channels": {
+                "intensity": null,
+                "color": null,
+                "zoom": null
+            },
+            "channelDescriptions": {
+                "intensity": "Ch1: Intensity - Intensity",
+                "color": "Ch2: Color - Color",
+                "zoom": "Ch3: Zoom - Zoom"
+            }
+        },
+        {
+            "fixtureId": "bubble-machine-104",
+            "name": "Bubble Supreme",
+            "manufacturer": "BeamZ",
+            "description": "Bubble Supreme",
+            "channels": {
+                "bubbles": null,
+                "fan": null,
+                "timer": null,
+                "volume": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "bubbles": "Ch1: Bubbles - Bubbles",
+                "fan": "Ch2: Fan - Fan",
+                "timer": "Ch3: Timer - Timer",
+                "volume": "Ch4: Volume - Volume",
+                "speed": "Ch5: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "led-par-105",
+            "name": "PAR 64 RGBA",
+            "manufacturer": "ADJ",
+            "description": "PAR 64 RGBA",
+            "channels": {
+                "red": null,
+                "green": null,
+                "blue": null,
+                "amber": null,
+                "dimmer": null,
+                "strobe": null,
+                "speed": null
+            },
+            "channelDescriptions": {
+                "red": "Ch1: Red - Red",
+                "green": "Ch2: Green - Green",
+                "blue": "Ch3: Blue - Blue",
+                "amber": "Ch4: Amber - Amber",
+                "dimmer": "Ch5: Dimmer - Dimmer",
+                "strobe": "Ch6: Strobe - Strobe",
+                "speed": "Ch7: Speed - Speed"
+            }
+        },
+        {
+            "fixtureId": "moving-head-106",
+            "name": "Beam 1500",
+            "manufacturer": "Clay Paky",
+            "description": "Beam 1500",
+            "channels": {
+                "pan": null,
+                "tilt": null,
+                "color": null,
+                "gobo": null,
+                "intensity": null,
+                "strobe": null,
+                "focus": null,
+                "zoom": null,
+                "iris": null
+            },
+            "channelDescriptions": {
+                "pan": "Ch1: Pan - Pan",
+                "tilt": "Ch2: Tilt - Tilt",
+                "color": "Ch3: Color - Color",
+                "gobo": "Ch4: Gobo - Gobo",
+                "intensity": "Ch5: Intensity - Intensity",
+                "strobe": "Ch6: Strobe - Strobe",
+                "focus": "Ch7: Focus - Focus",
+                "zoom": "Ch8: Zoom - Zoom",
+                "iris": "Ch9: Iris - Iris"
+            }
+        }
+    ]
 }

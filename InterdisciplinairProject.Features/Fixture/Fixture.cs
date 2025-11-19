@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+using InterdisciplinairProject.Core.Models;
+using System.Text.Json.Serialization;
 
 namespace InterdisciplinairProject.Features.Fixture;
 
@@ -14,21 +18,66 @@ public class Fixture
     {
         FixtureId = string.Empty;
         Name = string.Empty;
+        Manufacturer = string.Empty;
+        Description = string.Empty;
         Channels = new Dictionary<string, byte?>();
+        ChannelDescriptions = new Dictionary<string, string>();
+        ChannelTypes = new Dictionary<string, ChannelType>();
+        ChannelEffects = new Dictionary<string, List<ChannelEffect>>();
     }
 
     /// <summary>
-    /// Gets or sets the unique identifier of the fixture.
+    /// Gets or sets the unique identifier of the fixture type.
     /// </summary>
+    [JsonPropertyName("fixtureId")]
     public string FixtureId { get; set; }
 
     /// <summary>
     /// Gets or sets the display name of the fixture.
     /// </summary>
+    [JsonPropertyName("name")]
     public string Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the manufacturer of the fixture.
+    /// </summary>
+    public string Manufacturer { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description of the fixture.
+    /// </summary>
+    public string Description { get; set; }
 
     /// <summary>
     /// Gets or sets the channels of the fixture with their current values.
     /// </summary>
+    [JsonPropertyName("channels")]
     public Dictionary<string, byte?> Channels { get; set; }
+
+    /// <summary>
+    /// Gets or sets the channel descriptions (e.g., "Ch1: Dimmer - General intensity").
+    /// </summary>
+    public Dictionary<string, string> ChannelDescriptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the channel types.
+    /// </summary>
+    public Dictionary<string, ChannelType> ChannelTypes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the channel effects (e.g., fade-in, fade-out per channel).
+    /// Key is the channel name (e.g., "Ch1"), value is a list of effects.
+    /// </summary>
+    [JsonPropertyName("channelEffects")]
+    public Dictionary<string, List<ChannelEffect>> ChannelEffects { get; set; }
+
+    /// <summary>
+    /// Gets the total number of channels in this fixture.
+    /// </summary>
+    public int ChannelCount => Channels?.Count ?? 0;
+
+    /// <summary>
+    /// Gets a value indicating whether this fixture is complex (more than 16 channels).
+    /// </summary>
+    public bool IsComplex => ChannelCount > 16;
 }

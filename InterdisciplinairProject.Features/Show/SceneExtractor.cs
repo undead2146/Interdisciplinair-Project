@@ -1,6 +1,4 @@
 ﻿using Show.Model;
-using System;
-using System.IO;
 using System.Text.Json;
 
 namespace Show

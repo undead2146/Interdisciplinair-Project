@@ -16,11 +16,12 @@ public class ChannelViewModel : INotifyPropertyChanged
     /// </summary>
     /// <param name="name">The name of the channel.</param>
     /// <param name="value">The initial value of the channel.</param>
-    public ChannelViewModel(string name, byte value)
+    /// <param name="type">The type of the channel, if known.</param>
+    public ChannelViewModel(string name, byte value, ChannelType? type = null)
     {
         Name = name;
         _value = value;
-        Type = ChannelTypeHelper.GetChannelTypeFromName(name);
+        Type = type ?? ChannelTypeHelper.GetChannelTypeFromName(name);
         Symbol = ChannelTypeHelper.GetSymbol(Type);
         ColorHex = ChannelTypeHelper.GetColorHex(Type);
         Debug.WriteLine($"[DEBUG] ChannelViewModel created: {Name} = {value}, Type: {Type}, Symbol: {Symbol}, Color: {ColorHex}");

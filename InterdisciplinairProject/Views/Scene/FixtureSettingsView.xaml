@@ -1,0 +1,292 @@
+﻿<UserControl x:Class="InterdisciplinairProject.Views.FixtureSettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:InterdisciplinairProject.Converters">
+    
+    <UserControl.Resources>
+        <converters:HexColorConverter x:Key="HexColorConverter"/>
+        <converters:PercentageHeightConverter x:Key="PercentageHeightConverter"/>
+        <converters:ValueToPercentageConverter x:Key="ValueToPercentageConverter"/>
+    </UserControl.Resources>
+    
+    <Grid Background="#FFF8F8F8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header Section -->
+        <Border Grid.Row="0" 
+                Background="#FF2D6CDF" 
+                Padding="15,12"
+                CornerRadius="4,4,0,0">
+            <TextBlock Text="{Binding FixtureName}" 
+                       FontSize="20" 
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Dynamic Sliders Section -->
+        <ScrollViewer Grid.Row="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled"
+                      Padding="15,20"
+                      x:Name="SliderContainer">
+            <ItemsControl ItemsSource="{Binding Channels}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" 
+                                   HorizontalAlignment="Left"
+                                   Height="{Binding ElementName=SliderContainer, Path=ActualHeight}"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid MinWidth="80" Margin="5,0" 
+                              Height="{Binding RelativeSource={RelativeSource AncestorType=WrapPanel}, Path=ActualHeight}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <StackPanel Grid.Row="0" Orientation="Vertical" 
+                                        HorizontalAlignment="Center">
+                                <!-- Channel Symbol -->
+                                <TextBlock Text="{Binding Symbol}" 
+                                           HorizontalAlignment="Center"
+                                           FontSize="32"
+                                           FontWeight="Bold"
+                                           FontFamily="Segoe UI Emoji"
+                                           Foreground="{Binding ColorHex, Converter={StaticResource HexColorConverter}}"
+                                           Margin="0,0,0,5"/>
+                                
+                                <!-- Channel Name -->
+                                <TextBlock Text="{Binding Name}" 
+                                           HorizontalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,10"/>
+                            </StackPanel>
+                            
+                            <!-- Slider - This will fill remaining vertical space -->
+                            <Border Grid.Row="1" 
+                                    Width="60" 
+                                    CornerRadius="4" 
+                                    Margin="0,0,0,50" 
+                                    Background="Transparent"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Center">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#000000" Opacity="0.1" BlurRadius="4" ShadowDepth="2" Direction="270"/>
+                                </Border.Effect>
+                                <Grid Margin="4">
+                                    <!-- Track container (white border) -->
+                                    <Border CornerRadius="2" BorderBrush="#E0E0E0" BorderThickness="2" Background="White" ClipToBounds="True">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000" Opacity="0.05" BlurRadius="2" ShadowDepth="1" Direction="90"/>
+                                        </Border.Effect>
+                                        <!-- Channel-colored fill -->
+                                        <Border x:Name="PART_Fill" VerticalAlignment="Bottom" CornerRadius="0">
+                                            <Border.Height>
+                                                <MultiBinding Converter="{StaticResource PercentageHeightConverter}">
+                                                    <Binding Path="Value"/> <!-- Bind to channel Value (0-255) -->
+                                                    <Binding RelativeSource="{RelativeSource AncestorType=Border}" Path="ActualHeight"/>
+                                                </MultiBinding>
+                                            </Border.Height>
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Color="{Binding ColorHex, Converter={StaticResource HexColorConverter}}" Offset="0"/>
+                                                    <GradientStop Color="{Binding ColorHex, Converter={StaticResource HexColorConverter}}" Offset="0.5"/>
+                                                    <GradientStop Color="{Binding ColorHex, Converter={StaticResource HexColorConverter}}" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Border>
+                                    
+                                    <!-- The actual Slider -->
+                                    <Slider Minimum="0" Maximum="255"
+                                            Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Orientation="Vertical"
+                                            HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                                            Margin="0" Background="Transparent">
+                                        <Slider.Style>
+                                            <Style TargetType="Slider">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Slider">
+                                                            <Grid>
+                                                                <!-- Invisible track -->
+                                                                <Border x:Name="TrackBackground" Width="8" CornerRadius="4" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"/>
+                                                                <Track x:Name="PART_Track">
+                                                                    <!-- Invisible decrease/increase buttons -->
+                                                                    <Track.DecreaseRepeatButton>
+                                                                        <RepeatButton Command="Slider.DecreaseLarge">
+                                                                            <RepeatButton.Style>
+                                                                                <Style TargetType="RepeatButton">
+                                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                                    <Setter Property="BorderThickness" Value="0"/>
+                                                                                    <Setter Property="Template">
+                                                                                        <Setter.Value>
+                                                                                            <ControlTemplate TargetType="RepeatButton">
+                                                                                                <Border Background="Transparent"/>
+                                                                                            </ControlTemplate>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </Style>
+                                                                            </RepeatButton.Style>
+                                                                        </RepeatButton>
+                                                                    </Track.DecreaseRepeatButton>
+                                                                    <Track.IncreaseRepeatButton>
+                                                                        <RepeatButton Command="Slider.IncreaseLarge">
+                                                                            <RepeatButton.Style>
+                                                                                <Style TargetType="RepeatButton">
+                                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                                    <Setter Property="BorderThickness" Value="0"/>
+                                                                                    <Setter Property="Template">
+                                                                                        <Setter.Value>
+                                                                                            <ControlTemplate TargetType="RepeatButton">
+                                                                                                <Border Background="Transparent"/>
+                                                                                            </ControlTemplate>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </Style>
+                                                                            </RepeatButton.Style>
+                                                                        </RepeatButton>
+                                                                    </Track.IncreaseRepeatButton>
+                                                                    <!-- Custom Thumb -->
+                                                                    <Track.Thumb>
+                                                                        <Thumb>
+                                                                            <Thumb.Template>
+                                                                                <ControlTemplate TargetType="Thumb">
+                                                                                    <Grid>
+                                                                                        <!-- Thumb background -->
+                                                                                        <Rectangle Width="52" Height="25" RadiusX="4" RadiusY="4" Stroke="White" StrokeThickness="2">
+                                                                                            <Rectangle.Fill>
+                                                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                                                                    <GradientStop Color="#42A5F5" Offset="0"/>
+                                                                                                    <GradientStop Color="#2196F3" Offset="0.5"/>
+                                                                                                    <GradientStop Color="#1976D2" Offset="1"/>
+                                                                                                </LinearGradientBrush>
+                                                                                            </Rectangle.Fill>
+                                                                                            <Rectangle.Effect>
+                                                                                                <DropShadowEffect Color="#1565C0" Opacity="0.6" BlurRadius="8" ShadowDepth="2"/>
+                                                                                            </Rectangle.Effect>
+                                                                                        </Rectangle>
+                                                                                        <!-- Value label (0-100%) -->
+                                                                                        <Border Background="#66000000" CornerRadius="3" Padding="2" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-22,0,0">
+                                                                                            <TextBlock Foreground="White" FontWeight="Bold" FontSize="11" TextAlignment="Center">
+                                                                                                <TextBlock.Text>
+                                                                                                    <Binding Path="Value" Converter="{StaticResource ValueToPercentageConverter}" StringFormat="{}{0:0}%"/>
+                                                                                                </TextBlock.Text>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                    </Grid>
+                                                                                </ControlTemplate>
+                                                                            </Thumb.Template>
+                                                                        </Thumb>
+                                                                    </Track.Thumb>
+                                                                </Track>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Slider.Style>
+                                    </Slider>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <!-- Footer Section with Buttons -->
+        <Border Grid.Row="2" 
+                Background="White" 
+                BorderBrush="#FFE0E0E0" 
+                BorderThickness="0,1,0,0"
+                Padding="15,12">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right">
+                <Button Content="Cancel" 
+                        Width="100" 
+                        Height="32" 
+                        Margin="0,0,10,0"
+                        Click="CancelButton_Click"
+                        Background="#FFF5F5F5"
+                        BorderBrush="#FFD0D0D0"
+                        BorderThickness="1"
+                        FontSize="13"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="4"
+                                                Padding="12,6">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FFE8E8E8"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#FFD8D8D8"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                
+                <Button Content="Save" 
+                        Width="100" 
+                        Height="32"
+                        Click="SaveButton_Click"
+                        Background="#FF2D6CDF"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="13"
+                        FontWeight="SemiBold"
+                        Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="4"
+                                                Padding="12,6">
+                                            <ContentPresenter HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF2458B3"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#FF1A4A8F"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

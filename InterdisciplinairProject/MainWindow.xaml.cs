@@ -36,7 +36,7 @@ public partial class MainWindow : Window
         Debug.WriteLine("[DEBUG] MainWindow constructor called");
         Console.WriteLine("[DEBUG] MainWindow constructor called");
         InitializeComponent();
-        Debug.WriteLine("[DEBUG] MainWindow InitializeComponent completed");
+        Debug.WriteLine("[DEBUG] µMainWindow InitializeComponent completed");
         Console.WriteLine("[DEBUG] MainWindow InitializeComponent completed");
 
         DataContext = new MainViewModel();

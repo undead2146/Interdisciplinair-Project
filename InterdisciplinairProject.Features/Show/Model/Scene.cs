@@ -7,6 +7,8 @@ namespace Show.Model
 {
     public class Scene : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         private int _dimmer;
         private int _fadeInMs;
         private int _fadeOutMs;
@@ -59,7 +61,5 @@ namespace Show.Model
         [JsonIgnore]
         public string DisplayText => $"{Name} (ID: {Id}) - Dimmer: {Dimmer}%";
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

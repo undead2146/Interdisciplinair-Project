@@ -31,6 +31,16 @@ public enum ChannelType
     Blue,
 
     /// <summary>
+    /// White color channel.
+    /// </summary>
+    White,
+
+    /// <summary>
+    /// Amber color channel.
+    /// </summary>
+    Amber,
+
+    /// <summary>
     /// Strobe/flash effect channel.
     /// </summary>
     Strobe,
@@ -44,4 +54,44 @@ public enum ChannelType
     /// Tilt (vertical movement) channel.
     /// </summary>
     Tilt,
+
+    /// <summary>
+    /// Color temperature channel.
+    /// </summary>
+    ColorTemperature,
+
+    /// <summary>
+    /// Gobo/pattern selection channel.
+    /// </summary>
+    Gobo,
+
+    /// <summary>
+    /// Color wheel channel.
+    /// </summary>
+    Color,
+
+    /// <summary>
+    /// Speed control channel.
+    /// </summary>
+    Speed,
+
+    /// <summary>
+    /// Pattern selection channel.
+    /// </summary>
+    Pattern,
+
+    /// <summary>
+    /// Power/intensity channel.
+    /// </summary>
+    Power,
+
+    /// <summary>
+    /// Rate control channel.
+    /// </summary>
+    Rate,
+
+    /// <summary>
+    /// Brightness channel.
+    /// </summary>
+    Brightness,
 }
