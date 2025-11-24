@@ -4,8 +4,25 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+             xmlns:vm="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <!-- ViewModel to View mappings -->
+        <DataTemplate DataType="{x:Type vm:FixtureListViewModel}">
+            <local:FixtureListView />
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type vm:FixtureCreateViewModel}">
+            <local:FixtureCreateView />
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type vm:FixtureContentViewModel}">
+            <local:FixtureContentView />
+        </DataTemplate>
+    </UserControl.Resources>
+
 
     <Grid>
         <!-- Toolbar -->
@@ -23,7 +40,7 @@
                         Command="{Binding ExportFixtureCommand}"
                         Margin="0,0,10,0"
                         Padding="10,5"
-                        IsEnabled="{Binding SelectedFixture, Converter={StaticResource ObjectToBoolConverter}}"/>
+                        IsEnabled="{Binding SelectedFixture, TargetNullValue=False}"/>
                 <Button Content="Delete Fixture"
                         Command="{Binding DeleteCommand}"
                         Margin="0,0,10,0"
