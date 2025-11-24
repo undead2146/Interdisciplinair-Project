@@ -16,11 +16,13 @@
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="12"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Prominent button -->
+            <!-- Nieuwe Scene button -->
             <Button x:Name="NewSceneButton"
                     Grid.Row="0"
                     Content="Nieuwe Scene"
@@ -33,11 +35,27 @@
                     Foreground="White"
                     BorderThickness="0"/>
 
-            <!-- Spacer -->
+            <!-- Kleine spacer -->
             <Border Grid.Row="1"/>
 
+            <!-- Import Scenes button -->
+            <Button x:Name="ImportScenesButton"
+                    Grid.Row="2"
+                    Content="Import Scenes"
+                    FontSize="16"
+                    Padding="12,8"
+                    HorizontalAlignment="Left"
+                    Width="180"
+                    Command="{Binding ImportScenesCommand}"
+                    Background="#FF4CAF50"
+                    Foreground="White"
+                    BorderThickness="0"/>
+
+            <!-- Spacer -->
+            <Border Grid.Row="3"/>
+
             <!-- Overview list (aligned with button) -->
-            <Border Grid.Row="2" 
+            <Border Grid.Row="4" 
                     Background="#FFF" 
                     CornerRadius="4" 
                     BorderBrush="#FFE0E0E0" 

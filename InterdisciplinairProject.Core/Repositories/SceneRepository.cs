@@ -78,6 +78,48 @@ public class SceneRepository : ISceneRepository
         }
     }
 
+    /// <summary>
+    /// Removes a fixture from a scene.
+    /// </summary>
+    /// <param name="sceneId">The scene ID.</param>
+    /// <param name="fixture">The fixture to remove.</param>
+    /// <returns>A task.</returns>
+    public async Task RemoveFixtureAsync(string sceneId, Fixture? fixture)
+    {
+        if (fixture == null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[WARNING] Fixture is null, cannot remove.");
+            return;
+        }
+
+        var scene = _scenes.FirstOrDefault(s => s.Id == sceneId);
+
+        if (scene == null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[WARNING] Scene with ID '{sceneId}' not found.");
+            return;
+        }
+
+        if (scene.Fixtures == null)
+        {
+            System.Diagnostics.Debug.WriteLine($"[WARNING] Scene '{scene.Name}' has no fixtures.");
+            return;
+        }
+
+        var fixtureToRemove = scene.Fixtures.FirstOrDefault(f => f.Id == fixture.Id);
+
+        if (fixtureToRemove != null)
+        {
+            scene.Fixtures.Remove(fixtureToRemove);
+            await SaveToFileAsync();
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Fixture '{fixture.Name}' removed from scene '{scene.Name}'.");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"[WARNING] Fixture '{fixture.Name}' not found in scene '{scene.Name}'.");
+        }
+    }
+
     private void LoadScenesSync()
     {
         try
@@ -99,7 +141,24 @@ public class SceneRepository : ISceneRepository
 
     private async Task SaveToFileAsync()
     {
-        var json = JsonSerializer.Serialize(_scenes, new JsonSerializerOptions { WriteIndented = true });
-        await File.WriteAllTextAsync(_scenesFilePath, json);
+        try
+        {
+            // Ensure the directory exists
+            var directory = Path.GetDirectoryName(_scenesFilePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] SceneRepository: Created directory: {directory}");
+            }
+
+            var json = JsonSerializer.Serialize(_scenes, new JsonSerializerOptions { WriteIndented = true });
+            await File.WriteAllTextAsync(_scenesFilePath, json);
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] SceneRepository: Saved {_scenes.Count} scenes to {_scenesFilePath}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ERROR] SceneRepository: Error saving scenes: {ex.Message}");
+            throw;
+        }
     }
 }

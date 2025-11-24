@@ -19,6 +19,8 @@ public class Fixture
         Description = string.Empty;
         Channels = new Dictionary<string, byte?>();
         ChannelDescriptions = new Dictionary<string, string>();
+        ChannelTypes = new Dictionary<string, ChannelType>();
+        ChannelEffects = new Dictionary<string, List<ChannelEffect>>();
     }
 
     /// <summary>
@@ -59,6 +61,18 @@ public class Fixture
     /// Gets or sets the channel descriptions (e.g., "Ch1: Dimmer - General intensity").
     /// </summary>
     public Dictionary<string, string> ChannelDescriptions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the channel types.
+    /// </summary>
+    public Dictionary<string, ChannelType> ChannelTypes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the channel effects (e.g., fade-in, fade-out per channel).
+    /// Key is the channel name (e.g., "Ch1"), value is a list of effects.
+    /// </summary>
+    [JsonPropertyName("channelEffects")]
+    public Dictionary<string, List<ChannelEffect>> ChannelEffects { get; set; }
 
     /// <summary>
     /// Gets the total number of channels in this fixture.
