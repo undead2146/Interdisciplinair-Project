@@ -1,5 +1,4 @@
-﻿using InterdisciplinairProject.Fixtures.ViewModels;
-using System.Windows;
+using InterdisciplinairProject.Fixtures.ViewModels;
 using System.Windows.Controls;
 
 namespace InterdisciplinairProject.Fixtures.Views
@@ -9,10 +8,10 @@ namespace InterdisciplinairProject.Fixtures.Views
     /// </summary>
     public partial class MainWindowFixtures : UserControl
     {
-        public MainWindowFixtures()
+        public MainWindowFixtures(MainWindowFixturesViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = new MainWindowFixturesViewModel();
+            DataContext = viewModel;
         }
     }
 }

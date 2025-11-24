@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
-/// Represents an effect that can be applied to a channel.
+/// Represents an effect that can be applied to a fixture channel.
 /// </summary>
 public class ChannelEffect
 {
@@ -12,17 +12,21 @@ public class ChannelEffect
     /// </summary>
     public ChannelEffect()
     {
-        EffectType = string.Empty;
+        EffectType = EffectType.FadeIn;
+        Time = 0;
+        Min = 0;
+        Max = 255;
+        Parameters = new Dictionary<string, object>();
     }
 
     /// <summary>
-    /// Gets or sets the type of effect (e.g., "FadeIn", "FadeOut", "Strobe", etc.).
+    /// Gets or sets the type of effect.
     /// </summary>
     [JsonPropertyName("effectType")]
-    public string EffectType { get; set; }
+    public EffectType EffectType { get; set; }
 
     /// <summary>
-    /// Gets or sets the duration of the effect in milliseconds.
+    /// Gets or sets the time in milliseconds for the effect.
     /// </summary>
     [JsonPropertyName("time")]
     public int Time { get; set; }
@@ -40,8 +44,39 @@ public class ChannelEffect
     public byte Max { get; set; }
 
     /// <summary>
-    /// Gets or sets additional parameters for extensibility.
+    /// Gets or sets additional parameters for the effect.
     /// </summary>
     [JsonPropertyName("parameters")]
-    public Dictionary<string, object>? Parameters { get; set; }
+    public Dictionary<string, object> Parameters { get; set; }
+}
+
+/// <summary>
+/// Enumeration of effect types.
+/// </summary>
+public enum EffectType
+{
+    /// <summary>
+    /// Fade in effect.
+    /// </summary>
+    FadeIn,
+
+    /// <summary>
+    /// Fade out effect.
+    /// </summary>
+    FadeOut,
+
+    /// <summary>
+    /// Strobe effect.
+    /// </summary>
+    Strobe,
+
+    /// <summary>
+    /// Pulse effect.
+    /// </summary>
+    Pulse,
+
+    /// <summary>
+    /// Custom effect.
+    /// </summary>
+    Custom
 }

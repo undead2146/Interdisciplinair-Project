@@ -1,50 +1,53 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
 
-namespace InterdisciplinairProject.Fixtures.Models
+namespace InterdisciplinairProject.Fixtures.Models;
+
+/// <summary>
+/// Represents a channel in a fixture for UI binding.
+/// </summary>
+public class Channel
 {
-    public class Channel : ObservableObject
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Channel"/> class.
+    /// </summary>
+    public Channel()
     {
-        private string _name = "";
-        public string Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
+        Name = string.Empty;
+        Type = string.Empty;
+    }
 
-        private string _type = "";
-        public string Type
-        {
-            get => _type;
-            set => SetProperty(ref _type, value);
-        }
+    /// <summary>
+    /// Gets or sets the name of the channel.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
 
-        private string? _value;
-        [JsonPropertyName("value")]
-        public string? Value
-        {
-            get => _value;
-            set
-            {
-                if (SetProperty(ref _value, value))
-                {
-                    if (int.TryParse(value, out int number))
-                        Parameter = number;
-                }
-            }
-        }
+    /// <summary>
+    /// Gets or sets the type of the channel.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; }
 
-        private int _parameter;
-        [JsonIgnore]
-        public int Parameter
-        {
-            get => _parameter;
-            set => SetProperty(ref _parameter, value);
-        }
+    /// <summary>
+    /// Gets or sets the value of the channel.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public string? Value { get; set; }
 
-        [JsonIgnore]
-        public ICommand? TestCommand { get; set; }
+    /// <summary>
+    /// Gets or sets the test command for the channel.
+    /// </summary>
+    [JsonIgnore]
+    public ICommand? TestCommand { get; set; }
+
+    /// <summary>
+    /// Gets or sets the numeric parameter value.
+    /// </summary>
+    [JsonIgnore]
+    public int Parameter
+    {
+        get => int.TryParse(Value, out int val) ? val : 0;
+        set => Value = value.ToString();
     }
 }

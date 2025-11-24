@@ -1,6 +1,6 @@
+using System.Windows;
 using InterdisciplinairProject.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 
 namespace InterdiscplinairProject;
 
@@ -42,7 +42,6 @@ public partial class App : Application
         // 🧠 ViewModels
         services.AddSingleton<MainViewModel>();     // singleton ViewModel
         services.AddSingleton<ShowbuilderViewModel>();     // singleton ViewModel
-
 
         // 🪟 Views
         services.AddTransient<MainWindow>();

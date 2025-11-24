@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
-/// Represents a lighting fixture with its properties and channels.
+/// Represents a fixture instance in a scene with its current channel values.
 /// </summary>
 public class Fixture
 {
@@ -12,7 +12,7 @@ public class Fixture
     /// </summary>
     public Fixture()
     {
-        Id = string.Empty;
+        FixtureId = string.Empty;
         InstanceId = string.Empty;
         Name = string.Empty;
         Manufacturer = string.Empty;
@@ -27,13 +27,18 @@ public class Fixture
     /// Gets or sets the unique identifier of the fixture type.
     /// </summary>
     [JsonPropertyName("fixtureId")]
-    public string Id { get; set; }
+    public string FixtureId { get; set; }
 
     /// <summary>
     /// Gets or sets the unique identifier of the fixture instance.
     /// </summary>
     [JsonPropertyName("instanceId")]
     public string InstanceId { get; set; }
+
+    /// <summary>
+    /// Gets the unique identifier of the fixture instance (alias for InstanceId).
+    /// </summary>
+    public string Id => InstanceId;
 
     /// <summary>
     /// Gets or sets the display name of the fixture.
@@ -83,4 +88,9 @@ public class Fixture
     /// Gets a value indicating whether this fixture is complex (more than 16 channels).
     /// </summary>
     public bool IsComplex => ChannelCount > 16;
+
+    /// <summary>
+    /// Gets or sets the dimmer channel value (0..255).
+    /// </summary>
+    public byte Dimmer { get; set; }
 }

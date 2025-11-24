@@ -15,9 +15,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
+
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {

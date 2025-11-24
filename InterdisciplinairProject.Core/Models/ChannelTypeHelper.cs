@@ -1,6 +1,6 @@
 using System;
 
-namespace InterdisciplinairProject.Features.Fixture;
+namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
 /// Helper class for working with channel types.

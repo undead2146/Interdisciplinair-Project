@@ -15,6 +15,12 @@ public class Scene
     [JsonPropertyName("dimmer")]
     public int Dimmer { get; set; }
 
+    [JsonPropertyName("fadeInMs")]
+    public int FadeInMs { get; set; }
+
+    [JsonPropertyName("fadeOutMs")]
+    public int FadeOutMs { get; set; }
+
     [JsonPropertyName("fixtures")]
     public List<Fixture>? Fixtures { get; set; }
 

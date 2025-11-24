@@ -4,17 +4,17 @@ using System.Collections.ObjectModel;
 using InterdisciplinairProject.Core.Models;
 using System.Text.Json.Serialization;
 
-namespace InterdisciplinairProject.Features.Fixture;
+namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
-/// Represents a lighting fixture with its properties and channels.
+/// Represents a lighting fixture definition with its properties and channels.
 /// </summary>
-public class Fixture
+public class FixtureDefinition
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="Fixture"/> class.
+    /// Initializes a new instance of the <see cref="FixtureDefinition"/> class.
     /// </summary>
-    public Fixture()
+    public FixtureDefinition()
     {
         FixtureId = string.Empty;
         Name = string.Empty;
@@ -31,6 +31,11 @@ public class Fixture
     /// </summary>
     [JsonPropertyName("fixtureId")]
     public string FixtureId { get; set; }
+
+    /// <summary>
+    /// Gets the unique identifier of the fixture type (alias for FixtureId).
+    /// </summary>
+    public string Id => FixtureId;
 
     /// <summary>
     /// Gets or sets the display name of the fixture.
