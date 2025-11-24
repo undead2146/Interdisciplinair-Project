@@ -1,0 +1,150 @@
+name: InterdisciplinairProject CI
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  push:
+    branches: [ main]
+  pull_request:
+    branches: [ main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  BUILD_CONFIGURATION: 'Release'
+  SOLUTION: 'InterdisciplinairProject.sln'
+  TEST_GLOB: 'InterdisciplinairProject.Tests/**/*.csproj'
+
+jobs:
+  detect-changes:
+    name: Detect File Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      any: ${{ steps.set_any.outputs.any }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Filter Changed Paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            any:
+              - '**/*.cs'
+              - '**/*.xaml'
+              - '**/*.csproj'
+              - '**/*.sln'
+              - '.github/workflows/**'
+
+      - name: Set job outputs
+        id: set_any
+        env:
+          ANY: ${{ steps.filter.outputs['any'] }}
+        run: |
+          echo "any=$ANY" >> $GITHUB_OUTPUT
+
+      - name: Summary header
+        run: |
+          echo "### 🔍 File Changes Summary" >> $GITHUB_STEP_SUMMARY
+
+      - name: Changes Summary - any true
+        if: ${{ steps.filter.outputs['any'] == 'true' }}
+        run: |
+          echo "- Any: ✅" >> $GITHUB_STEP_SUMMARY
+
+      - name: Changes Summary - any false
+        if: ${{ steps.filter.outputs['any'] != 'true' }}
+        run: |
+          echo "- Any: ❌" >> $GITHUB_STEP_SUMMARY
+
+  build-windows:
+    name: Build Windows
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.any == 'true' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build Solution
+        shell: pwsh
+        run: |
+          Write-Host "Building solution"
+          dotnet build $env:SOLUTION -c $env:BUILD_CONFIGURATION
+
+      - name: Publish Windows App (UI)
+        shell: pwsh
+        run: |
+          # Publish only the main WPF UI project to an artifact
+          if (Test-Path "InterdisciplinairProject/InterdisciplinairProject.csproj") {
+            Write-Host "Publishing WPF application"
+            dotnet publish "InterdisciplinairProject/InterdisciplinairProject.csproj" `
+              -c $env:BUILD_CONFIGURATION `
+              -r win-x64 `
+              --self-contained false `
+              -o "win-publish"
+          } else {
+            Write-Host "No WPF project found to publish."
+          }
+
+      - name: Run Tests
+        id: tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $testProjects = Get-ChildItem -Path "InterdisciplinairProject.Tests" -Recurse -Filter *.csproj | Where-Object { $_ }
+          if ($testProjects) {
+            foreach ($testProject in $testProjects) {
+              Write-Host "Testing $($testProject.FullName)"
+              dotnet test $testProject.FullName -c $env:BUILD_CONFIGURATION
+              if ($LASTEXITCODE -ne 0) {
+                throw "Test failed for $($testProject.FullName)"
+              }
+            }
+          } else {
+            Write-Host "No test projects found."
+          }
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: interdisciplinair-win
+          path: win-publish
+          if-no-files-found: error
+
+  summary:
+    name: Build Summary
+    needs: [build-windows]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate Summary
+        run: |
+          echo "### 🚀 InterdisciplinairProject Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Windows | ${{ needs.build-windows.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
