@@ -1,29 +1,43 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Models;
-using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Fixtures.Services;
-using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Fixtures.Views;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
+
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureCreateViewModel : ObservableObject
     {
-        private readonly string _dataDir;
+        private readonly string _dataDir = Path.Combine(
+                                           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                           "InterdisciplinairProject",
+                                           "Fixtures");
         private readonly bool _isEditing;
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
         private readonly ManufacturerService _manufacturerService;
+
+        [ObservableProperty]
+        private ChannelItem? selectedChannel;
+
+        //partial void OnSliderDivisionsChanged(int value) => OnPropertyChanged(nameof(TickFrequency));
+
+        /// <summary>
+        /// ----------------------------------------------------------------------------------------------------------------------------------
+        /// </summary>
 
         [ObservableProperty]
         private string fixtureName = "New Fixture";
@@ -34,26 +48,58 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        public event EventHandler? BackRequested;
+        private Fixture _currentFixture = new Fixture();
+
         public event EventHandler? FixtureSaved;
-        public ObservableCollection<ChannelViewModel> Channels { get; } = new();
+
+        public event EventHandler? BackRequested;
+
+        public ObservableCollection<ChannelItem> Channels { get; } = new();
 
         public ICommand AddChannelCommand { get; }
+
         public ICommand DeleteChannelCommand { get; }
+
         public ICommand SaveCommand { get; }
+
         public ICommand CancelCommand { get; }
+
         public ICommand RegisterManufacturerCommand { get; }
+
         public ICommand AddImageCommand { get; }
 
-        private InterdisciplinairProject.Fixtures.Models.Fixture _currentFixture = new InterdisciplinairProject.Fixtures.Models.Fixture();
+        public ICommand AddTypeBtn { get; }
+
+        public Fixture CurrentFixture
+        {
+            get => _currentFixture;
+            set
+            {
+                _currentFixture = value;
+                OnPropertyChanged(nameof(CurrentFixture));
+                OnPropertyChanged(nameof(ImageBase64));
+            }
+        }
+
+        private string _imageBase64 = string.Empty;
+
+        public string ImageBase64
+        {
+            get => _imageBase64;
+            set
+            {
+                if (_imageBase64 != value)
+                {
+                    _imageBase64 = value;
+                    OnPropertyChanged(); // als je INotifyPropertyChanged gebruikt
+                }
+            }
+        }
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-            _dataDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Fixtures");
+
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
@@ -62,11 +108,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
-            DeleteChannelCommand = new RelayCommand<ChannelViewModel>(DeleteChannel, CanDeleteChannel);
+            DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<InterdisciplinairProject.Fixtures.Models.Fixture>(AddImage);
+            AddImageCommand = new RelayCommand<Fixture>(AddImage);
 
             if (existing != null)
             {
@@ -78,10 +124,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 Channels.Clear();
                 foreach (var ch in existing.Channels)
-                    Channels.Add(new ChannelViewModel(ch));
+                    Channels.Add(new ChannelItem(ch));
 
                 _currentFixture.Name = FixtureName;
                 _currentFixture.Manufacturer = SelectedManufacturer!;
+
+                ImageBase64 = ImageCompressionHelpers.DecompressBase64(existing.ImageBase64 ?? string.Empty);
             }
             else
             {
@@ -121,6 +169,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     LoadManufacturers();
                     SelectedManufacturer = newManufacturerName;
+                    SaveManufacturersToJson();
 
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -131,9 +180,32 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        private void SaveManufacturersToJson() 
+        {
+            try
+            {
+                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
+
+                Directory.CreateDirectory(_dataDir);
+
+                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                });
+
+                File.WriteAllText(jsonPath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to save manufacturers JSON:\n{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void SaveFixture()
         {
-            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || ch.SelectedType == ChannelType.Unknown))
+            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
             {
                 MessageBox.Show("Please fill in the following (Name Fixture, Name channel, Channel type).", "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -161,18 +233,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 var channelObj = new JsonObject
                 {
                     ["Name"] = ch.Name,
-                    ["Type"] = ChannelTypeHelper.GetDisplayName(ch.SelectedType),
-                    ["value"] = ch.Parameter,
+                    ["Type"] = ch.SelectedType,
+                    ["value"] = ch.Level.ToString(),
                 };
                 channelsArray.Add(channelObj);
             }
 
+            // json root
             var root = new JsonObject
             {
                 ["name"] = FixtureName,
                 ["manufacturer"] = manufacturer,
                 ["channels"] = channelsArray,
-                ["imagePath"] = _currentFixture.ImagePath
+                ["imageBase64"] = !string.IsNullOrEmpty(ImageBase64) ? ImageCompressionHelpers.CompressBase64(ImageBase64) : _currentFixture.ImageBase64,
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -207,25 +280,25 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var newModel = new Channel
             {
-                Name = $"New Channel {Channels.Count + 1}",
-                Type = ChannelTypeHelper.GetDisplayName(ChannelType.Dimmer),
+                Name = "Lamp",
+                Type = "Lamp",
                 Value = "0"
             };
-            Channels.Add(new ChannelViewModel(newModel));
-            (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
+            Channels.Add(new ChannelItem(newModel));
+            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
         }
 
-        private bool CanDeleteChannel(ChannelViewModel? channel)
+        private bool CanDeleteChannel(ChannelItem? channel)
         {
             return channel != null && Channels.Count > 1;
         }
 
-        private void DeleteChannel(ChannelViewModel? channel)
+        private void DeleteChannel(ChannelItem? channel)
         {
             if (channel != null)
             {
                 Channels.Remove(channel);
-                (DeleteChannelCommand as RelayCommand<ChannelViewModel>)?.NotifyCanExecuteChanged();
+                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
             }
         }
 
@@ -236,6 +309,31 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        private void AddImage(Fixture fixture)
+        {
+            var dlg = new OpenFileDialog
+            {
+                Title = "Select an image",
+                Filter = "images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg",
+                Multiselect = false,
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                string selectedFile = dlg.FileName;
+
+                try
+                {
+                    byte[] imageBytes = File.ReadAllBytes(selectedFile);
+                    ImageBase64 = Convert.ToBase64String(imageBytes);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"unable to Load image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         private string SanitizeFileName(string name)
         {
             string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
@@ -243,49 +341,171 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             return Regex.Replace(name, invalidRegex, "_");
         }
 
-        private void AddImage(InterdisciplinairProject.Fixtures.Models.Fixture fixture)
+        public partial class ChannelItem : ObservableObject
         {
-            string imagesDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Images");
+            private readonly Channel _model;
 
-            if (!Directory.Exists(imagesDir))
-                Directory.CreateDirectory(imagesDir);
+            [ObservableProperty]
+            private bool isEditing;
 
-            var dlg = new OpenFileDialog
+            [ObservableProperty]
+            private bool isExpanded;
+
+            public ChannelItem(Channel model)
             {
-                Title = "Select an image",
-                Filter = "images (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg",
-                Multiselect = false,
-                InitialDirectory = imagesDir
-            };
+                _model = model;
 
-            if (dlg.ShowDialog() == true)
+                Name = _model.Name;
+                SelectedType = string.IsNullOrWhiteSpace(_model.Type) ? "Lamp" : _model.Type!;
+                if (int.TryParse(_model.Value, out var lvl)) Level = lvl;
+
+                TypeCatalogService.EnsureLoaded();
+                ApplyTypeSpec(SelectedType);
+
+                AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
+            }
+            private bool _isNameManuallyEdited = false;
+
+            private string _name = "Lamp";
+            public string Name
             {
-                string selectedFile = dlg.FileName;
-                string safeFileName = Path.GetFileName(selectedFile);
-                string destPath = Path.Combine(imagesDir, safeFileName);
-
-                try
+                get => _name;
+                set
                 {
-                    if (!File.Exists(destPath))
+                    if (SetProperty(ref _name, value))
                     {
-                        File.Copy(selectedFile, destPath);
-                        MessageBox.Show($"image copied to:\n{destPath}", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show($"path added to fixture.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                        _model.Name = value;
 
-                    _currentFixture.ImagePath = $"Images/{safeFileName}";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"unable to copy image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        // mark as manually edited if it's different from the type
+                        _isNameManuallyEdited = value != _selectedType;
+                    }
                 }
             }
+
+            private string _selectedType = "Lamp";
+            public string SelectedType
+            {
+                get => _selectedType;
+                set
+                {
+                    if (SetProperty(ref _selectedType, value))
+                    {
+                        _model.Type = value;
+                        ApplyTypeSpec(value);
+                        if (IsSliderType) Level = Level; // re-snap
+
+                        // update Name only if the user hasn't manually edited it
+                        if (!_isNameManuallyEdited)
+                            Name = value;
+                    }
+                }
+            }
+
+
+
+            // Slider level <-> model.Value
+            private int _level;
+            public int Level
+            {
+                get => _level;
+                set
+                {
+                    var snapped = Snap(value, Math.Max(1, SliderDivisions));
+                    if (SetProperty(ref _level, snapped))
+                        _model.Value = snapped.ToString();
+                }
+            }
+
+            public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
+
+            private bool _isSliderType;
+            public bool IsSliderType
+            {
+                get => _isSliderType;
+                set => SetProperty(ref _isSliderType, value);
+            }
+
+            private bool _isCustomType;
+            public bool IsCustomType
+            {
+                get => _isCustomType;
+                set => SetProperty(ref _isCustomType, value);
+            }
+
+            private int _sliderDivisions = 255;
+            public int SliderDivisions
+            {
+                get => _sliderDivisions;
+                set
+                {
+                    if (SetProperty(ref _sliderDivisions, value))
+                        OnPropertyChanged(nameof(TickFrequency));
+                }
+            }
+
+            public int TickFrequency => Math.Max(1, 255 / Math.Max(1, SliderDivisions));
+
+            // Custom panel fields
+            private string? _customTypeName;
+            public string? CustomTypeName
+            {
+                get => _customTypeName;
+                set => SetProperty(ref _customTypeName, value);
+            }
+
+            private int _customTypeSliderValue;
+            public int CustomTypeSliderValue
+            {
+                get => _customTypeSliderValue;
+                set => SetProperty(ref _customTypeSliderValue, value);
+            }
+
+            public IRelayCommand AddCustomTypeCommand { get; }
+
+            private void DoAddCustomType()
+            {
+                var name = (CustomTypeName ?? "").Trim();
+                var divisions = CustomTypeSliderValue;
+
+                if (string.IsNullOrWhiteSpace(name)) { MessageBox.Show("Type name is empty."); return; }
+                if (divisions <= 0 || divisions > 255) { MessageBox.Show("Step value must be between 1 and 255."); return; }
+                if (string.Equals(name, "Custom", StringComparison.OrdinalIgnoreCase)) { MessageBox.Show("Choose another name than 'Custom'."); return; }
+
+                var spec = new TypeSpecification { name = name, input = "slider", divisions = divisions };
+                if (!TypeCatalogService.AddOrUpdate(spec)) { MessageBox.Show("Failed to save the type."); return; }
+
+                OnPropertyChanged(nameof(AvailableTypes)); // refresh ComboBox
+                SelectedType = name;                       // becomes slider with divisions
+                IsCustomType = false;                      // hide custom panel
+            }
+
+            private void ApplyTypeSpec(string? typeName)
+            {
+                IsSliderType = false;
+                IsCustomType = false;
+
+                var spec = TypeCatalogService.GetByName(typeName);
+                if (spec == null) return;
+
+                if (spec.input.Equals("slider", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsSliderType = true;
+                    SliderDivisions = spec.divisions.GetValueOrDefault(255);
+                }
+                else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsCustomType = true;
+                }
+                // "text" -> panels remain collapsed by XAML triggers
+            }
+
+            private static int Snap(int value, int divisions)
+            {
+                var step = Math.Max(1, 255 / Math.Max(1, divisions));
+                var snapped = (int)Math.Round((double)value / step) * step;
+                return Math.Max(0, Math.Min(255, snapped));
+            }
         }
+
     }
 }

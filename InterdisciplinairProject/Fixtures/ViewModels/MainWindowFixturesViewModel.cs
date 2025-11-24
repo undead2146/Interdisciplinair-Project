@@ -236,11 +236,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // Use filename (without extension) as fixture name
                 string fixtureName = Path.GetFileNameWithoutExtension(jsonPath);
 
-                if (fixtureListVm.Fixtures.Any(f => f.Name.Equals(fixtureName, StringComparison.OrdinalIgnoreCase)))
+                if (fixtureListVm.ManufacturerGroups
+                    .SelectMany(g => g.Fixtures)
+                    .Any(f => f.Name.Equals(fixtureName, StringComparison.OrdinalIgnoreCase)))
                 {
                     System.Windows.MessageBox.Show($"Fixture '{fixtureName}' already exists.");
                     return;
                 }
+
 
                 // Save fixture into local fixtures folder
                 string manufactorFolder = Path.Combine(_fixturesFolder, manufacturer);
