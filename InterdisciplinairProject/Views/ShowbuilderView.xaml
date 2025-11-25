@@ -77,6 +77,400 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+
+            <!-- Timeline Area (Top Left White Space) -->
+            <Border Grid.Column="0" 
+                    Grid.Row="0" 
+                    Margin="10" 
+                    BorderBrush="#B0B0B0" 
+                    BorderThickness="2" 
+                    CornerRadius="8"
+                    Background="White">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Timeline Header -->
+                    <Border Grid.Row="0" 
+                            Background="#00CED1" 
+                            CornerRadius="6,6,0,0" 
+                            Padding="10,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Timeline" 
+                                       FontSize="18" 
+                                       FontWeight="Bold" 
+                                       Foreground="White" 
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Timeline Content Area (Placeholder for scenes) -->
+                    <ScrollViewer Grid.Row="1" 
+                                  HorizontalScrollBarVisibility="Auto" 
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="10">
+                        <Border Background="#FAFAFA" 
+                                BorderBrush="#DDDDDD" 
+                                BorderThickness="1" 
+                                CornerRadius="4"
+                                MinHeight="150">
+                            <Grid>
+                                <!-- Placeholder content -->
+                                <StackPanel VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.5">
+                                    <TextBlock Text="⏱️" 
+                                               FontSize="48" 
+                                               HorizontalAlignment="Center" 
+                                               Margin="0,0,0,10"/>
+                                    <TextBlock Text="Timeline is empty" 
+                                               FontSize="16" 
+                                               Foreground="#666" 
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Add scenes to create a timeline" 
+                                               FontSize="12" 
+                                               Foreground="#999" 
+                                               HorizontalAlignment="Center" 
+                                               Margin="0,5,0,0"/>
+                                </StackPanel>
+
+                                <!-- Future: Timeline scenes will be displayed here -->
+                                <!-- ItemsControl for timeline scenes can be added here later -->
+                            </Grid>
+                        </Border>
+                    </ScrollViewer>
+
+                    <!-- Timeline Controls -->
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            BorderBrush="#E0E0E0" 
+                            BorderThickness="0,1,0,0" 
+                            Padding="15,10"
+                            CornerRadius="0,0,6,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Playback Controls (Left) -->
+                            <StackPanel Grid.Column="0" 
+                                        Orientation="Horizontal" 
+                                        VerticalAlignment="Center">
+                                <!-- Play Button -->
+                                <Button Width="50" 
+                                        Height="40" 
+                                        Margin="0,0,8,0"
+                                        Background="#4CAF50" 
+                                        BorderBrush="#388E3C"
+                                        BorderThickness="2"
+                                        ToolTip="Start timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="▶" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Play" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Pause Button -->
+                                <Button Width="50" 
+                                        Height="40" 
+                                        Margin="0,0,8,0"
+                                        Background="#FF9800" 
+                                        BorderBrush="#F57C00"
+                                        BorderThickness="2"
+                                        ToolTip="Pause timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="⏸" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Pause" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Stop Button -->
+                                <Button Width="50" 
+                                        Height="40"
+                                        Background="#F44336" 
+                                        BorderBrush="#D32F2F"
+                                        BorderThickness="2"
+                                        ToolTip="Stop timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="⏹" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Stop" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Progress/Time Display (Center) -->
+                            <StackPanel Grid.Column="1" 
+                                        Orientation="Horizontal" 
+                                        HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="00:00:00" 
+                                           FontSize="16" 
+                                           FontWeight="Bold" 
+                                           Foreground="#333"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text=" / " 
+                                           FontSize="14" 
+                                           Foreground="#999"
+                                           Margin="5,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="00:00:00" 
+                                           FontSize="14" 
+                                           Foreground="#666"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Add Scene Button (Right) -->
+                            <Button Grid.Column="2" 
+                                    Height="40" 
+                                    Padding="15,0"
+                                    Background="#2196F3" 
+                                    BorderBrush="#1976D2"
+                                    BorderThickness="2"
+                                    ToolTip="Add scene to timeline">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="➕" 
+                                               FontSize="16" 
+                                               Foreground="White" 
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"/>
+                                    <TextBlock Text="Add Scene" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold"
+                                               Foreground="White" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+
+            <!-- Timeline Area (Top Left White Space) -->
+            <Border Grid.Column="0" 
+                    Grid.Row="0" 
+                    Margin="10" 
+                    BorderBrush="#B0B0B0" 
+                    BorderThickness="2" 
+                    CornerRadius="8"
+                    Background="White">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Timeline Header -->
+                    <Border Grid.Row="0" 
+                            Background="#2196F3" 
+                            CornerRadius="6,6,0,0" 
+                            Padding="10,8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Timeline" 
+                                       FontSize="18" 
+                                       FontWeight="Bold" 
+                                       Foreground="White" 
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Timeline Content Area (Placeholder for scenes) -->
+                    <ScrollViewer Grid.Row="1" 
+                                  HorizontalScrollBarVisibility="Auto" 
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="10">
+                        <Border Background="#FAFAFA" 
+                                BorderBrush="#DDDDDD" 
+                                BorderThickness="1" 
+                                CornerRadius="4"
+                                MinHeight="150">
+                            <Grid>
+                                <!-- Placeholder content -->
+                                <StackPanel VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center"
+                                            Opacity="0.5">
+                                    <TextBlock Text="⏱️" 
+                                               FontSize="48" 
+                                               HorizontalAlignment="Center" 
+                                               Margin="0,0,0,10"/>
+                                    <TextBlock Text="Timeline is empty" 
+                                               FontSize="16" 
+                                               Foreground="#666" 
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Add scenes to create a timeline" 
+                                               FontSize="12" 
+                                               Foreground="#999" 
+                                               HorizontalAlignment="Center" 
+                                               Margin="0,5,0,0"/>
+                                </StackPanel>
+
+                                <!-- Future: Timeline scenes will be displayed here -->
+                                <!-- ItemsControl for timeline scenes can be added here later -->
+                            </Grid>
+                        </Border>
+                    </ScrollViewer>
+
+                    <!-- Timeline Controls -->
+                    <Border Grid.Row="2" 
+                            Background="#F5F5F5" 
+                            BorderBrush="#E0E0E0" 
+                            BorderThickness="0,1,0,0" 
+                            Padding="15,10"
+                            CornerRadius="0,0,6,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Playback Controls (Left) -->
+                            <StackPanel Grid.Column="0" 
+                                        Orientation="Horizontal" 
+                                        VerticalAlignment="Center">
+                                <!-- Play Button -->
+                                <Button Width="50" 
+                                        Height="40" 
+                                        Margin="0,0,8,0"
+                                        Background="#4CAF50" 
+                                        BorderBrush="#388E3C"
+                                        BorderThickness="2"
+                                        ToolTip="Start timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="▶" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Play" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Pause Button -->
+                                <Button Width="50" 
+                                        Height="40" 
+                                        Margin="0,0,8,0"
+                                        Background="#FF9800" 
+                                        BorderBrush="#F57C00"
+                                        BorderThickness="2"
+                                        ToolTip="Pause timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="⏸" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Pause" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Stop Button -->
+                                <Button Width="50" 
+                                        Height="40"
+                                        Background="#F44336" 
+                                        BorderBrush="#D32F2F"
+                                        BorderThickness="2"
+                                        ToolTip="Stop timeline">
+                                    <StackPanel>
+                                        <TextBlock Text="⏹" 
+                                                   FontSize="18" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-2,0,0"/>
+                                        <TextBlock Text="Stop" 
+                                                   FontSize="8" 
+                                                   Foreground="White" 
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,-3,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Progress/Time Display (Center) -->
+                            <StackPanel Grid.Column="1" 
+                                        Orientation="Horizontal" 
+                                        HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="00:00:00" 
+                                           FontSize="16" 
+                                           FontWeight="Bold" 
+                                           Foreground="#333"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text=" / " 
+                                           FontSize="14" 
+                                           Foreground="#999"
+                                           Margin="5,0"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Text="00:00:00" 
+                                           FontSize="14" 
+                                           Foreground="#666"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Add Scene Button (Right) -->
+                            <Button Grid.Column="2" 
+                                    Height="40" 
+                                    Padding="15,0"
+                                    Background="#2196F3" 
+                                    BorderBrush="#1976D2"
+                                    BorderThickness="2"
+                                    ToolTip="Add scene to timeline">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="➕" 
+                                               FontSize="16" 
+                                               Foreground="White" 
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"/>
+                                    <TextBlock Text="Add Scene" 
+                                               FontSize="13" 
+                                               FontWeight="SemiBold"
+                                               Foreground="White" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
             <ListBox x:Name="sceneListView"
                      Margin="0,0,5,0"
                      Grid.Column="0"
