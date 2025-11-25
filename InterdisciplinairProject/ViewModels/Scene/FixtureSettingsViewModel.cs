@@ -49,6 +49,31 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     public string FixtureName => _currentFixture?.Name ?? "Selecteer een fixture";
 
     /// <summary>
+    /// Gets or sets the dimmer percentage (0-100).
+    /// </summary>
+    private int _dimmerPercentage;
+    public int DimmerPercentage
+    {
+        get => _dimmerPercentage;
+        set
+        {
+            if (_dimmerPercentage != value && _currentFixture != null)
+            {
+                _dimmerPercentage = value;
+                
+                // Convert percentage to 0-255 byte value
+                byte dimmerValue = (byte)Math.Round(value * 255.0 / 100.0);
+                _currentFixture.Dimmer = dimmerValue;
+                
+                // Update UI channels to reflect the proportional changes
+                UpdateChannelViewModelsFromFixture();
+                
+                OnPropertyChanged(nameof(DimmerPercentage));
+            }
+        }
+    }
+
+    /// <summary>
     /// Loads a new fixture into the view model.
     /// </summary>
     /// <param name="fixture">The fixture to load.</param>
@@ -63,12 +88,19 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] LoadFixture called for: {fixture.Name}");
         _currentFixture = fixture;
 
+        // NIEUW: Bereken de verhoudingen tussen de channels op basis van de JSON waarden
+        _currentFixture.CalculateChannelRatios();
+
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
         _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels);
+
+        // Calculate initial dimmer percentage
+        _dimmerPercentage = (int)Math.Round(_currentFixture.Dimmer * 100.0 / 255.0);
 
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
         OnPropertyChanged(nameof(CurrentFixture));
+        OnPropertyChanged(nameof(DimmerPercentage));
     }
 
     /// <summary>
@@ -106,7 +138,12 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         // 1. Herstel de _currentFixture.Channels naar de oorspronkelijke (opgeslagen) waarden
         _currentFixture.Channels = new Dictionary<string, byte?>(_initialChannelValues);
 
-        // 2. Herlaad de Channel ViewModels om de sliders te updaten (dit stuurt ook de herstelde waarden live naar de hardware)
+        // 2. Recalculeer de verhoudingen op basis van de herstelde waarden
+        _currentFixture.CalculateChannelRatios();
+        _dimmerPercentage = (int)Math.Round(_currentFixture.Dimmer * 100.0 / 255.0);
+        OnPropertyChanged(nameof(DimmerPercentage));
+
+        // 3. Herlaad de Channel ViewModels om de sliders te updaten (dit stuurt ook de herstelde waarden live naar de hardware)
         LoadChannelsFromFixture(_currentFixture);
     }
 
@@ -122,6 +159,9 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         // Zorg ervoor dat de _currentFixture de meest recente sliderwaarden heeft
         GetCurrentChannelValues();
+
+        // Herbereken verhoudingen op basis van de huidige waarden
+        _currentFixture.CalculateChannelRatios();
 
         // Maak een nieuwe kopie van de HUIDIGE waarden van de _currentFixture en stel deze in als de nieuwe 'initial state'
         _initialChannelValues = new Dictionary<string, byte?>(_currentFixture.Channels);
@@ -166,6 +206,32 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] LoadChannelsFromFixture complete. Total channels loaded: {Channels.Count}");
     }
 
+    /// <summary>
+    /// Updates the channel ViewModels from the current fixture's channel values without triggering change events.
+    /// </summary>
+    private void UpdateChannelViewModelsFromFixture()
+    {
+        if (_currentFixture == null)
+        {
+            return;
+        }
+
+        foreach (var channelVm in Channels)
+        {
+            // Unsubscribe temporarily to avoid triggering hardware updates
+            channelVm.PropertyChanged -= ChannelViewModel_PropertyChanged;
+
+            if (_currentFixture.Channels.TryGetValue(channelVm.Name, out byte? value))
+            {
+                channelVm.Value = value ?? 0;
+                Debug.WriteLine($"[DEBUG] Updated ChannelViewModel {channelVm.Name} to {value ?? 0}");
+            }
+
+            // Resubscribe
+            channelVm.PropertyChanged += ChannelViewModel_PropertyChanged;
+        }
+    }
+
     // Deze methode blijft verantwoordelijk voor de LIVE update naar de hardware
     private async void ChannelViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -173,10 +239,15 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         {
             Debug.WriteLine($"[DEBUG] Channel value changed: {channelVm.Name} = {channelVm.Value}");
 
-            // Update the fixture model (tijdelijk)
+            // Update the fixture model (tijdelijk) en herbereken verhoudingen
             if (_currentFixture != null)
             {
-                _currentFixture.Channels[channelVm.Name] = channelVm.Value;
+                _currentFixture.UpdateChannelValue(channelVm.Name, channelVm.Value);
+                
+                // Update dimmer percentage to reflect the change
+                _dimmerPercentage = (int)Math.Round(_currentFixture.Dimmer * 100.0 / 255.0);
+                OnPropertyChanged(nameof(DimmerPercentage));
+
                 Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
 
                 // Send to hardware connection (LIVE)

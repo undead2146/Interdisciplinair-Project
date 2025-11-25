@@ -98,12 +98,20 @@ namespace InterdisciplinairProject.ViewModels
                             Dimmer = 0,
                             FadeInMs = scene.FadeInMs,
                             FadeOutMs = scene.FadeOutMs,
-                            Fixtures = scene.Fixtures?.Select(f => new ShowFixture
-                            {
-                                Id = f.Id,
-                                InstanceId = f.Id, // Use fixture ID as instance ID for now
-                                Name = f.Name,
-                                Dimmer = 0
+                            Fixtures = scene.Fixtures?.Select(f => {
+                                var showFixture = new ShowFixture
+                                {
+                                    Id = f.Id,
+                                    InstanceId = f.Id, // Use fixture ID as instance ID for now
+                                    Name = f.Name,
+                                    Dimmer = 0,
+                                    Channels = new Dictionary<string, byte?>(f.Channels ?? new Dictionary<string, byte?>())
+                                };
+                                
+                                // Calculate channel ratios from loaded JSON values
+                                showFixture.CalculateChannelRatios();
+                                
+                                return showFixture;
                             }).ToList()
                         };
                         Scenes.Add(showScene);
@@ -238,6 +246,16 @@ namespace InterdisciplinairProject.ViewModels
                         {
                             // when opening/importing a show, reset dimmer to 0 so sliders start off
                             scene.Dimmer = 0;
+                            
+                            // Calculate channel ratios for all fixtures in the scene
+                            if (scene.Fixtures != null)
+                            {
+                                foreach (var fixture in scene.Fixtures)
+                                {
+                                    fixture.CalculateChannelRatios();
+                                }
+                            }
+                            
                             Scenes.Add(scene);
                         }
                     }
@@ -338,6 +356,12 @@ namespace InterdisciplinairProject.ViewModels
                             {
                                 try
                                 {
+                                    // Calculate ratios if needed
+                                    if (!fixture.Channels.Any())
+                                    {
+                                        fixture.CalculateChannelRatios();
+                                    }
+                                    
                                     // set observable property if available
                                     fixture.Dimmer = 0;
                                 }
@@ -366,6 +390,12 @@ namespace InterdisciplinairProject.ViewModels
                 {
                     try
                     {
+                        // Calculate ratios if needed
+                        if (!fixture.Channels.Any())
+                        {
+                            fixture.CalculateChannelRatios();
+                        }
+                        
                         fixture.Dimmer = channelValue;
                     }
                     catch (Exception ex)
@@ -468,6 +498,12 @@ namespace InterdisciplinairProject.ViewModels
             {
                 try
                 {
+                    // Calculate ratios if not yet done
+                    if (!fixture.Channels.Any())
+                    {
+                        fixture.CalculateChannelRatios();
+                    }
+                    
                     fixture.Dimmer = channelValue;
                 }
                 catch (Exception ex)

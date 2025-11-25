@@ -7,6 +7,8 @@ namespace Show.Model
 {
     public class Fixture : INotifyPropertyChanged
     {
+        private Dictionary<string, double> _channelRatios = new();
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
@@ -32,16 +34,85 @@ namespace Show.Model
             {
                 if (_dimmer == value) return;
                 _dimmer = value;
-                // keep Channels in sync (non-breaking)
+                
+                // Apply dimmer proportionally to all channels
+                ApplyDimmerToChannels();
+                
+                OnPropertyChanged(nameof(Dimmer));
+            }
+        }
+
+        /// <summary>
+        /// Calculates and stores the ratio of each channel value relative to the maximum channel value.
+        /// This should be called after loading channel values from JSON.
+        /// </summary>
+        public void CalculateChannelRatios()
+        {
+            _channelRatios.Clear();
+
+            if (Channels == null || Channels.Count == 0)
+            {
+                return;
+            }
+
+            // Find the maximum channel value
+            byte maxValue = 0;
+            foreach (var channel in Channels.Values)
+            {
+                if (channel.HasValue && channel.Value > maxValue)
+                {
+                    maxValue = channel.Value;
+                }
+            }
+
+            // If all channels are zero, set dimmer to 0 and use equal ratios
+            if (maxValue == 0)
+            {
+                _dimmer = 0;
+                foreach (var channelName in Channels.Keys)
+                {
+                    _channelRatios[channelName] = 1.0;
+                }
+                return;
+            }
+
+            // Calculate ratio for each channel
+            foreach (var channel in Channels)
+            {
+                byte channelValue = channel.Value ?? 0;
+                _channelRatios[channel.Key] = channelValue / (double)maxValue;
+            }
+
+            // Set the dimmer to the maximum channel value found
+            _dimmer = maxValue;
+        }
+
+        /// <summary>
+        /// Applies the current dimmer value proportionally to all channels based on their stored ratios.
+        /// </summary>
+        private void ApplyDimmerToChannels()
+        {
+            if (Channels == null || _channelRatios.Count == 0)
+            {
+                // Fallback: just sync dimmer channel
                 try
                 {
-                    Channels["dimmer"] = value;
+                    Channels["dimmer"] = _dimmer;
                 }
                 catch
                 {
                     // ignore if Channels not writable for some reason
                 }
-                OnPropertyChanged(nameof(Dimmer));
+                return;
+            }
+
+            foreach (var channelName in Channels.Keys.ToList())
+            {
+                if (_channelRatios.TryGetValue(channelName, out double ratio))
+                {
+                    byte newValue = (byte)Math.Round(_dimmer * ratio);
+                    Channels[channelName] = newValue;
+                }
             }
         }
     }
