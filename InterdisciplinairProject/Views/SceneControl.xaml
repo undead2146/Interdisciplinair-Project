@@ -176,6 +176,8 @@
                                 <Border.Height>
                                     <MultiBinding Converter="{StaticResource PercentageHeightConverter}">
                                         <Binding ElementName="PART_DimmerSlider" Path="Value"/>
+                                        <Binding ElementName="PART_DimmerSlider" Path="Minimum"/>
+                                        <Binding ElementName="PART_DimmerSlider" Path="Maximum"/>
                                         <Binding ElementName="SliderContainer" Path="ActualHeight"/>
                                     </MultiBinding>
                                 </Border.Height>
