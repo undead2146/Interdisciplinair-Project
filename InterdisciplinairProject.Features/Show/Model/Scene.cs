@@ -9,9 +9,7 @@ namespace Show.Model
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        private int _dimmer;
-        private int _fadeInMs;
-        private int _fadeOutMs;
+        private int _universe;
 
         [JsonPropertyName("id")]
         public string? Id { get; set; }
@@ -19,47 +17,25 @@ namespace Show.Model
         [JsonPropertyName("name")]
         public string? Name { get; set; }
 
-        [JsonPropertyName("dimmer")]
-        public int Dimmer
+        [JsonPropertyName("universe")]
+        public int Universe
         {
-            get => _dimmer;
+            get => _universe;
             set
             {
-                if (_dimmer == value) return;
-                _dimmer = value;
-                OnPropertyChanged(nameof(Dimmer));
+                if (_universe == value) return;
+                _universe = value;
+                OnPropertyChanged(nameof(Universe));
             }
         }
 
-        [JsonPropertyName("fadeInMs")]
-        public int FadeInMs
-        {
-            get => _fadeInMs;
-            set
-            {
-                if (_fadeInMs == value) return;
-                _fadeInMs = value;
-                OnPropertyChanged(nameof(FadeInMs));
-            }
-        }
 
-        [JsonPropertyName("fadeOutMs")]
-        public int FadeOutMs
-        {
-            get => _fadeOutMs;
-            set
-            {
-                if (_fadeOutMs == value) return;
-                _fadeOutMs = value;
-                OnPropertyChanged(nameof(FadeOutMs));
-            }
-        }
 
         [JsonPropertyName("fixtures")]
         public List<Fixture>? Fixtures { get; set; }
 
         [JsonIgnore]
-        public string DisplayText => $"{Name} (ID: {Id}) - Dimmer: {Dimmer}%";
+        public string DisplayText => $"{Name} (ID: {Id}) ";
 
     }
 }
