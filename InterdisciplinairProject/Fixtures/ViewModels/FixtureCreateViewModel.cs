@@ -15,12 +15,18 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System;
+using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public partial class FixtureCreateViewModel : ObservableObject
     {
-        private readonly string _dataDir;
+        private readonly string _dataDir = Path.Combine(
+                                           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                           "InterdisciplinairProject",
+                                           "Fixtures");
         private readonly bool _isEditing;
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
@@ -44,9 +50,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        public event EventHandler? BackRequested;
+        private Fixture _currentFixture = new Fixture();
 
         public event EventHandler? FixtureSaved;
+
+        public event EventHandler? BackRequested;
+
+        
 
         public ObservableCollection<ChannelItem> Channels { get; } = new();
 
@@ -64,7 +74,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddTypeBtn { get; }
 
-        private Fixture _currentFixture = new Fixture();
         public Fixture CurrentFixture
         {
             get => _currentFixture;
@@ -94,10 +103,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-            _dataDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "InterdisciplinairProject",
-                "Fixtures");
+
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
@@ -161,10 +167,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 string newManufacturerName = registerWindow.ManufacturerName;
                 if (_manufacturerService.RegisterManufacturer(newManufacturerName))
                 {
-                    string manufacturerDir = Path.Combine(_dataDir, SanitizeFileName(newManufacturerName));
-                    if (!Directory.Exists(manufacturerDir))
-                        Directory.CreateDirectory(manufacturerDir);
-
                     LoadManufacturers();
                     SelectedManufacturer = newManufacturerName;
 
@@ -242,7 +244,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 LoadManufacturers();
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
-                BackRequested?.Invoke(this, EventArgs.Empty);
+
+                if (!_isEditing) {  //only go back if you were editing
+                BackRequested?.Invoke(this, EventArgs.Empty); 
+                }
             }
             catch (IOException ioEx)
             {
@@ -278,6 +283,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void Cancel()
         {
+           
+
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 BackRequested?.Invoke(this, EventArgs.Empty);
@@ -314,6 +321,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string invalidRegex = string.Format(@"[{0}]", invalidChars);
             return Regex.Replace(name, invalidRegex, "_");
         }
+
+
+
+
+
 
         public partial class ChannelItem : ObservableObject
         {
@@ -376,6 +388,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
 
 
+            private int _maxValue = 255;
+            public int MaxValue
+            {
+                get => _maxValue;
+                set
+                {
+                    if (SetProperty(ref _maxValue, value))
+                    {
+                        OnPropertyChanged(nameof(TickFrequency));
+                        if (Level > _maxValue)
+                            Level = _maxValue;
+                    }
+                }
+            }
+
 
             // Slider level <-> model.Value
             private int _level;
@@ -384,11 +411,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 get => _level;
                 set
                 {
-                    var snapped = Snap(value, Math.Max(1, SliderDivisions));
+                    var snapped = Snap(value, Math.Max(1, SliderDivisions), MaxValue);
                     if (SetProperty(ref _level, snapped))
                         _model.Value = snapped.ToString();
                 }
             }
+
 
             public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
 
@@ -406,6 +434,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 set => SetProperty(ref _isCustomType, value);
             }
 
+            private bool _isDegreeHType;
+            public bool IsDegreeHType
+            {
+                get => _isDegreeHType;
+                set => SetProperty(ref _isDegreeHType, value);
+            }
+            private bool _isDegreeFType;
+            public bool IsDegreeFType
+            {
+                get => _isDegreeFType;
+                set => SetProperty(ref _isDegreeFType, value);
+            }
+
             private int _sliderDivisions = 255;
             public int SliderDivisions
             {
@@ -417,7 +458,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
 
-            public int TickFrequency => Math.Max(1, 255 / Math.Max(1, SliderDivisions));
+            public int TickFrequency => Math.Max(1, MaxValue / Math.Max(1, SliderDivisions));
+
 
             // Custom panel fields
             private string? _customTypeName;
@@ -457,6 +499,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 IsSliderType = false;
                 IsCustomType = false;
+                IsDegreeHType = false;
+                IsDegreeFType = false;
 
                 var spec = TypeCatalogService.GetByName(typeName);
                 if (spec == null) return;
@@ -464,7 +508,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 if (spec.input.Equals("slider", StringComparison.OrdinalIgnoreCase))
                 {
                     IsSliderType = true;
+                    MaxValue = 255;
+
                     SliderDivisions = spec.divisions.GetValueOrDefault(255);
+                }
+                if (spec.input.Equals("degreeH", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsDegreeHType = true;
+                    MaxValue = 180;
+
+                    SliderDivisions = spec.divisions.GetValueOrDefault(180);
+                }
+                if (spec.input.Equals("degreeF", StringComparison.OrdinalIgnoreCase))
+                {
+                    IsDegreeFType = true;
+
+                    MaxValue = 360;
+                    SliderDivisions = spec.divisions.GetValueOrDefault(360);
                 }
                 else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
                 {
@@ -473,12 +533,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 // "text" -> panels remain collapsed by XAML triggers
             }
 
-            private static int Snap(int value, int divisions)
+            private static int Snap(int value, int divisions, int max)
             {
-                var step = Math.Max(1, 255 / Math.Max(1, divisions));
+                var step = Math.Max(1, max / Math.Max(1, divisions));
                 var snapped = (int)Math.Round((double)value / step) * step;
-                return Math.Max(0, Math.Min(255, snapped));
+                return Math.Max(0, Math.Min(max, snapped));
             }
+
         }
 
     }

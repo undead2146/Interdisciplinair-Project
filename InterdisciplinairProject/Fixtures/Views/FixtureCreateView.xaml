@@ -176,7 +176,7 @@
 
                                         <!-- SLIDER input -->
                                         <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
                                             <Slider Minimum="0" Maximum="255"
 												Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 												TickFrequency="{Binding TickFrequency}"
@@ -187,6 +187,34 @@
                                                     />
                                             <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
+                                        
+                                        <StackPanel x:Name="degreePanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
+                                            <Slider Minimum="0" Maximum="180"
+									            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+									            TickFrequency="{Binding TickFrequency}"
+									            IsSnapToTickEnabled="True"
+									            SmallChange="{Binding TickFrequency}"
+									            LargeChange="{Binding TickFrequency}"
+									            TickPlacement="BottomRight"
+                                                />
+                                            <TextBlock x:Name="sliderDegreeValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+
+                                        <StackPanel x:Name="degreeFullPanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
+                                            <Slider Minimum="0" Maximum="360"
+                                                    Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    TickFrequency="{Binding TickFrequency}"
+                                                    IsSnapToTickEnabled="True"
+                                                    SmallChange="{Binding TickFrequency}"
+                                                    LargeChange="{Binding TickFrequency}"
+                                                    TickPlacement="BottomRight"
+                                                    />
+                                            <TextBlock x:Name="sliderDegreeFullValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+
+
 
 
 
@@ -223,6 +251,8 @@
                                                 </Grid>
                                             </StackPanel>
                                         </StackPanel>
+
+                                        
                                     </StackPanel>
                                 </Border>
                                 <!-- NEW: Delete button shown only while editing -->
@@ -242,6 +272,8 @@
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
+                                
+
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
@@ -261,6 +293,19 @@
                                 <Setter TargetName="CustomPanel" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
                                 <Setter TargetName="addType" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding IsDegreeHType}" Value="True">
+                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="degreePanel" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDegreeFType}" Value="True">
+                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="degreeFullPanel" Property="Visibility" Value="Visible"/>
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding ShowSliderPanel}" Value="True">

@@ -13,21 +13,31 @@ namespace InterdisciplinairProject.Fixtures.Services
     public static class TypeCatalogService
     {
         private static List<TypeSpecification>? _specs;
+        //private static readonly string DataPath =
+        //    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "allTypes.json");
+        //private static readonly string DataPath =
+        //    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fixtures", "Data", "allTypes.json");
+
         private static readonly string DataPath =
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "allTypes.json");
+    Path.GetFullPath(
+        Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "..", "..", "..",        // up from bin\Debug\net8.0-windows to project root
+            "Fixtures", "Data", "allTypes.json"));
+
 
         private static readonly List<TypeSpecification> _defaults = new()
         {
             new TypeSpecification{ name="Custom", input="custom"},
             new TypeSpecification{ name="Lamp", input="slider", divisions=255},
-            new TypeSpecification{ name="Ster", input="slider", divisions=255},
-            new TypeSpecification{ name="Klok", input="slider", divisions=255},
-            new TypeSpecification{ name="Tilt", input = "slider", divisions = 255},
-            new TypeSpecification{ name="Ventilator", input = "slider", divisions = 255},
-            new TypeSpecification{ name="Rood", input="slider", divisions=255},
-            new TypeSpecification{ name="Groen", input="slider", divisions=255},
-            new TypeSpecification{ name="Blauw", input="slider", divisions=255},
-            new TypeSpecification{ name="Wit", input="slider", divisions=255},
+            new TypeSpecification{ name="Star", input="slider", divisions=255},
+            new TypeSpecification{ name="clock", input="slider", divisions=255},
+            new TypeSpecification{ name="Tilt 180°", input = "degreeH", divisions = 180},
+            new TypeSpecification{ name="Ventilator 360°", input = "degreeF", divisions = 360},
+            new TypeSpecification{ name="Red", input="slider", divisions=255},
+            new TypeSpecification{ name="Green", input="slider", divisions=255},
+            new TypeSpecification{ name="Blue", input="slider", divisions=255},
+            new TypeSpecification{ name="White", input="slider", divisions=255},
         };
 
         public static void EnsureLoaded()
@@ -82,6 +92,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
             catch
             {
+                MessageBox.Show("ERROR");
                 // don’t throw; you can optionally log or MessageBox here if you want
             }
         }
