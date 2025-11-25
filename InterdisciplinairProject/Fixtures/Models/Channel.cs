@@ -8,64 +8,61 @@ namespace InterdisciplinairProject.Fixtures.Models;
 /// <summary>
 /// Represents a channel in a fixture for UI binding.
 /// </summary>
-public class Channel
+public class Channel : ObservableObject
 {
-    public class Channel : ObservableObject
+    private string _name = "";
+
+    public string Name
     {
-        private string _name = "";
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
 
-        public string Name
+    private string _type = "";
+
+    public string Type
+    {
+        get => _type;
+        set => SetProperty(ref _type, value);
+    }
+
+    private string? _value;
+
+    [JsonPropertyName("value")]
+    public string? Value
+    {
+        get => _value;
+        set
         {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-
-        private string _type = "";
-
-        public string Type
-        {
-            get => _type;
-            set => SetProperty(ref _type, value);
-        }
-
-        private string? _value;
-
-        [JsonPropertyName("value")]
-        public string? Value
-        {
-            get => _value;
-            set
+            if (SetProperty(ref _value, value))
             {
-                if (SetProperty(ref _value, value))
-                {
-                    if (int.TryParse(value, out int number))
-                        Parameter = number;
-                }
+                if (int.TryParse(value, out int number))
+                    Parameter = number;
             }
         }
-
-        private int _parameter;
-
-        [JsonIgnore]
-        public int Parameter
-        {
-            get => _parameter;
-            set => SetProperty(ref _parameter, value);
-        }
-
-        [JsonPropertyName("min")]
-        public int Min { get; set; } = 0;
-
-        [JsonPropertyName("max")]
-        public int Max { get; set; } = 255;
-
-        [JsonPropertyName("time")]
-        public int Time { get; set; } = 0;
-
-        [JsonPropertyName("effectType")]
-        public string effectType{ get; set; }
-
-        [JsonIgnore]
-        public ICommand? TestCommand { get; set; }
     }
+
+    private int _parameter;
+
+    [JsonIgnore]
+    public int Parameter
+    {
+        get => _parameter;
+        set => SetProperty(ref _parameter, value);
+    }
+
+    [JsonPropertyName("min")]
+    public int Min { get; set; } = 0;
+
+    [JsonPropertyName("max")]
+    public int Max { get; set; } = 255;
+
+    [JsonPropertyName("time")]
+    public int Time { get; set; } = 0;
+
+    [JsonPropertyName("effectType")]
+    public string effectType{ get; set; }
+
+    [JsonIgnore]
+    public ICommand? TestCommand { get; set; }
 }
