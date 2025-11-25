@@ -29,6 +29,9 @@ namespace InterdisciplinairProject.ViewModels
         private ShowScene? selectedScene;
 
         [ObservableProperty]
+        private ShowScene? selectedTimelineScene;
+
+        [ObservableProperty]
         private string? currentShowId;
 
         [ObservableProperty]
@@ -138,6 +141,12 @@ namespace InterdisciplinairProject.ViewModels
         private void SceneSelectionChanged(ShowScene selectedScene)
         {
             selectedScene = selectedScene;
+        }
+
+        [RelayCommand]
+        private void TimelineSceneSelectionChanged(ShowScene selectedScene)
+        {
+            selectedTimelineScene = selectedScene;
         }
 
         // ============================================================
@@ -582,6 +591,24 @@ namespace InterdisciplinairProject.ViewModels
                 }
             }
             catch (OperationCanceledException) { }
+        }
+
+        public void MoveTimelineScene(ShowScene scene, string direction)
+        {
+            if (scene == null) return;
+            int index = TimeLineScenes.IndexOf(scene);
+            if (index < 0) return; // scene not found in timeline
+
+            if (direction == "left")
+            {
+                if (index == 0) return; // already first
+                TimeLineScenes.Move(index, index - 1);
+            }
+            else if (direction == "right")
+            {
+                if (index >= TimeLineScenes.Count - 1) return; // already last
+                TimeLineScenes.Move(index, index + 1);
+            }
         }
     }
 }

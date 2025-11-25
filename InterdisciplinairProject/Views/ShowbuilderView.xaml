@@ -162,9 +162,15 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <!-- Let the Scene item be the DataContext for SceneControl -->
-                                            <views:SceneControl x:Name="scenecontrol" Margin="0" DataContext="{Binding}" />
+                                            <views:TimelineScene x:Name="timelinescene" Margin="0" DataContext="{Binding}" />
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="TimelineSelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding TimelineSceneSelectionChanged}"
+                                   CommandParameter="{Binding SelectedItem, ElementName=sceneTimeLineListView}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
                                 </ListBox>
                                 <!-- ItemsControl for timeline scenes can be added here later -->
                             </Grid>
