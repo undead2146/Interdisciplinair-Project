@@ -23,6 +23,7 @@ namespace InterdisciplinairProject.ViewModels
         private string? _currentShowPath;
 
         public ObservableCollection<ShowScene> Scenes { get; } = new();
+        public ObservableCollection<ShowScene> TimeLineScenes { get; } = new();
 
         [ObservableProperty]
         private ShowScene? selectedScene;
@@ -136,7 +137,7 @@ namespace InterdisciplinairProject.ViewModels
         [RelayCommand]
         private void SceneSelectionChanged(ShowScene selectedScene)
         {
-            SelectedScene = selectedScene;
+            selectedScene = selectedScene;
         }
 
         // ============================================================
@@ -568,6 +569,11 @@ namespace InterdisciplinairProject.ViewModels
             {
                 CancelFadeForScene(targetScene);
             }
+        }
+        [RelayCommand]
+        private void addScene()
+        {
+            TimeLineScenes.Add(selectedScene);
         }
     }
 }

@@ -143,7 +143,29 @@
                                                Margin="0,5,0,0"/>
                                 </StackPanel>
 
-                                <!-- Future: Timeline scenes will be displayed here -->
+                                <ListBox x:Name="sceneTimeLineListView"
+                                      Margin="0,0,5,0"
+                                      Grid.Column="0"
+                                      Grid.Row="1"
+                                      ItemsSource="{Binding TimeLineScenes}"
+                                      BorderBrush="#CCC"
+                                      BorderThickness="1"
+                                      Background="#FAFAFA"
+                                      SelectionMode="Single"
+                                      HorizontalContentAlignment="Center">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <!-- Let the Scene item be the DataContext for SceneControl -->
+                                            <views:SceneControl x:Name="scenecontrol" Margin="0" DataContext="{Binding}" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                                 <!-- ItemsControl for timeline scenes can be added here later -->
                             </Grid>
                         </Border>
@@ -194,6 +216,7 @@
                                                    Margin="0,-3,0,0"/>
                                     </StackPanel>
                                 </Button>
+
 
                                 <!-- Stop Button -->
                                 <Button Width="50" 
@@ -251,7 +274,8 @@
                                     Background="#2196F3" 
                                     BorderBrush="#1976D2"
                                     BorderThickness="2"
-                                    ToolTip="Add scene to timeline">
+                                    ToolTip="Add scene to timeline"
+                                    Command="{Binding addSceneCommand}">
                                 <Button.Resources>
                                     <Style TargetType="Border">
                                         <Setter Property="CornerRadius" Value="6"/>
