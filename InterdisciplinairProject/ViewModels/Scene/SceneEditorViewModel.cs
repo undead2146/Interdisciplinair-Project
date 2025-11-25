@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Views;
+using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
@@ -235,14 +236,23 @@ public partial class SceneEditorViewModel : ObservableObject
                 };
 
                 // Voeg de nieuwe fixture toe aan de scene
-                var nextChannel = GetNextAvailableChannel();
-                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = nextChannel };
+                // var nextChannel = GetNextAvailableChannel();
+                // var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = nextChannel };
 
-                SceneFixtures.Add(sceneFixture);
-                SelectedFixture = sceneFixture;
+                // UITGESCHAKELD: Fixture niet automatisch toevoegen, enkel het dialoog tonen
+                // SceneFixtures.Add(sceneFixture);
+                // SelectedFixture = sceneFixture;
 
-                Debug.WriteLine($"[DEBUG] Added fixture '{newCoreFixture.Name}' to scene at channel {nextChannel}");
-                MessageBox.Show($"Fixture '{newCoreFixture.Name}' succesvol toegevoegd aan de lijst!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                // Toon het dialoog voor de geselecteerde fixture
+                var dialog = new FixtureRegistryDialog(newCoreFixture)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+
+                dialog.ShowDialog();
+
+                Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{newCoreFixture.Name}'");
+                Debug.WriteLine($"[DEBUG] Fixture '{newCoreFixture.Name}' NOT added to scene yet");
             }
         }
         catch (Exception ex)
@@ -285,25 +295,21 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Opens the fixture settings view when a fixture is selected.
+    /// Opens the fixture registry dialog when a fixture is selected.
     /// </summary>
     partial void OnSelectedFixtureChanged(SceneFixture? value)
     {
         if (value?.Fixture != null)
         {
-            // Maak een nieuwe FixtureSettingsViewModel
-            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
-            fixtureSettingsViewModel.LoadFixture(value.Fixture);
-
-            // Laad de FixtureSettingsView
-            CurrentView = new FixtureSettingsView
+            // Show the FixtureRegistryDialog for the selected fixture
+            var dialog = new FixtureRegistryDialog(value.Fixture)
             {
-                DataContext = fixtureSettingsViewModel
+                Owner = Application.Current.MainWindow
             };
-        }
-        else
-        {
-            CurrentView = null;
+
+            dialog.ShowDialog();
+
+            Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{value.Fixture.Name}'");
         }
     }
 
