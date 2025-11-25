@@ -8,6 +8,7 @@ namespace InterdisciplinairProject.Fixtures.Models
     public class Channel : ObservableObject
     {
         private string _name = "";
+
         public string Name
         {
             get => _name;
@@ -15,6 +16,7 @@ namespace InterdisciplinairProject.Fixtures.Models
         }
 
         private string _type = "";
+
         public string Type
         {
             get => _type;
@@ -22,6 +24,7 @@ namespace InterdisciplinairProject.Fixtures.Models
         }
 
         private string? _value;
+
         [JsonPropertyName("value")]
         public string? Value
         {
@@ -37,12 +40,25 @@ namespace InterdisciplinairProject.Fixtures.Models
         }
 
         private int _parameter;
+
         [JsonIgnore]
         public int Parameter
         {
             get => _parameter;
             set => SetProperty(ref _parameter, value);
         }
+
+        [JsonPropertyName("min")]
+        public int Min { get; set; } = 0;
+
+        [JsonPropertyName("max")]
+        public int Max { get; set; } = 255;
+
+        [JsonPropertyName("time")]
+        public int Time { get; set; } = 0;
+
+        [JsonPropertyName("effectType")]
+        public string effectType{ get; set; }
 
         [JsonIgnore]
         public ICommand? TestCommand { get; set; }
