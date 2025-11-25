@@ -13,6 +13,10 @@ namespace InterdisciplinairProject.Fixtures.Communication
         {
             try
             {
+                // Ensure all values are 0–255 using modulo 255
+                for (int i = 0; i < data.Length; i++)
+                    data[i] = (byte)(data[i] % 255);
+
                 using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Open();
                 Thread.Sleep(1); // small delay
@@ -45,6 +49,10 @@ namespace InterdisciplinairProject.Fixtures.Communication
         {
             try
             {
+                // Ensure all values are 0–255 using modulo 255
+                for (int i = 0; i < channelBytes.Length; i++)
+                    channelBytes[i] = (byte)(channelBytes[i] % 255);
+
                 using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Handshake = Handshake.None;
                 sp.Open();

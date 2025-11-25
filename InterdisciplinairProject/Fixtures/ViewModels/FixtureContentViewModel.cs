@@ -94,7 +94,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private bool ValidateChannel(Channel channel, out string error)
         {
             error = "";
-            if (channel.Parameter < 0 || channel.Parameter > 255)
+            if (channel.Parameter < 0 || channel.Parameter > 1024)
             {
                 error = channel.Name;
                 return false;
