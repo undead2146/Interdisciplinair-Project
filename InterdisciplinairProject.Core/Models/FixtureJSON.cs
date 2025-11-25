@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace InterdisciplinairProject.Fixtures.Models
 {
-    public class Fixture
+    public class FixtureJSON
     {
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
@@ -20,9 +20,9 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("imagePath")]
         public string ImagePath { get; set; } = string.Empty;
 
-        public Fixture() { }
+        public FixtureJSON() { }
 
-        public Fixture(string name)
+        public FixtureJSON(string name)
         {
             Name = name;
         }

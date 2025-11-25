@@ -48,7 +48,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        private Fixture _currentFixture = new Fixture();
+        private FixtureJSON _currentFixture = new FixtureJSON();
 
         public event EventHandler? FixtureSaved;
 
@@ -70,7 +70,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddTypeBtn { get; }
 
-        public Fixture CurrentFixture
+        public FixtureJSON CurrentFixture
         {
             get => _currentFixture;
             set
@@ -112,7 +112,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+            AddImageCommand = new RelayCommand<FixtureJSON>(AddImage);
 
             if (existing != null)
             {
@@ -310,7 +310,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void AddImage(Fixture fixture)
+        private void AddImage(FixtureJSON fixture)
         {
             var dlg = new OpenFileDialog
             {
