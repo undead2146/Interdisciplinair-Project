@@ -32,7 +32,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
     [ObservableProperty]
     private SceneFixture? _selectedFixture;
-    
+
     /// <summary>
     /// Event raised when the scene has been updated.
     /// </summary>
@@ -68,13 +68,17 @@ public partial class SceneEditorViewModel : ObservableObject
         Scene = scene;
         SceneFixtures.Clear();
 
-        var currentChannel = 1;
         if (scene.Fixtures != null)
         {
             foreach (var fixture in scene.Fixtures)
             {
-                SceneFixtures.Add(new SceneFixture { Fixture = fixture, StartChannel = currentChannel });
-                currentChannel += fixture.Channels.Count;
+                // Als de fixture nog geen StartAddress heeft, bereken deze dan
+                if (fixture.StartAddress == 0 || fixture.StartAddress == 1)
+                {
+                    fixture.StartAddress = GetNextAvailableChannel();
+                }
+
+                SceneFixtures.Add(new SceneFixture { Fixture = fixture, StartChannel = fixture.StartAddress });
             }
         }
     }
@@ -161,7 +165,7 @@ public partial class SceneEditorViewModel : ObservableObject
         try
         {
             var fixtureListViewModel = new FixtureListViewModel();
-            
+
             // Abonneren op het FixtureSelected event
             fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
 
@@ -231,7 +235,10 @@ public partial class SceneEditorViewModel : ObservableObject
                     // Zorg ervoor dat Id uniek is voor de instance.
                     InstanceId = Guid.NewGuid().ToString(),
                     // De Id van de Fixture Type is hetzelfde als de Name in dit geval (aanname)
-                    FixtureId = tempFixture.Name
+                    FixtureId = tempFixture.Name,
+
+                    // Bereken het volgende beschikbare DMX adres
+                    StartAddress = GetNextAvailableChannel(),
                 };
 
                 // Voeg de nieuwe fixture toe aan de scene
@@ -267,7 +274,7 @@ public partial class SceneEditorViewModel : ObservableObject
 
             // Reload the scene from repository to get the updated version
             var updatedScene = await _sceneRepository.GetSceneByIdAsync(Scene.Id);
-            
+
             if (updatedScene != null)
             {
                 LoadScene(updatedScene);
@@ -315,7 +322,7 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             // We controleren op null om crashes te voorkomen
             int channelCount = sf.Fixture.Channels?.Count ?? 0;
-            var endChannel = sf.StartChannel + channelCount - 1;
+            var endChannel = sf.Fixture.StartAddress + channelCount - 1;
             if (endChannel > maxChannel)
             {
                 maxChannel = endChannel;
