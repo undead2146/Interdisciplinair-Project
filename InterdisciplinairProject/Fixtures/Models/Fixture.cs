@@ -17,10 +17,10 @@ namespace InterdisciplinairProject.Fixtures.Models
         [JsonPropertyName("imageBase64")]
         public string ImageBase64 { get; set; } = string.Empty;
 
-        public Fixture() { }
-
         [JsonPropertyName("imagePath")]
         public string ImagePath { get; set; } = string.Empty;
+
+        public Fixture() { }
 
         public Fixture(string name)
         {
