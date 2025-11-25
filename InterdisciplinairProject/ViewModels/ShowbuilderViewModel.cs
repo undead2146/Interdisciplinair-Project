@@ -573,7 +573,15 @@ namespace InterdisciplinairProject.ViewModels
         [RelayCommand]
         private void addScene()
         {
-            TimeLineScenes.Add(selectedScene);
+            try
+            {
+                if (selectedScene != null)
+                {
+                    TimeLineScenes.Add(selectedScene);
+                    selectedScene = null;
+                }
+            }
+            catch (OperationCanceledException) { }
         }
     }
 }
