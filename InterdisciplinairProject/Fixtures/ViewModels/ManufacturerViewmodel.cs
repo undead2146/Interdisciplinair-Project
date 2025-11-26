@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -57,6 +58,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
     {
         public event EventHandler? ManufacturersUpdated;
 
+        private readonly ManufacturerService _manufacturerService;
+
         private readonly string _rootDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "InterdisciplinairProject",
@@ -75,6 +78,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ManufacturerViewModel()
         {
+            _manufacturerService = new ManufacturerService();
+            LoadManufacturers();
+
             _centralJsonPath = Path.Combine(_rootDirectory, "manufacturers.json");
 
             // Zorg ervoor dat de root directory bestaat
@@ -98,28 +104,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public void LoadManufacturers()
         {
             Manufacturers.Clear();
-
-            try
+            foreach (var name in _manufacturerService.GetManufacturers())
             {
-                var names = Directory.GetDirectories(_rootDirectory)
-                                     .Select(Path.GetFileName)
-                                     .Where(name => name != null)
-                                     .ToList();
-
-                foreach (var name in names.OrderBy(n => n))
-                {
-                    if (!string.IsNullOrWhiteSpace(name))
-                    {
-                        // Strikte controle: alleen fabrikanten uit de map toevoegen
-                        bool isEmpty = IsManufacturerEmpty(name!);
-                        Manufacturers.Add(new ManufacturerItem(name!, isEmpty));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // VERTALING: Fout bij het laden van fabrikanten
-                MessageBox.Show($"Error loading manufacturers: {ex.Message}", "Loading Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                bool isEmpty = IsManufacturerEmpty(name);
+                Manufacturers.Add(new ManufacturerItem(name, isEmpty));
             }
         }
 

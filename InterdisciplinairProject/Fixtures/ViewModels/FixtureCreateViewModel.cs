@@ -102,13 +102,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-
+            LoadManufacturers();
+            RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
                 Directory.CreateDirectory(unknownDir);
-
-            LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
             DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
@@ -142,30 +141,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /*********** MANUFACTURERS SAVEN & LOADEN ***********/
         private void LoadManufacturers()
         {
-            string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
+            AvailableManufacturers = _manufacturerService.LoadManufacturersFromJson();
 
-            if (File.Exists(jsonPath))
-            {
-                try
-                {
-                    var json = File.ReadAllText(jsonPath);
-                    var manufacturers = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
-                    AvailableManufacturers = manufacturers;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Failed to load manufacturers JSON:\n{ex.Message}",
-                                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AvailableManufacturers = new List<string> { "Unknown" };
-                }
-            }
-            else
-            {
-                AvailableManufacturers = new List<string> { "Unknown" };
-            }
+            if (AvailableManufacturers.Count == 0)
+                AvailableManufacturers = _manufacturerService.GetManufacturers();
 
+            if (!AvailableManufacturers.Contains("Unknown"))
+                AvailableManufacturers.Insert(0, "Unknown");
         }
 
         private void ExecuteRegisterManufacturer()
@@ -183,7 +168,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 LoadManufacturers();
                 SelectedManufacturer = name;
-                SaveManufacturersToJson();
 
                 MessageBox.Show($"Manufacturer '{name}' saved succesfully.",
                                 "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -197,27 +181,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        private void SaveManufacturersToJson()
+        /*********** FIXTURES SAVEN ***********/
+        private string SanitizeFileName(string name)
         {
-            try
-            {
-                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
-
-                Directory.CreateDirectory(_dataDir);
-
-                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                });
-
-                File.WriteAllText(jsonPath, json);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to save manufacturers JSON:\n{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
+            string invalidRegex = string.Format(@"[{0}]", invalidChars);
+            return Regex.Replace(name, invalidRegex, "_");
         }
 
         private void SaveFixture()
@@ -352,13 +321,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     MessageBox.Show($"unable to Load image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-        }
-
-        private string SanitizeFileName(string name)
-        {
-            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
-            string invalidRegex = string.Format(@"[{0}]", invalidChars);
-            return Regex.Replace(name, invalidRegex, "_");
         }
 
         public partial class ChannelItem : ObservableObject
