@@ -219,17 +219,27 @@ public partial class SceneEditorViewModel : ObservableObject
             if (tempFixture != null)
             {
                 // Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
-                // Dictionary<string, byte?> en Dictionary<string, string> die Core.Models.Fixture verwacht.
-                var channelDictionary = new Dictionary<string, byte?>();
+                // ObservableCollection<Channel> die Core.Models.Fixture verwacht.
+                var channels = new ObservableCollection<InterdisciplinairProject.Core.Models.Channel>();
                 var descriptionDictionary = new Dictionary<string, string>();
 
                 int channelIndex = 1;
-                foreach (var channel in tempFixture.DefinitionChannels)
+                foreach (var channel in tempFixture.Channels)
                 {
                     string channelKey = $"Ch{channelIndex}";
 
-                    // Voeg toe aan de channels dictionary (met default DMX waarde 0)
-                    channelDictionary.Add(channelKey, 0);
+                    // Voeg toe aan de channels collection
+                    channels.Add(new InterdisciplinairProject.Core.Models.Channel
+                    {
+                        Name = channelKey,
+                        Type = channel.Type,
+                        Value = "0",
+                        Parameter = 0,
+                        Min = channel.Min,
+                        Max = channel.Max,
+                        Time = channel.Time,
+                        ChannelEffect = channel.ChannelEffect,
+                    });
 
                     // Creëer de beschrijving (bijv. "Ch1: Dimmer - General intensity")
                     string description = $"{channelKey}: {channel.Type} - {channel.Name}";
@@ -247,8 +257,8 @@ public partial class SceneEditorViewModel : ObservableObject
                     Name = tempFixture.Name,
                     Manufacturer = tempFixture.Manufacturer,
 
-                    // Wijs de geconverteerde dictionaries toe
-                    Channels = channelDictionary,
+                    // Wijs de geconverteerde collection toe
+                    Channels = channels,
                     ChannelDescriptions = descriptionDictionary,
 
                     // Zorg ervoor dat Id uniek is voor de instance.

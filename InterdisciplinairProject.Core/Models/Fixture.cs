@@ -22,10 +22,8 @@ public class Fixture : INotifyPropertyChanged
         Name = string.Empty;
         Manufacturer = string.Empty;
         Description = string.Empty;
-        Channels = new Dictionary<string, byte?>();
         ChannelDescriptions = new Dictionary<string, string>();
-        ChannelTypes = new Dictionary<string, ChannelType>();
-        ChannelEffects = new Dictionary<string, List<ChannelEffect>>();
+        Channels = new ObservableCollection<Channel>();
     }
 
     /// <summary>
@@ -67,10 +65,10 @@ public class Fixture : INotifyPropertyChanged
     public string Description { get; set; }
 
     /// <summary>
-    /// Gets or sets the channels of the fixture with their current values.
+    /// Gets or sets the definition channels for this fixture.
     /// </summary>
     [JsonPropertyName("channels")]
-    public Dictionary<string, byte?> Channels { get; set; }
+    public ObservableCollection<Channel> Channels { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the channel descriptions (e.g., "Ch1: Dimmer - General intensity").
@@ -80,14 +78,7 @@ public class Fixture : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the channel types.
     /// </summary>
-    public Dictionary<string, ChannelType> ChannelTypes { get; set; }
-
-    /// <summary>
-    /// Gets or sets the channel effects (e.g., fade-in, fade-out per channel).
-    /// Key is the channel name (e.g., "Ch1"), value is a list of effects.
-    /// </summary>
-    [JsonPropertyName("channelEffects")]
-    public Dictionary<string, List<ChannelEffect>> ChannelEffects { get; set; }
+    public Dictionary<string, ChannelType> ChannelTypes { get; set; } = new();
 
     /// <summary>
     /// Gets the total number of channels in this fixture.
@@ -131,12 +122,6 @@ public class Fixture : INotifyPropertyChanged
     /// </summary>
     [JsonPropertyName("imagePath")]
     public string ImagePath { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the definition channels for this fixture.
-    /// </summary>
-    [JsonPropertyName("channels")]
-    public ObservableCollection<Channel> DefinitionChannels { get; set; } = new();
 
     /// <summary>
     /// Raises the <see cref="PropertyChanged"/> event.
