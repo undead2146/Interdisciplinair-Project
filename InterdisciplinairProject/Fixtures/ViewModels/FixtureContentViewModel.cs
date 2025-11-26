@@ -73,7 +73,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.Channels)
+                foreach (var c in parsed.DefinitionChannels)
                 {
                     // FIX: capture local variable for correct TestCommand
                     var channelCopy = c;

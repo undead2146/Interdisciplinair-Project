@@ -100,9 +100,10 @@ namespace InterdisciplinairProject.ViewModels
                             FadeOutMs = scene.FadeOutMs,
                             Fixtures = scene.Fixtures?.Select(f => new Fixture
                             {
-                                Id = f.Id,
-                                InstanceId = f.Id, // Use fixture ID as instance ID for now
+                                InstanceId = f.InstanceId,
+                                FixtureId = f.FixtureId,
                                 Name = f.Name,
+                                Manufacturer = f.Manufacturer,
                                 Dimmer = 0
                             }).ToList()
                         };
