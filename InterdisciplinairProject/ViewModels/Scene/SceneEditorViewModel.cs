@@ -213,8 +213,8 @@ public partial class SceneEditorViewModel : ObservableObject
 
         try
         {
-            // Deserialiseer de JSON naar het Fixtures.Models.Fixture type
-            var tempFixture = JsonSerializer.Deserialize<InterdisciplinairProject.Fixtures.Models.FixtureJSON>(json);
+            // Deserialiseer de JSON naar het Core.Models.Fixture type
+            var tempFixture = JsonSerializer.Deserialize<InterdisciplinairProject.Core.Models.Fixture>(json);
 
             if (tempFixture != null)
             {
@@ -224,7 +224,7 @@ public partial class SceneEditorViewModel : ObservableObject
                 var descriptionDictionary = new Dictionary<string, string>();
 
                 int channelIndex = 1;
-                foreach (var channel in tempFixture.Channels)
+                foreach (var channel in tempFixture.DefinitionChannels)
                 {
                     string channelKey = $"Ch{channelIndex}";
 

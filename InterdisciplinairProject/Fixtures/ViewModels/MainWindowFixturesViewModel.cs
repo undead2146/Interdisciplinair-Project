@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.IO;
@@ -16,14 +16,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private FixtureJSON? _selectedFixture;
+        private Fixture? _selectedFixture;
 
         [ObservableProperty]
         private object currentViewModel;
 
         public event EventHandler? DeleteRequested;
 
-        public FixtureJSON? SelectedFixture
+        public Fixture? SelectedFixture
         {
             get => _selectedFixture;
             set

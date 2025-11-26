@@ -98,7 +98,7 @@ namespace InterdisciplinairProject.ViewModels
                             Dimmer = 0,
                             FadeInMs = scene.FadeInMs,
                             FadeOutMs = scene.FadeOutMs,
-                            Fixtures = scene.Fixtures?.Select(f => new ShowFixture
+                            Fixtures = scene.Fixtures?.Select(f => new Fixture
                             {
                                 Id = f.Id,
                                 InstanceId = f.Id, // Use fixture ID as instance ID for now
