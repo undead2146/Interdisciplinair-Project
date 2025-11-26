@@ -2,19 +2,18 @@
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Fixtures.ViewModels;
+using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
 using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Windows;
-using InterdisciplinairProject.Fixtures.Views;
-using InterdisciplinairProject.Fixtures.ViewModels;
 using System.Linq;
-using System.Collections.Generic;
 using System.Text.Json;
-using InterdisciplinairProject.Fixtures.Models;
+using System.Windows;
+using SceneModel = InterdisciplinairProject.Core.Models.Scene;
 
-namespace InterdisciplinairProject.ViewModels;
+namespace InterdisciplinairProject.ViewModels.SceneEditor;
 
 /// <summary>
 /// ViewModel for editing a scene.
@@ -23,10 +22,11 @@ public partial class SceneEditorViewModel : ObservableObject
 {
     private readonly ISceneRepository _sceneRepository;
     private readonly IFixtureRepository _fixtureRepository;
+    private readonly IFixtureRegistry _fixtureRegistry;
     private readonly IHardwareConnection _hardwareConnection;
 
     [ObservableProperty]
-    private Scene _scene = new();
+    private SceneModel _scene = new();
 
     [ObservableProperty]
     private ObservableCollection<SceneFixture> _sceneFixtures = new();
@@ -34,11 +34,6 @@ public partial class SceneEditorViewModel : ObservableObject
     [ObservableProperty]
     private SceneFixture? _selectedFixture;
     
-    /// <summary>
-    /// Event raised when the scene has been updated.
-    /// </summary>
-    public event EventHandler<Scene>? SceneUpdated;
-
     [ObservableProperty]
     private object? _currentView;
 
@@ -47,19 +42,26 @@ public partial class SceneEditorViewModel : ObservableObject
     /// </summary>
     /// <param name="sceneRepository">The scene repository.</param>
     /// <param name="fixtureRepository">The fixture repository.</param>
+    /// <param name="fixtureRegistry">The fixture registry.</param>
     /// <param name="hardwareConnection">The hardware connection.</param>
-    public SceneEditorViewModel(ISceneRepository sceneRepository, IFixtureRepository fixtureRepository, IHardwareConnection hardwareConnection)
+    public SceneEditorViewModel(ISceneRepository sceneRepository, IFixtureRepository fixtureRepository, IFixtureRegistry fixtureRegistry, IHardwareConnection hardwareConnection)
     {
         _sceneRepository = sceneRepository;
         _fixtureRepository = fixtureRepository;
+        _fixtureRegistry = fixtureRegistry;
         _hardwareConnection = hardwareConnection;
     }
+
+    /// <summary>
+    /// Event raised when the scene has been updated.
+    /// </summary>
+    public event EventHandler<SceneModel>? SceneUpdated;
 
     /// <summary>
     /// Loads a scene for editing.
     /// </summary>
     /// <param name="scene">The scene to load.</param>
-    public void LoadScene(Scene scene)
+    public void LoadScene(SceneModel scene)
     {
         if (scene == null)
         {
@@ -69,13 +71,11 @@ public partial class SceneEditorViewModel : ObservableObject
         Scene = scene;
         SceneFixtures.Clear();
 
-        var currentChannel = 1;
         if (scene.Fixtures != null)
         {
             foreach (var fixture in scene.Fixtures)
             {
-                SceneFixtures.Add(new SceneFixture { Fixture = fixture, StartChannel = currentChannel });
-                currentChannel += fixture.Channels.Count;
+                SceneFixtures.Add(new SceneFixture { Fixture = fixture, StartChannel = fixture.StartAddress });
             }
         }
     }
@@ -162,13 +162,13 @@ public partial class SceneEditorViewModel : ObservableObject
         try
         {
             var fixtureListViewModel = new FixtureListViewModel();
-            
+
             // Abonneren op het FixtureSelected event
             fixtureListViewModel.FixtureSelected += FixtureListViewModel_FixtureSelected;
 
             CurrentView = new FixtureListView
             {
-                DataContext = fixtureListViewModel
+                DataContext = fixtureListViewModel,
             };
         }
         catch (Exception ex)
@@ -179,7 +179,7 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Event handler om de geselecteerde fixture toe te voegen
+    /// Event handler om de geselecteerde fixture toe te voegen.
     /// </summary>
     private void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
@@ -200,7 +200,6 @@ public partial class SceneEditorViewModel : ObservableObject
             {
                 // Converteer de ObservableCollection<Fixtures.Models.Channel> naar de
                 // Dictionary<string, byte?> en Dictionary<string, string> die Core.Models.Fixture verwacht.
-
                 var channelDictionary = new Dictionary<string, byte?>();
                 var descriptionDictionary = new Dictionary<string, string>();
 
@@ -231,8 +230,9 @@ public partial class SceneEditorViewModel : ObservableObject
 
                     // Zorg ervoor dat Id uniek is voor de instance.
                     InstanceId = Guid.NewGuid().ToString(),
+
                     // De Id van de Fixture Type is hetzelfde als de Name in dit geval (aanname)
-                    FixtureId = tempFixture.Name
+                    FixtureId = tempFixture.Name,
                 };
 
                 // Voeg de nieuwe fixture toe aan de scene
@@ -320,8 +320,8 @@ public partial class SceneEditorViewModel : ObservableObject
         foreach (var sf in SceneFixtures)
         {
             // We controleren op null om crashes te voorkomen
-            int channelCount = sf.Fixture.Channels?.Count ?? 0;
-            var endChannel = sf.StartChannel + channelCount - 1;
+            int channelCount = sf.Fixture.ChannelCount;
+            var endChannel = sf.Fixture.StartAddress + channelCount - 1;
             if (endChannel > maxChannel)
             {
                 maxChannel = endChannel;

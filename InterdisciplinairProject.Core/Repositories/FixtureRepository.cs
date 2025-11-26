@@ -1,9 +1,7 @@
-using InterdisciplinairProject.Core.Models;
 using System.Diagnostics;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using InterdisciplinairProject.Core.Interfaces;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.Core.Repositories;
 
@@ -13,7 +11,7 @@ namespace InterdisciplinairProject.Core.Repositories;
 public class FixtureRepository : IFixtureRepository
 {
     private readonly string _fixturesDirectoryPath;
-    private List<FixtureDefinition> _cachedFixtures;
+    private List<Fixture> _cachedFixtures;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FixtureRepository"/> class.
@@ -22,16 +20,16 @@ public class FixtureRepository : IFixtureRepository
     public FixtureRepository(string fixturesDirectoryPath)
     {
         _fixturesDirectoryPath = fixturesDirectoryPath;
-        _cachedFixtures = new List<FixtureDefinition>();
+        _cachedFixtures = new List<Fixture>();
     }
 
     /// <summary>
     /// Gets all fixtures from the JSON files in the fixtures directory.
     /// </summary>
     /// <returns>A list of fixtures.</returns>
-    public async Task<List<FixtureDefinition>> GetAllFixturesAsync()
+    public async Task<List<Fixture>> GetAllFixturesAsync()
     {
-        var fixtures = new List<FixtureDefinition>();
+        var fixtures = new List<Fixture>();
 
         if (!Directory.Exists(_fixturesDirectoryPath))
         {
@@ -77,7 +75,7 @@ public class FixtureRepository : IFixtureRepository
     /// </summary>
     /// <param name="fixtureId">The fixture ID.</param>
     /// <returns>The fixture, or null if not found.</returns>
-    public FixtureDefinition? GetFixtureById(string fixtureId)
+    public Fixture? GetFixtureById(string fixtureId)
     {
         // First check cached fixtures
         var fixture = _cachedFixtures.FirstOrDefault(f => f.FixtureId == fixtureId);
@@ -118,7 +116,7 @@ public class FixtureRepository : IFixtureRepository
         return null;
     }
 
-    private async Task<FixtureDefinition?> LoadFixtureFromFileAsync(string filePath)
+    private async Task<Fixture?> LoadFixtureFromFileAsync(string filePath)
     {
         var json = await File.ReadAllTextAsync(filePath);
         Debug.WriteLine($"[DEBUG] FixtureRepository: Loading fixture from {filePath}");
@@ -181,7 +179,7 @@ public class FixtureRepository : IFixtureRepository
             }
         }
 
-        var fixture = new FixtureDefinition
+        var fixture = new Fixture
         {
             FixtureId = name, // Use name as FixtureId for now
             Name = name,

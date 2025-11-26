@@ -93,4 +93,10 @@ public class Fixture
     /// Gets or sets the dimmer channel value (0..255).
     /// </summary>
     public byte Dimmer { get; set; }
+
+    /// <summary>
+    /// Gets or sets the DMX start address for this fixture (1-512).
+    /// </summary>
+    [JsonPropertyName("startAddress")]
+    public int StartAddress { get; set; } = 1;
 }
