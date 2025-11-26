@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Scene;
 
 namespace InterdisciplinairProject.Services;
 
@@ -43,33 +39,34 @@ public class SceneManager
     /// <summary>
     /// Gets the current scene loaded in memory.
     /// </summary>
-    public Features.Scene.Scene CurrentScene { get; private set; }
+    public Scene CurrentScene { get; private set; }
 
     /// <summary>
     /// Adds a fixture to the current scene as a new instance.
     /// </summary>
-    /// <param name="fixture">The fixture to add.</param>
-    public void AddFixtureToScene(Core.Models.Fixture fixture)
+    /// <param name="fixture">The fixture definition to add to the scene.</param>
+    public void AddFixtureToScene(Fixture fixture)
     {
-        var instance = new Features.Scene.SceneFixture
+        var instance = new Fixture
         {
-            FixtureId = fixture.Id,
+            FixtureId = fixture.FixtureId,
             InstanceId = Guid.NewGuid().ToString("N"),
             Name = fixture.Name,
-            Channels = new Dictionary<string, byte?>(),
+            Manufacturer = fixture.Manufacturer,
+            Description = fixture.Description,
+            Channels = new Dictionary<string, byte?>(fixture.Channels),
+            ChannelDescriptions = new Dictionary<string, string>(fixture.ChannelDescriptions),
+            ChannelTypes = new Dictionary<string, ChannelType>(fixture.ChannelTypes),
+            ChannelEffects = new Dictionary<string, List<ChannelEffect>>(fixture.ChannelEffects),
+            StartAddress = fixture.StartAddress,
         };
 
-        foreach (var ch in fixture.Channels)
-        {
-            instance.Channels[ch.Key] = ch.Value ?? 0;
-        }
-
-        CurrentScene.Fixtures.Add(instance);
+        CurrentScene.Fixtures?.Add(instance);
         Debug.WriteLine($"[DEBUG] SceneManager: Added fixture '{instance.Name}' ({instance.InstanceId}) to scene '{CurrentScene.Name}' ({CurrentScene.Id})");
         SaveSceneToFile();
     }
 
-    private Features.Scene.Scene? LoadSceneFromFile()
+    private Scene? LoadSceneFromFile()
     {
         try
         {
@@ -88,7 +85,7 @@ public class SceneManager
                 var name = sceneEl.TryGetProperty("name", out var nameEl) ? nameEl.GetString() ?? string.Empty : string.Empty;
                 var universe = sceneEl.TryGetProperty("universe", out var uEl) ? uEl.GetInt32() : 1;
 
-                var scene = new Features.Scene.Scene { Id = id, Name = name, Universe = universe };
+                var scene = new Scene { Id = id, Name = name, Universe = universe, Fixtures = new List<Fixture>() };
 
                 if (sceneEl.TryGetProperty("fixtures", out var fixturesEl) && fixturesEl.ValueKind == JsonValueKind.Array)
                 {
@@ -100,7 +97,7 @@ public class SceneManager
                             var instanceId = fixEl.TryGetProperty("instanceId", out var iId) ? iId.GetString() ?? Guid.NewGuid().ToString("N") : Guid.NewGuid().ToString("N");
                             var nameProp = fixEl.TryGetProperty("name", out var nEl) ? nEl.GetString() ?? string.Empty : string.Empty;
 
-                            var sceneFix = new Features.Scene.SceneFixture
+                            var sceneFix = new Fixture
                             {
                                 FixtureId = fixtureId,
                                 InstanceId = instanceId,
@@ -144,9 +141,9 @@ public class SceneManager
         return null;
     }
 
-    private Features.Scene.Scene CreateDefaultScene()
+    private Scene CreateDefaultScene()
     {
-        var defaultScene = new Features.Scene.Scene { Id = "default", Name = "Default Scene", Universe = 1 };
+        var defaultScene = new Scene { Id = "default", Name = "Default Scene", Universe = 1, Fixtures = new List<Fixture>() };
         return defaultScene;
     }
 
@@ -227,13 +224,13 @@ public class SceneManager
                     id = CurrentScene.Id,
                     name = CurrentScene.Name,
                     universe = CurrentScene.Universe,
-                    fixtures = CurrentScene.Fixtures.Select(f => new
+                    fixtures = CurrentScene.Fixtures?.Select(f => new
                     {
                         fixtureId = f.FixtureId,
                         instanceId = f.InstanceId,
                         name = f.Name,
                         channels = f.Channels.ToDictionary(kvp => kvp.Key, kvp => (int)(kvp.Value ?? 0)),
-                    }).ToArray(),
+                    }).ToArray() ?? Array.Empty<object>(),
                 },
             };
 

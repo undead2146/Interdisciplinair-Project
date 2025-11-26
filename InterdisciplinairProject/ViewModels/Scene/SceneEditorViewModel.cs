@@ -8,7 +8,6 @@ using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using SceneModel = InterdisciplinairProject.Core.Models.Scene;

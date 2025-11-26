@@ -3,8 +3,6 @@ using System.Text.Json;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 
-using CoreFixture = InterdisciplinairProject.Core.Models.Fixture;
-
 namespace InterdisciplinairProject.Features.Scene;
 
 /// <summary>
@@ -19,7 +17,7 @@ public class FixtureRegistry : IFixtureRegistry
     private readonly string _registryPath;
     private readonly IFixtureRepository _fixtureRepository;
     private readonly object _lock = new object();
-    private List<CoreFixture> _cachedFixtures;
+    private List<Core.Models.Fixture> _cachedFixtures;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FixtureRegistry"/> class.
@@ -35,23 +33,23 @@ public class FixtureRegistry : IFixtureRegistry
 
         Directory.CreateDirectory(appDataPath);
         _registryPath = Path.Combine(appDataPath, RegistryFileName);
-        _cachedFixtures = new List<CoreFixture>();
+        _cachedFixtures = new List<Core.Models.Fixture>();
 
         Debug.WriteLine($"[DEBUG] FixtureRegistry: Registry path set to: {_registryPath}");
     }
 
     /// <inheritdoc/>
-    public async Task<List<CoreFixture>> GetAllFixturesAsync()
+    public async Task<List<Core.Models.Fixture>> GetAllFixturesAsync()
     {
         await EnsureRegistryLoadedAsync();
         lock (_lock)
         {
-            return new List<CoreFixture>(_cachedFixtures);
+            return new List<InterdisciplinairProject.Core.Models.Fixture>(_cachedFixtures);
         }
     }
 
     /// <inheritdoc/>
-    public CoreFixture? GetFixtureById(string instanceId)
+    public Core.Models.Fixture? GetFixtureById(string instanceId)
     {
         if (string.IsNullOrWhiteSpace(instanceId))
         {
@@ -104,7 +102,7 @@ public class FixtureRegistry : IFixtureRegistry
     }
 
     /// <inheritdoc/>
-    public async Task<bool> AddFixtureAsync(CoreFixture fixture)
+    public async Task<bool> AddFixtureAsync(Core.Models.Fixture fixture)
     {
         if (fixture == null || string.IsNullOrWhiteSpace(fixture.InstanceId))
         {
@@ -164,7 +162,7 @@ public class FixtureRegistry : IFixtureRegistry
     }
 
     /// <inheritdoc/>
-    public CoreFixture? CreateFixtureInstance(string fixtureId, string instanceId, int startAddress)
+    public Core.Models.Fixture? CreateFixtureInstance(string fixtureId, string instanceId, int startAddress)
     {
         var definition = _fixtureRepository.GetFixtureById(fixtureId);
         if (definition == null)
@@ -173,7 +171,7 @@ public class FixtureRegistry : IFixtureRegistry
             return null;
         }
 
-        var instance = new CoreFixture
+        var instance = new Core.Models.Fixture
         {
             FixtureId = definition.FixtureId,
             InstanceId = instanceId,
@@ -223,10 +221,10 @@ public class FixtureRegistry : IFixtureRegistry
     {
         try
         {
-            List<CoreFixture> toExport;
+            List<Core.Models.Fixture> toExport;
             lock (_lock)
             {
-                toExport = new List<CoreFixture>(_cachedFixtures);
+                toExport = new List<Core.Models.Fixture>(_cachedFixtures);
             }
 
             var options = new JsonSerializerOptions
@@ -284,7 +282,7 @@ public class FixtureRegistry : IFixtureRegistry
         try
         {
             // First, try to load from the registry file
-            var fixtures = new List<CoreFixture>();
+            var fixtures = new List<Core.Models.Fixture>();
 
             if (File.Exists(_registryPath))
             {
@@ -317,10 +315,10 @@ public class FixtureRegistry : IFixtureRegistry
     {
         try
         {
-            List<CoreFixture> toSave;
+            List<Core.Models.Fixture> toSave;
             lock (_lock)
             {
-                toSave = new List<CoreFixture>(_cachedFixtures);
+                toSave = new List<Core.Models.Fixture>(_cachedFixtures);
             }
 
             var options = new JsonSerializerOptions
@@ -358,9 +356,9 @@ public class FixtureRegistry : IFixtureRegistry
         }
     }
 
-    private List<CoreFixture> ParseMultipleFixtures(string json)
+    private List<Core.Models.Fixture> ParseMultipleFixtures(string json)
     {
-        var fixtures = new List<CoreFixture>();
+        var fixtures = new List<Core.Models.Fixture>();
 
         try
         {
@@ -397,7 +395,7 @@ public class FixtureRegistry : IFixtureRegistry
         return fixtures;
     }
 
-    private CoreFixture? ParseFixtureElement(JsonElement element)
+    private Core.Models.Fixture? ParseFixtureElement(JsonElement element)
     {
         try
         {
@@ -501,12 +499,13 @@ public class FixtureRegistry : IFixtureRegistry
                             // Parse ChannelEffect if needed, for now assume it's simple
                             effects.Add(new ChannelEffect()); // Placeholder
                         }
+
                         channelEffects[channelEffectProp.Name] = effects;
                     }
                 }
             }
 
-            return new CoreFixture
+            return new Core.Models.Fixture
             {
                 FixtureId = fixtureId ?? string.Empty,
                 InstanceId = instanceId,
