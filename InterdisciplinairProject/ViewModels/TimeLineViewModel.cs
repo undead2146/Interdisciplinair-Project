@@ -13,8 +13,9 @@ namespace InterdisciplinairProject.ViewModels
 {
     public partial class TimeLineViewModel : ObservableObject
     {
-        private readonly ShowScene? _sceneModel;
+        private readonly TimelineShowScene? _sceneModel;
         private readonly ShowbuilderViewModel? _parentShowVm;
+
 
         // cancellation for play animation
         private CancellationTokenSource? _playCts;
@@ -22,7 +23,7 @@ namespace InterdisciplinairProject.ViewModels
         // suppress pushing changes back to parent when they originate from the model (e.g. fades)
         private bool _suppressParentUpdate;
 
-        public TimeLineViewModel(ShowScene? scene = null, ShowbuilderViewModel? parentShowVm = null)
+        public TimeLineViewModel(TimelineShowScene? scene = null, ShowbuilderViewModel? parentShowVm = null)
         {
             _sceneModel = scene;
             _parentShowVm = parentShowVm;
@@ -37,16 +38,16 @@ namespace InterdisciplinairProject.ViewModels
         {
             if (_sceneModel == null) return;
 
-            if (e.PropertyName == nameof(ShowScene.Id) || e.PropertyName == nameof(ShowScene.Name))
+            if (e.PropertyName == nameof(TimelineShowScene.Id) || e.PropertyName == nameof(TimelineShowScene.ShowScene.Name))
             {
                 OnPropertyChanged(nameof(Id));
                 OnPropertyChanged(nameof(Name));
             }
         }
 
-        public ShowScene? SceneModel => _sceneModel;
-        public string? Id => _sceneModel?.Id;
-        public string? Name => _sceneModel?.Name;
+        public TimelineShowScene? SceneModel => _sceneModel;
+        public int? Id => _sceneModel.Id;
+        public string? Name => _sceneModel?.ShowScene.Name;
 
         // Play command: always fade to 100% over the configured FadeInMs.
         [RelayCommand]
@@ -58,7 +59,7 @@ namespace InterdisciplinairProject.ViewModels
             // ensure fixtures list is visible immediately
             if (_parentShowVm != null && _sceneModel != null)
             {
-                _parentShowVm.SelectedTimelineScene = _sceneModel;
+                _parentShowVm.SelectedTimelineScene = _sceneModel.ShowScene;
             }
 
             // If we have a parent show VM, ask it to orchestrate fade-out of others
@@ -66,7 +67,7 @@ namespace InterdisciplinairProject.ViewModels
             {
                 try
                 {
-                    await _parentShowVm.FadeToAndActivateAsync(_sceneModel, 100);
+                    await _parentShowVm.FadeToAndActivateAsync(_sceneModel.ShowScene, 100);
                 }
                 catch (OperationCanceledException) { }
                 return;
@@ -97,7 +98,7 @@ namespace InterdisciplinairProject.ViewModels
             };
 
             // Create a SceneControlViewModel for the settings window
-            var settingsVm = new SceneControlViewModel(_sceneModel, _parentShowVm);
+            var settingsVm = new SceneControlViewModel(_sceneModel.ShowScene, _parentShowVm);
             window.DataContext = settingsVm;
 
             window.ShowDialog();

@@ -290,7 +290,7 @@
                                     BorderBrush="#1976D2"
                                     BorderThickness="2"
                                     ToolTip="Add scene to timeline"
-                                    Command="{Binding addSceneCommand}">
+                                    Command="{Binding AddSceneToTimelineCommand}">
                                 <Button.Resources>
                                     <Style TargetType="Border">
                                         <Setter Property="CornerRadius" Value="6"/>

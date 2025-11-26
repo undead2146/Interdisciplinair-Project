@@ -23,7 +23,9 @@ namespace InterdisciplinairProject.ViewModels
         private string? _currentShowPath;
 
         public ObservableCollection<ShowScene> Scenes { get; } = new();
-        public ObservableCollection<ShowScene> TimeLineScenes { get; } = new();
+        public ObservableCollection<TimelineShowScene> TimeLineScenes { get; } = new();
+
+        private int id = 1;
 
         [ObservableProperty]
         private ShowScene? selectedScene;
@@ -580,19 +582,27 @@ namespace InterdisciplinairProject.ViewModels
             }
         }
         [RelayCommand]
-        private void addScene()
+        private void AddSceneToTimeline()
         {
+            if(selectedScene == null)
+            {
+                return;
+            }
             try
             {
-                if (selectedScene != null)
+                TimelineShowScene scene = new TimelineShowScene();
+                scene.ShowScene = selectedScene;
+                scene.Id = id;
+                if (scene.ShowScene != null)
                 {
-                    TimeLineScenes.Add(selectedScene);
+                    TimeLineScenes.Add(scene);
                 }
+                id++;
             }
             catch (OperationCanceledException) { }
         }
 
-        public void MoveTimelineScene(ShowScene scene, string direction)
+        public void MoveTimelineScene(TimelineShowScene scene, string direction)
         {
             if (scene == null) return;
             int index = TimeLineScenes.IndexOf(scene);
@@ -611,14 +621,14 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         [RelayCommand]
-        private void DeleteTimelineScene(ShowScene? scene)
+        private void DeleteTimelineScene(TimelineShowScene? scene)
         {
             if (scene == null)
                 return;
 
             // Ask for confirmation before deleting
             var result = MessageBox.Show(
-                $"Weet je zeker dat je de scene '{scene.Name}' wilt verwijderen?",
+                $"Weet je zeker dat je de scene '{scene.ShowScene.Name}' wilt verwijderen?",
                 "Bevestig verwijderen",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -630,7 +640,8 @@ namespace InterdisciplinairProject.ViewModels
             if (TimeLineScenes.Contains(scene))
                 TimeLineScenes.Remove(scene);
 
-            Message = $"Scene '{scene.Name}' verwijderd.";
+            Message = $"Scene '{scene.ShowScene.Name}' verwijderd.";
         }
+
     }
 }

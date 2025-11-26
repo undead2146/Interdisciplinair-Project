@@ -115,7 +115,7 @@
                     </Button.Template>
                 </Button>
 
-                <TextBlock Text="{Binding Id}"
+                <TextBlock Text="{Binding Name }"
                            FontWeight="SemiBold"
                            FontSize="16"
                            Foreground="#2C3E50"

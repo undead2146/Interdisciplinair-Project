@@ -17,12 +17,25 @@ namespace InterdisciplinairProject.Views
             Loaded += SceneControl_Loaded;
         }
 
+        public TimelineShowScene TimelineSceneModel
+        {
+            get { return (TimelineShowScene) GetValue(SceneModelProperty); }
+            set { SetValue(SceneModelProperty, value); }
+        }
+
+        public static readonly DependencyProperty SceneModelProperty =
+            DependencyProperty.Register(
+                "sceneModel",
+                typeof(TimelineShowScene),
+                typeof(TimelineScene),
+                new PropertyMetadata(null));
+
         private void SceneControl_Loaded(object? sender, RoutedEventArgs e)
         {
             // If the DataContext provided by the ItemsControl is a ShowScene model,
             // replace it with a TimeLineViewModel that wraps the model and
             // has a reference to the parent ShowbuilderViewModel.
-            if (DataContext is ShowScene sceneModel)
+            if (DataContext is TimelineShowScene sceneModel)
             {
                 var parentShowVm = FindParentShowbuilderViewModel();
                 this.DataContext = new TimeLineViewModel(sceneModel, parentShowVm);
