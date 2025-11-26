@@ -2,11 +2,108 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:InterdisciplinairProject.Fixtures.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
+             xmlns:conv="clr-namespace:InterdisciplinairProject.Fixtures.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance vm:ManufacturerViewModel}">
+
+    <UserControl.Resources>
+        <conv:ManufacturerBoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <conv:ManufacturerInverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <conv:ManufacturerDeleteButtonForegroundConverter x:Key="DeleteButtonForegroundConverter"/>
+
+        <Style x:Key="TitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <DataTemplate x:Key="ManufacturerItemTemplate" DataType="{x:Type vm:ManufacturerItem}">
+            <Grid Margin="0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" 
+                           VerticalAlignment="Center" 
+                           Text="{Binding Name}"
+                           FontSize="14"
+                           Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+
+                <TextBox Grid.Column="0" 
+                         VerticalAlignment="Center" 
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="14"
+                         Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <Button Grid.Column="2" 
+                        Content="✎ Edit" 
+                        Margin="5,0"
+                        Command="{Binding DataContext.StartEditCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                        CommandParameter="{Binding}"
+                        Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                        IsEnabled="{Binding IsSystemItem, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" 
+                            Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <Button Content="✔ Save" 
+                            Margin="5,0,0,0"
+                            Foreground="Green"
+                            Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                            CommandParameter="{Binding}"/>
+
+                    <Button Content="✘ Cancel" 
+                            Margin="5,0,0,0"
+                            Foreground="Red"
+                            Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                            CommandParameter="{Binding}"/>
+                </StackPanel>
+
+                <Button Grid.Column="3" 
+                        Content="🗑 Delete" 
+                        Margin="5,0"
+                        Command="{Binding DataContext.DeleteManufacturerCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                        CommandParameter="{Binding}"
+                        Foreground="{Binding IsEmpty, Converter={StaticResource DeleteButtonForegroundConverter}}"
+                        IsEnabled="{Binding IsEmpty}" />
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Manufacturer Management" Style="{StaticResource TitleStyle}"/>
+
+
+        <ListView Grid.Row="2" 
+                  ItemsSource="{Binding Manufacturers}" 
+                  ItemTemplate="{StaticResource ManufacturerItemTemplate}"
+                  HorizontalContentAlignment="Stretch"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="BorderBrush" Value="LightGray"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="Padding" Value="0,5"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEmpty}" Value="True">
+                            <Setter Property="Background" Value="#F8F8F8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
 </UserControl>
