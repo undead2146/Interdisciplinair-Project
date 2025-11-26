@@ -1,12 +1,17 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
 /// Represents a fixture instance in a scene with its current channel values.
 /// </summary>
-public class Fixture
+public class Fixture : INotifyPropertyChanged
 {
+    private byte _dimmer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Fixture"/> class.
     /// </summary>
@@ -22,6 +27,11 @@ public class Fixture
         ChannelTypes = new Dictionary<string, ChannelType>();
         ChannelEffects = new Dictionary<string, List<ChannelEffect>>();
     }
+
+    /// <summary>
+    /// Occurs when a property value changes.
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Gets or sets the unique identifier of the fixture type.
@@ -92,11 +102,48 @@ public class Fixture
     /// <summary>
     /// Gets or sets the dimmer channel value (0..255).
     /// </summary>
-    public byte Dimmer { get; set; }
+    [JsonIgnore]
+    public byte Dimmer
+    {
+        get => _dimmer;
+        set
+        {
+            if (_dimmer == value) return;
+            _dimmer = value;
+            OnPropertyChanged(nameof(Dimmer));
+        }
+    }
 
     /// <summary>
     /// Gets or sets the DMX start address for this fixture (1-512).
     /// </summary>
     [JsonPropertyName("startAddress")]
     public int StartAddress { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the base64 encoded image for this fixture.
+    /// </summary>
+    [JsonPropertyName("imageBase64")]
+    public string ImageBase64 { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the image path for this fixture.
+    /// </summary>
+    [JsonPropertyName("imagePath")]
+    public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the definition channels for this fixture.
+    /// </summary>
+    [JsonPropertyName("channels")]
+    public ObservableCollection<Channel> DefinitionChannels { get; set; } = new();
+
+    /// <summary>
+    /// Raises the <see cref="PropertyChanged"/> event.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }
