@@ -13,7 +13,7 @@
         <converters:Base64ToImageConverter  x:Key="Base64ToImageC"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityC"/>
     </UserControl.Resources>
-    
+
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -54,7 +54,6 @@
             <!-- RECHTER BLOK: Afbeelding -->
             <Border Grid.Column="1" Padding="12" Background="#f5f5f5" CornerRadius="6">
                 <Grid>
-                    <!-- De afbeelding -->
                     <Image x:Name="FixturePreview"
                            Source="{Binding ImageBase64, Converter={StaticResource Base64ToImageC}}"
                            Height="140"
@@ -68,7 +67,6 @@
                         </Image.InputBindings>
                     </Image>
 
-                    <!-- De knop (zichtbaar als er geen afbeelding is) -->
                     <Button x:Name="AddImageButton"
                             Content="Add Image"
                             Command="{Binding AddImageCommand}"
@@ -83,8 +81,6 @@
                 </Grid>
             </Border>
         </Grid>
-        
-        
 
         <Grid Grid.Row="1" Margin="0,12,0,0">
             <Button
@@ -99,6 +95,7 @@
 
         <Grid Grid.Row="2" Margin="0,12,0,0">
             <ListBox x:Name="ChannelsListBox"
+                 HorizontalAlignment="Stretch"
 				 Grid.Row="0"
 				 ItemsSource="{Binding Channels}"
 				 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
@@ -109,7 +106,15 @@
 				 PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
 				 PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
 				 Drop="ChannelsListBox_Drop"
-				 DragOver="ChannelsListBox_DragOver">
+				 DragOver="ChannelsListBox_DragOver"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
 
                 <ListBox.Resources>
                     <Style x:Key="EditingTextBoxStyle" TargetType="TextBox">
@@ -122,7 +127,7 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="0,2" Background="White" CornerRadius="3">
+                        <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="8" Background="White" CornerRadius="3">
                             <StackPanel>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -157,11 +162,10 @@
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
 
-
                                 </Grid>
 
                                 <Border x:Name="OptionsPanel"
-									Visibility="Collapsed"
+									Visibility="Visible"
 									Margin="0,6,0,0"
 									Padding="6"
 									Background="#F5F7FB"
@@ -174,9 +178,7 @@
 											  SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 											  Width="180"/>
 
-                                        <!-- SLIDER input -->
                                         <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
                                             <Slider Minimum="0" Maximum="255"
 												Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 												TickFrequency="{Binding TickFrequency}"
@@ -187,9 +189,8 @@
                                                     />
                                             <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
-                                        
+
                                         <StackPanel x:Name="degreePanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
                                             <Slider Minimum="0" Maximum="180"
 									            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 									            TickFrequency="{Binding TickFrequency}"
@@ -202,7 +203,6 @@
                                         </StackPanel>
 
                                         <StackPanel x:Name="degreeFullPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
                                             <Slider Minimum="0" Maximum="360"
                                                     Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     TickFrequency="{Binding TickFrequency}"
@@ -213,11 +213,6 @@
                                                     />
                                             <TextBlock x:Name="sliderDegreeFullValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
-
-
-
-
-
 
                                         <StackPanel x:Name="CustomPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
@@ -251,17 +246,15 @@
                                                 </Grid>
                                             </StackPanel>
                                         </StackPanel>
-
-                                        
                                     </StackPanel>
                                 </Border>
-                                <!-- NEW: Delete button shown only while editing -->
+
                                 <Button x:Name="DeleteButton"
 										Grid.Column="1"
 										Content="Delete"
 										Padding="6,2"
 										Margin="0,10,0,10"
-										Visibility="Collapsed"
+										Visibility="Visible"
 										Command="{Binding DataContext.DeleteChannelCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
 										CommandParameter="{Binding .}"/>
                             </StackPanel>
@@ -272,8 +265,6 @@
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
-                                
-
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
