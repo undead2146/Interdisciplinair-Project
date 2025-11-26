@@ -73,10 +73,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.DefinitionChannels)
+                foreach (var c in parsed.Channels)
                 {
                     // FIX: capture local variable for correct TestCommand
                     var channelCopy = c;
+                    if (int.TryParse(c.Value, out var param))
+                    {
+                        channelCopy.Parameter = param;
+                    }
+
                     channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
                     Channels.Add(channelCopy);
                 }
