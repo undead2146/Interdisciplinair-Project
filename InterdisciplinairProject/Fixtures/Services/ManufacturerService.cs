@@ -29,7 +29,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             _jsonPath = Path.Combine(_rootDirectory, "manufacturers.json");
         }
 
-        // ========== HELPERS ==========
+        // ========== JSON ==========
         private string Sanitize(string name)
         {
             foreach (char c in Path.GetInvalidFileNameChars())
@@ -37,7 +37,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             return name.Trim();
         }
 
-        // ========== JSON ==========
         public void SaveManufacturers(List<string> manufacturers)
         {
             var json = JsonSerializer.Serialize(manufacturers, new JsonSerializerOptions
@@ -80,10 +79,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
         }
 
-        /// <summary>
-        /// Registreert een nieuwe fabrikant en maakt de bijbehorende map aan.
-        /// (Voldoet aan requirement: folder wordt aangemaakt)
-        /// </summary>
+        // ========== SAVE MANUFACTURER ==========
         public bool RegisterManufacturer(string name)
         {
             if (string.IsNullOrWhiteSpace(name))

@@ -16,14 +16,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private Fixture? _selectedFixture;
+        private FixtureJSON? _selectedFixture;
 
         [ObservableProperty]
         private object currentViewModel;
 
         public event EventHandler? DeleteRequested;
 
-        public Fixture? SelectedFixture
+        public FixtureJSON? SelectedFixture
         {
             get => _selectedFixture;
             set

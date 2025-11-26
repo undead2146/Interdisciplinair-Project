@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Repositories;
+using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
@@ -25,6 +26,7 @@ namespace InterdisciplinairProject.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly ShowbuilderViewModel _showbuilderViewModel;
+    private readonly MainWindowFixturesViewModel _mainWindowFixturesViewModel;
     private readonly ISceneRepository _sceneRepository = null!;
     private readonly IFixtureRepository _fixtureRepository = null!;
     private readonly IHardwareConnection _hardwareConnection = null!;
@@ -90,6 +92,7 @@ public partial class MainViewModel : ObservableObject
 
         // Initialize ViewModel, e.g., load services from DI if injected
         _showbuilderViewModel = new ShowbuilderViewModel();
+        _mainWindowFixturesViewModel = new MainWindowFixturesViewModel();
         Debug.WriteLine("[DEBUG] MainViewModel initialized with OpenFixtureSettingsCommand");
 
         // Show welcome view by default
@@ -123,7 +126,7 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenFixtureBuilder()
     {
-        CurrentView = new MainWindowFixtures();
+        CurrentView = new MainWindowFixtures(_mainWindowFixturesViewModel);
         Title = "InterdisciplinairProject - Fixture Builder";
     }
 

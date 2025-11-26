@@ -269,7 +269,7 @@ public class FixtureRepository
 
             return new Fixture
             {
-                Id = fixtureId,
+                InstanceId = fixtureId,
                 Name = name ?? fixtureId,
                 Manufacturer = manufacturer ?? string.Empty,
                 Description = description ?? string.Empty,

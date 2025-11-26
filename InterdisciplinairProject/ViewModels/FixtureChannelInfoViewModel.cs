@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Fixture;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.ViewModels;
 

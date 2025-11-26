@@ -15,9 +15,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
+
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
@@ -50,13 +48,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        private Fixture _currentFixture = new Fixture();
+        private FixtureJSON _currentFixture = new FixtureJSON();
 
         public event EventHandler? FixtureSaved;
 
         public event EventHandler? BackRequested;
-
-        
 
         public ObservableCollection<ChannelItem> Channels { get; } = new();
 
@@ -74,7 +70,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddTypeBtn { get; }
 
-        public Fixture CurrentFixture
+        public FixtureJSON CurrentFixture
         {
             get => _currentFixture;
             set
@@ -116,7 +112,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+            AddImageCommand = new RelayCommand<FixtureJSON>(AddImage);
 
             if (existing != null)
             {
@@ -169,6 +165,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     LoadManufacturers();
                     SelectedManufacturer = newManufacturerName;
+                    SaveManufacturersToJson();
 
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -176,6 +173,29 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+
+        private void SaveManufacturersToJson() 
+        {
+            try
+            {
+                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
+
+                Directory.CreateDirectory(_dataDir);
+
+                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                });
+
+                File.WriteAllText(jsonPath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to save manufacturers JSON:\n{ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -290,7 +310,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void AddImage(Fixture fixture)
+        private void AddImage(FixtureJSON fixture)
         {
             var dlg = new OpenFileDialog
             {
@@ -321,11 +341,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string invalidRegex = string.Format(@"[{0}]", invalidChars);
             return Regex.Replace(name, invalidRegex, "_");
         }
-
-
-
-
-
 
         public partial class ChannelItem : ObservableObject
         {
@@ -416,7 +431,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                         _model.Value = snapped.ToString();
                 }
             }
-
 
             public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
 
