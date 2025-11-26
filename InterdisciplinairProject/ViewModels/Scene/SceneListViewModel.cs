@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 
+using Scene = InterdisciplinairProject.Core.Models.Scene;
+
 namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
@@ -64,7 +66,7 @@ public partial class SceneListViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteSelectedScene()
     {
-        if (SelectedScene != null)
+        if (SelectedScene != null && SelectedScene.Id != null)
         {
             await _sceneRepository.DeleteSceneAsync(SelectedScene.Id);
             Scenes.Remove(SelectedScene);

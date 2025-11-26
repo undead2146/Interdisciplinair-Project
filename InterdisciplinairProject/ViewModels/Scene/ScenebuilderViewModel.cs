@@ -2,11 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.ViewModels.SceneEditor;
 using InterdisciplinairProject.Views;
 using Show;
 using System.Collections.ObjectModel;
 using System.Windows;
-
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -17,6 +17,7 @@ public partial class ScenebuilderViewModel : ObservableObject
 {
     private readonly ISceneRepository _sceneRepository;
     private readonly IFixtureRepository _fixtureRepository;
+    private readonly IFixtureRegistry _fixtureRegistry;
     private readonly IHardwareConnection _hardwareConnection;
 
     [ObservableProperty]
@@ -30,14 +31,17 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// </summary>
     /// <param name="sceneRepository">The scene repository.</param>
     /// <param name="fixtureRepository">The fixture repository.</param>
+    /// <param name="fixtureRegistry">The fixture registry.</param>
     /// <param name="hardwareConnection">The hardware connection.</param>
     public ScenebuilderViewModel(
         ISceneRepository sceneRepository,
         IFixtureRepository fixtureRepository,
+        IFixtureRegistry fixtureRegistry,
         IHardwareConnection hardwareConnection)
     {
         _sceneRepository = sceneRepository;
         _fixtureRepository = fixtureRepository;
+        _fixtureRegistry = fixtureRegistry;
         _hardwareConnection = hardwareConnection;
         _ = LoadScenesAsync(); // fire-and-forget; constructor can't be async
     }
@@ -68,6 +72,7 @@ public partial class ScenebuilderViewModel : ObservableObject
                 var sceneEditorViewModel = new SceneEditorViewModel(
                     _sceneRepository,
                     _fixtureRepository,
+                    _fixtureRegistry,
                     _hardwareConnection);
 
                 sceneEditorViewModel.LoadScene(fullScene);
@@ -199,7 +204,7 @@ public partial class ScenebuilderViewModel : ObservableObject
             {
                 Title = "Selecteer scene bestanden om te importeren",
                 Filter = "JSON bestanden (*.json)|*.json|Alle bestanden (*.*)|*.*",
-                Multiselect = true
+                Multiselect = true,
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -221,7 +226,7 @@ public partial class ScenebuilderViewModel : ObservableObject
                             Id = Guid.NewGuid().ToString(),
                             Name = showModelScene.Name,
                             Dimmer = showModelScene.Dimmer,
-                            Fixtures = new System.Collections.Generic.List<InterdisciplinairProject.Core.Models.Fixture>()
+                            Fixtures = new System.Collections.Generic.List<InterdisciplinairProject.Core.Models.Fixture>(),
                         };
 
                         // Sla de scene op via repository
@@ -285,14 +290,17 @@ public partial class ScenebuilderViewModel : ObservableObject
                 if (existingScene != null)
                 {
                     var index = Scenes.IndexOf(existingScene);
+
                     // Remove and re-add to trigger ObservableCollection change notification
                     Scenes.RemoveAt(index);
                     Scenes.Insert(index, updatedScene);
+
                     // Update SelectedScene reference if it's the same scene
                     if (SelectedScene?.Id == updatedScene.Id)
                     {
                         SelectedScene = updatedScene;
                     }
+
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] Updated scene '{updatedScene.Name}' in list at index {index}");
                 }
             }
