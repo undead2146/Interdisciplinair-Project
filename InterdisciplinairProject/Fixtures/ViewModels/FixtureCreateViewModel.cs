@@ -48,6 +48,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
+        [ObservableProperty]
+        private string? newManufacturerName;
+
         private FixtureJSON _currentFixture = new FixtureJSON();
 
         public event EventHandler? FixtureSaved;
@@ -99,13 +102,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-
+            LoadManufacturers();
+            RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
                 Directory.CreateDirectory(unknownDir);
-
-            LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
             DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
@@ -139,64 +141,52 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /*********** MANUFACTURERS SAVEN & LOADEN ***********/
         private void LoadManufacturers()
         {
-            var directoryInfo = new DirectoryInfo(_dataDir);
-            var currentManufacturers = directoryInfo.GetDirectories()
-                                                    .Select(d => d.Name)
-                                                    .ToList();
-            currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
-            var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
-            var finalManufacturerList = new List<string> { "Unknown" };
-            finalManufacturerList.AddRange(sortedOtherManufacturers);
-            AvailableManufacturers = finalManufacturerList;
+            AvailableManufacturers = _manufacturerService.LoadManufacturersFromJson();
+
+            if (AvailableManufacturers.Count == 0)
+                AvailableManufacturers = _manufacturerService.GetManufacturers();
+
+            if (!AvailableManufacturers.Contains("Unknown"))
+                AvailableManufacturers.Insert(0, "Unknown");
         }
 
         private void ExecuteRegisterManufacturer()
         {
-            var registerWindow = new RegisterManufacturerWindow();
-            if (Application.Current.MainWindow != null)
-                registerWindow.Owner = Application.Current.MainWindow;
+            string name = NewManufacturerName?.Trim() ?? string.Empty;
 
-            if (registerWindow.ShowDialog() == true)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                string newManufacturerName = registerWindow.ManufacturerName;
-                if (_manufacturerService.RegisterManufacturer(newManufacturerName))
-                {
-                    LoadManufacturers();
-                    SelectedManufacturer = newManufacturerName;
-                    SaveManufacturersToJson();
+                MessageBox.Show("Manufacturer can't be empty.", "Error",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            if (_manufacturerService.RegisterManufacturer(name))
+            {
+                LoadManufacturers();
+                SelectedManufacturer = name;
+
+                MessageBox.Show($"Manufacturer '{name}' saved succesfully.",
+                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                NewManufacturerName = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show($"Manufacturer '{name}' can't be saved. Name is empty or duplicate.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void SaveManufacturersToJson() 
+        /*********** FIXTURES SAVEN ***********/
+        private string SanitizeFileName(string name)
         {
-            try
-            {
-                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
-
-                Directory.CreateDirectory(_dataDir);
-
-                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                });
-
-                File.WriteAllText(jsonPath, json);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to save manufacturers JSON:\n{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
+            string invalidRegex = string.Format(@"[{0}]", invalidChars);
+            return Regex.Replace(name, invalidRegex, "_");
         }
 
         private void SaveFixture()
@@ -303,8 +293,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void Cancel()
         {
-           
-
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 BackRequested?.Invoke(this, EventArgs.Empty);
@@ -333,13 +321,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     MessageBox.Show($"unable to Load image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-        }
-
-        private string SanitizeFileName(string name)
-        {
-            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
-            string invalidRegex = string.Format(@"[{0}]", invalidChars);
-            return Regex.Replace(name, invalidRegex, "_");
         }
 
         public partial class ChannelItem : ObservableObject
