@@ -12,11 +12,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+      
         <!-- Scene naam -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
             <TextBlock Text="Scène Naam:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Scene.Name}" Width="200" Margin="0,0,10,0" IsReadOnly="True"/>
+            <TextBlock Text="{Binding Scene.Name}" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <Button Content="Opslaan" Command="{Binding SaveSceneCommand}" Padding="10,5"/>
             <Button Command="{Binding EditSceneNameCommand}" 
                     Padding="8,5" 
@@ -49,7 +49,7 @@
                 </Button.Template>
             </Button>
         </StackPanel>
-
+       
         <!-- Fixture toevoegen knop -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
             <Button Content="Fixture Toevoegen" Command="{Binding AddFixtureCommand}" Padding="10,5"/>
@@ -61,7 +61,7 @@
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
+          
             <!-- Fixture lijst -->
             <Border Grid.Column="0" 
                     BorderBrush="#FFE0E0E0" 
@@ -71,7 +71,14 @@
                 <ListBox ItemsSource="{Binding SceneFixtures}" 
                          SelectedItem="{Binding SelectedFixture}"
                          BorderThickness="0"
-                         Margin="5">
+                         Margin="5"
+                         HorizontalContentAlignment="Stretch">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -82,27 +89,54 @@
                                 <TextBlock Grid.Column="0" 
                                            Text="{Binding Fixture.Name}" 
                                            Padding="5" 
-                                           VerticalAlignment="Center"/>
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Left"/>
                                 <Button Grid.Column="1" 
                                         Content="X" 
-                                        Foreground="Red" 
-                                        FontWeight="Bold" 
-                                        Width="20" 
-                                        Height="20" 
-                                        Padding="0"
+                                        Foreground="Red"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="14"
+                                        Padding="5,0"
+                                        Margin="5,0,0,0"
+                                        Cursor="Hand"
                                         HorizontalAlignment="Right" 
                                         VerticalAlignment="Center"
                                         ToolTip="Verwijder deze fixture"
                                         Command="{Binding DataContext.RemoveFixtureCommand, 
                                                   RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
-                                        CommandParameter="{Binding}"/>
+                                        CommandParameter="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                                BorderThickness="0"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                            VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#15000000"/>
+                                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
-
-            <!-- Fixture settings view - AANGEPAST -->
+            <!-- Fixture settings view -->
             <Border Grid.Column="1"
                     BorderBrush="#FFE0E0E0" 
                     BorderThickness="1" 

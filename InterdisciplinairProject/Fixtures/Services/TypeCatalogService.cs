@@ -29,12 +29,11 @@ namespace InterdisciplinairProject.Fixtures.Services
         private static readonly List<TypeSpecification> _defaults = new()
         {
             new TypeSpecification{ name="Custom", input="custom"},
-            new TypeSpecification{ name="testtest", input="slider", divisions=255},
             new TypeSpecification{ name="Lamp", input="slider", divisions=255},
             new TypeSpecification{ name="Star", input="slider", divisions=255},
             new TypeSpecification{ name="clock", input="slider", divisions=255},
-            new TypeSpecification{ name="Tilt", input = "slider", divisions = 255},
-            new TypeSpecification{ name="Ventilator", input = "slider", divisions = 255},
+            new TypeSpecification{ name="Tilt 180°", input = "degreeH", divisions = 180},
+            new TypeSpecification{ name="Ventilator 360°", input = "degreeF", divisions = 360},
             new TypeSpecification{ name="Red", input="slider", divisions=255},
             new TypeSpecification{ name="Green", input="slider", divisions=255},
             new TypeSpecification{ name="Blue", input="slider", divisions=255},

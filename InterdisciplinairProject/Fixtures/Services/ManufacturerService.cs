@@ -15,7 +15,7 @@ namespace InterdisciplinairProject.Fixtures.Services
         public ManufacturerService()
         {
             _rootDirectory = Path.Combine(
-                             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                              "InterdisciplinairProject",
                              "Fixtures");
 
@@ -29,7 +29,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             _jsonPath = Path.Combine(_rootDirectory, "manufacturers.json");
         }
 
-        // ========== HELPERS ==========
+        // ========== JSON ==========
         private string Sanitize(string name)
         {
             foreach (char c in Path.GetInvalidFileNameChars())
@@ -37,7 +37,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             return name.Trim();
         }
 
-        // ========== JSON ==========
         public void SaveManufacturers(List<string> manufacturers)
         {
             var json = JsonSerializer.Serialize(manufacturers, new JsonSerializerOptions
@@ -69,7 +68,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         {
             try
             {
-                // Haal alle submappen op en gebruik de mapnamen als fabrikantnamen
                 return Directory.GetDirectories(_rootDirectory)
                                 .Select(Path.GetFileName)
                                 .Where(name => name != null)
@@ -81,10 +79,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
         }
 
-        /// <summary>
-        /// Registreert een nieuwe fabrikant en maakt de bijbehorende map aan.
-        /// (Voldoet aan requirement: folder wordt aangemaakt)
-        /// </summary>
+        // ========== SAVE MANUFACTURER ==========
         public bool RegisterManufacturer(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -93,7 +88,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             string manufacturerName = Sanitize(name);
 
             // Controleer op bestaan (Voldoet aan requirement: mag niet al bestaan)
-            if (GetManufacturers().Any(m => m.Equals(manufacturerName, StringComparison.OrdinalIgnoreCase)))
+            if (GetManufacturers().Any(map => map.Equals(manufacturerName, StringComparison.OrdinalIgnoreCase)))
             {
                 return false;
             }
@@ -101,6 +96,14 @@ namespace InterdisciplinairProject.Fixtures.Services
             try
             {
                 Directory.CreateDirectory(Path.Combine(_rootDirectory, manufacturerName));
+                var manufacturers = LoadManufacturersFromJson();
+                if (!manufacturers.Contains(manufacturerName, StringComparer.OrdinalIgnoreCase))
+                {
+                    manufacturers.Add(manufacturerName);
+                    manufacturers.Sort(StringComparer.OrdinalIgnoreCase);
+                    SaveManufacturers(manufacturers);
+                }
+
                 return true;
             }
             catch (Exception)
