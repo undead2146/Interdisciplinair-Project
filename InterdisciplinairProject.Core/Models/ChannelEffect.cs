@@ -1,37 +1,7 @@
 using System.Text.Json.Serialization;
+using InterdisciplinairProject.Core.Models.Enums;
 
 namespace InterdisciplinairProject.Core.Models;
-
-/// <summary>
-/// Enumeration of effect types.
-/// </summary>
-public enum EffectType
-{
-    /// <summary>
-    /// Fade in effect.
-    /// </summary>
-    FadeIn,
-
-    /// <summary>
-    /// Fade out effect.
-    /// </summary>
-    FadeOut,
-
-    /// <summary>
-    /// Strobe effect.
-    /// </summary>
-    Strobe,
-
-    /// <summary>
-    /// Pulse effect.
-    /// </summary>
-    Pulse,
-
-    /// <summary>
-    /// Custom effect.
-    /// </summary>
-    Custom,
-}
 
 /// <summary>
 /// Represents an effect that can be applied to a fixture channel.

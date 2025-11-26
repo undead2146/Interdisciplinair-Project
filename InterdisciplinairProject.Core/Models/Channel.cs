@@ -49,8 +49,8 @@ public class Channel
     /// <summary>
     /// Gets or sets the effect type.
     /// </summary>
-    [JsonPropertyName("effectType")]
-    public string effectType { get; set; } = string.Empty;
+    [JsonPropertyName("channelEffect")]
+    public ChannelEffect ChannelEffect { get; set; } = new ChannelEffect();
 
     /// <summary>
     /// Gets or sets the test command.

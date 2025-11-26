@@ -5,8 +5,6 @@ using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Services;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -16,9 +14,11 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
 
-
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
+    /// <summary>
+    /// ViewModel for creating or editing fixtures.
+    /// </summary>
     public partial class FixtureCreateViewModel : ObservableObject
     {
         private readonly string _dataDir = Path.Combine(
@@ -26,6 +26,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                                            "InterdisciplinairProject",
                                            "Fixtures");
         private readonly bool _isEditing;
+
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
         private readonly ManufacturerService _manufacturerService;
@@ -36,9 +37,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         //partial void OnSliderDivisionsChanged(int value) => OnPropertyChanged(nameof(TickFrequency));
 
         /// <summary>
-        /// ----------------------------------------------------------------------------------------------------------------------------------
+        /// Separator.
         /// </summary>
-
         [ObservableProperty]
         private string fixtureName = "New Fixture";
 
@@ -50,26 +50,54 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private Fixture _currentFixture = new Fixture();
 
+        /// <summary>
+        /// Occurs when a fixture is saved.
+        /// </summary>
         public event EventHandler? FixtureSaved;
 
+        /// <summary>
+        /// Occurs when the user requests to go back.
+        /// </summary>
         public event EventHandler? BackRequested;
 
+        /// <summary>
+        /// Gets the collection of channels.
+        /// </summary>
         public ObservableCollection<ChannelItem> Channels { get; } = new();
 
+        /// <summary>
+        /// Gets the command to add a channel.
+        /// </summary>
         public ICommand AddChannelCommand { get; }
 
+        /// <summary>
+        /// Gets the command to delete a channel.
+        /// </summary>
         public ICommand DeleteChannelCommand { get; }
 
+        /// <summary>
+        /// Gets the command to save the fixture.
+        /// </summary>
         public ICommand SaveCommand { get; }
 
+        /// <summary>
+        /// Gets the command to cancel.
+        /// </summary>
         public ICommand CancelCommand { get; }
 
+        /// <summary>
+        /// Gets the command to register a manufacturer.
+        /// </summary>
         public ICommand RegisterManufacturerCommand { get; }
 
+        /// <summary>
+        /// Gets the command to add an image.
+        /// </summary>
         public ICommand AddImageCommand { get; }
 
-        public ICommand AddTypeBtn { get; }
-
+        /// <summary>
+        /// Gets or sets the current fixture.
+        /// </summary>
         public Fixture CurrentFixture
         {
             get => _currentFixture;
@@ -83,6 +111,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private string _imageBase64 = string.Empty;
 
+        /// <summary>
+        /// Gets or sets the base64 encoded image.
+        /// </summary>
         public string ImageBase64
         {
             get => _imageBase64;
@@ -99,7 +130,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
-
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
@@ -171,7 +201,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
                 else
                 {
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(
+                        $"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.",
+                        "Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                 }
             }
         }
@@ -194,7 +228,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 MessageBox.Show(
                     $"Failed to save manufacturers JSON:\n{ex.Message}",
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -264,8 +300,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
 
-                if (!_isEditing) {  // only go back if you were editing
-                BackRequested?.Invoke(this, EventArgs.Empty);
+                if (!_isEditing)
+                {  // only go back if you were editing
+                    BackRequested?.Invoke(this, EventArgs.Empty);
                 }
             }
             catch (IOException ioEx)
@@ -302,15 +339,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void Cancel()
         {
-           
-
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void AddImage(Fixture fixture)
+        private void AddImage(Fixture? fixture)
         {
+            if (fixture == null) return;
             var dlg = new OpenFileDialog
             {
                 Title = "Select an image",
@@ -341,6 +377,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             return Regex.Replace(name, invalidRegex, "_");
         }
 
+        /// <summary>
+        /// Represents a channel item in the fixture creation view.
+        /// </summary>
         public partial class ChannelItem : ObservableObject
         {
             private readonly Channel _model;
@@ -364,9 +403,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
             }
+
             private bool _isNameManuallyEdited = false;
 
             private string _name = "Lamp";
+
+            /// <summary>
+            /// Gets or sets the name of the channel.
+            /// </summary>
             public string Name
             {
                 get => _name;
@@ -383,6 +427,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
 
             private string _selectedType = "Lamp";
+
             public string SelectedType
             {
                 get => _selectedType;
@@ -403,6 +448,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
 
             private int _maxValue = 255;
+
+            /// <summary>
+            /// Gets or sets the maximum value.
+            /// </summary>
             public int MaxValue
             {
                 get => _maxValue;
@@ -500,7 +549,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             private void DoAddCustomType()
             {
-                var name = (CustomTypeName ?? "").Trim();
+                var name = (CustomTypeName ?? string.Empty).Trim();
                 var divisions = CustomTypeSliderValue;
 
                 if (string.IsNullOrWhiteSpace(name))

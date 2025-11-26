@@ -26,11 +26,11 @@ public partial class FixtureItemViewModel : ObservableObject
         int channelNumber = 1;
         foreach (var channel in fixture.Channels)
         {
-            var description = fixture.ChannelDescriptions.TryGetValue(channel.Key, out var desc)
+            var description = fixture.ChannelDescriptions.TryGetValue(channel.Name, out var desc)
                 ? desc
                 : string.Empty;
 
-            Channels.Add(new FixtureChannelInfoViewModel(channelNumber, channel.Key, description));
+            Channels.Add(new FixtureChannelInfoViewModel(channelNumber, channel.Name, description));
             channelNumber++;
         }
     }

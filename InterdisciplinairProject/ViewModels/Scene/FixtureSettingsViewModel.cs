@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 
@@ -78,7 +77,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         _currentFixture.CalculateChannelRatios();
 
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
-        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels);
+        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter));
 
         // Calculate initial dimmer percentage
         _dimmerPercentage = (int)Math.Round(_currentFixture.Dimmer * 100.0 / 255.0);
@@ -104,10 +103,14 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         // Update fixture channels met de huidige slider waardes (deze waarden zijn de TIJDELIJKE 'werk'-waarden)
         foreach (var channelVm in Channels)
         {
-            _currentFixture.Channels[channelVm.Name] = channelVm.Value;
+            var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
+            if (channel != null)
+            {
+                channel.Parameter = channelVm.Value;
+            }
         }
 
-        return _currentFixture.Channels;
+        return _currentFixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter);
     }
 
     /// <summary>
@@ -123,7 +126,17 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] CancelChanges called. Restoring initial values for {_currentFixture.Name}");
 
         // 1. Herstel de _currentFixture.Channels naar de oorspronkelijke (opgeslagen) waarden
-        _currentFixture.Channels = new Dictionary<string, byte?>(_initialChannelValues);
+        _currentFixture.Channels = new ObservableCollection<Channel>(_initialChannelValues.Select(kvp => new Channel
+        {
+            Name = kvp.Key,
+            Value = kvp.Value?.ToString() ?? "0",
+            Parameter = kvp.Value ?? 0,
+            Type = _currentFixture.ChannelTypes.TryGetValue(kvp.Key, out var ct) ? ct.ToString() : "Unknown",
+            Min = 0,
+            Max = 255,
+            Time = 0,
+            ChannelEffect = new ChannelEffect(),
+        }));
 
         // 2. Recalculeer de verhoudingen op basis van de herstelde waarden
         _currentFixture.CalculateChannelRatios();
@@ -151,11 +164,10 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         _currentFixture.CalculateChannelRatios();
 
         // Maak een nieuwe kopie van de HUIDIGE waarden van de _currentFixture en stel deze in als de nieuwe 'initial state'
-        _initialChannelValues = new Dictionary<string, byte?>(_currentFixture.Channels);
+        _initialChannelValues = new Dictionary<string, byte?>(_currentFixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter));
 
         Debug.WriteLine($"[DEBUG] ConfirmSave called. New initial values stored for {_currentFixture.Name}");
     }
-
 
     /// <summary>
     /// Raises the <see cref="PropertyChanged"/> event.
@@ -180,9 +192,9 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         foreach (var channel in fixture.Channels)
         {
-            var type = fixture.ChannelTypes.TryGetValue(channel.Key, out var channelType) ? channelType : ChannelType.Unknown;
-            var channelVm = new ChannelViewModel(channel.Key, channel.Value ?? 0, type);
-            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Key} = {channel.Value ?? 0}");
+            var type = fixture.ChannelTypes.TryGetValue(channel.Name, out var channelType) ? channelType : ChannelType.Unknown;
+            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type);
+            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}");
 
             // Subscribe to channel value changes
             channelVm.PropertyChanged += ChannelViewModel_PropertyChanged;
@@ -229,11 +241,11 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             // Update the fixture model (tijdelijk) en herbereken verhoudingen
             if (_currentFixture != null)
             {
-                _currentFixture.UpdateChannelValue(channelVm.Name, channelVm.Value);
-                
-                // Update dimmer percentage to reflect the change
-                _dimmerPercentage = (int)Math.Round(_currentFixture.Dimmer * 100.0 / 255.0);
-                OnPropertyChanged(nameof(DimmerPercentage));
+                var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
+                if (channel != null)
+                {
+                    channel.Parameter = channelVm.Value;
+                }
 
                 Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
 

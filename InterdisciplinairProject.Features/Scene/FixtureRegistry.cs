@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
 using InterdisciplinairProject.Core.Interfaces;
@@ -178,18 +179,21 @@ public class FixtureRegistry : IFixtureRegistry
             Name = definition.Name,
             Manufacturer = definition.Manufacturer,
             Description = definition.Description,
-            Channels = new Dictionary<string, byte?>(definition.Channels),
+            Channels = new ObservableCollection<Channel>(definition.Channels.Select(c => new Channel
+            {
+                Name = c.Name,
+                Type = c.Type,
+                Value = c.Value,
+                Parameter = c.Parameter,
+                Min = c.Min,
+                Max = c.Max,
+                Time = c.Time,
+                ChannelEffect = c.ChannelEffect,
+            })),
             ChannelDescriptions = new Dictionary<string, string>(definition.ChannelDescriptions),
-            ChannelTypes = new Dictionary<string, ChannelType>(definition.ChannelTypes),
-            ChannelEffects = new Dictionary<string, List<ChannelEffect>>(),
+            ChannelTypes = new Dictionary<string, ChannelType>(), // TODO: set properly
             StartAddress = startAddress,
         };
-
-        // Deep copy channel effects
-        foreach (var kvp in definition.ChannelEffects)
-        {
-            instance.ChannelEffects[kvp.Key] = new List<ChannelEffect>(kvp.Value);
-        }
 
         Debug.WriteLine($"[DEBUG] FixtureRegistry: Created instance '{instanceId}' from definition '{fixtureId}'");
         return instance;
@@ -245,8 +249,6 @@ public class FixtureRegistry : IFixtureRegistry
                     description = f.Description,
                     channels = f.Channels,
                     channelDescriptions = f.ChannelDescriptions,
-                    channelTypes = f.ChannelTypes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()),
-                    channelEffects = f.ChannelEffects,
                     startAddress = f.StartAddress,
                 }),
             };
@@ -339,8 +341,6 @@ public class FixtureRegistry : IFixtureRegistry
                     description = f.Description,
                     channels = f.Channels,
                     channelDescriptions = f.ChannelDescriptions,
-                    channelTypes = f.ChannelTypes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()),
-                    channelEffects = f.ChannelEffects,
                     startAddress = f.StartAddress,
                 }),
             };
@@ -412,34 +412,22 @@ public class FixtureRegistry : IFixtureRegistry
             var description = element.TryGetProperty("description", out var descProp) ? descProp.GetString() : string.Empty;
             var startAddress = element.TryGetProperty("startAddress", out var saProp) && saProp.TryGetInt32(out var sa) ? sa : 1;
 
-            var channels = new Dictionary<string, byte?>();
+            var channels = new ObservableCollection<Channel>();
             var channelDescriptions = new Dictionary<string, string>();
-            var channelTypes = new Dictionary<string, ChannelType>();
-            var channelEffects = new Dictionary<string, List<ChannelEffect>>();
 
             if (element.TryGetProperty("channels", out var channelsElement))
             {
                 if (channelsElement.ValueKind == JsonValueKind.Array)
                 {
                     // Array format: [{Name, Type, value}, ...]
-                    foreach (var channelElement in channelsElement.EnumerateArray())
+                    var list = JsonSerializer.Deserialize<List<Channel>>(channelsElement.GetRawText());
+                    if (list != null)
                     {
-                        var channelName = channelElement.GetProperty("Name").GetString() ?? string.Empty;
-                        var channelTypeStr = channelElement.TryGetProperty("Type", out var typeProp) ? typeProp.GetString() : "Unknown";
-                        var valueStr = channelElement.TryGetProperty("value", out var valProp) ? valProp.GetString() : "0";
-
-                        if (byte.TryParse(valueStr, out var value))
+                        foreach (var c in list)
                         {
-                            channels[channelName] = value;
+                            channels.Add(c);
+                            channelDescriptions[c.Name] = $"{c.Name}: {c.Type}";
                         }
-                        else
-                        {
-                            channels[channelName] = 0;
-                        }
-
-                        var channelType = Enum.TryParse<ChannelType>(channelTypeStr, true, out var parsedType) ? parsedType : ChannelType.Unknown;
-                        channelTypes[channelName] = channelType;
-                        channelDescriptions[channelName] = $"{channelName}: {channelTypeStr}";
                     }
                 }
                 else if (channelsElement.ValueKind == JsonValueKind.Object)
@@ -447,16 +435,18 @@ public class FixtureRegistry : IFixtureRegistry
                     // Dictionary format: {name: value, ...}
                     foreach (var prop in channelsElement.EnumerateObject())
                     {
-                        if (prop.Value.ValueKind == JsonValueKind.Number)
+                        var ch = new Channel
                         {
-                            channels[prop.Name] = (byte)prop.Value.GetInt32();
-                        }
-                        else
-                        {
-                            channels[prop.Name] = null;
-                        }
-
-                        channelTypes[prop.Name] = Enum.TryParse<ChannelType>(prop.Name, true, out var parsedType) ? parsedType : ChannelType.Unknown;
+                            Name = prop.Name,
+                            Value = prop.Value.ToString(),
+                            Type = "Unknown",
+                            Min = 0,
+                            Max = 255,
+                            Time = 0,
+                            ChannelEffect = new ChannelEffect(),
+                        };
+                        channels.Add(ch);
+                        channelDescriptions[prop.Name] = $"{prop.Name}: Unknown";
                     }
                 }
             }
@@ -472,39 +462,6 @@ public class FixtureRegistry : IFixtureRegistry
                 }
             }
 
-            if (element.TryGetProperty("channelTypes", out var channelTypesElement))
-            {
-                foreach (var channelTypeProp in channelTypesElement.EnumerateObject())
-                {
-                    if (channelTypeProp.Value.ValueKind == JsonValueKind.String)
-                    {
-                        var typeStr = channelTypeProp.Value.GetString();
-                        if (Enum.TryParse<ChannelType>(typeStr, true, out var parsedType))
-                        {
-                            channelTypes[channelTypeProp.Name] = parsedType;
-                        }
-                    }
-                }
-            }
-
-            if (element.TryGetProperty("channelEffects", out var channelEffectsElement))
-            {
-                foreach (var channelEffectProp in channelEffectsElement.EnumerateObject())
-                {
-                    if (channelEffectProp.Value.ValueKind == JsonValueKind.Array)
-                    {
-                        var effects = new List<ChannelEffect>();
-                        foreach (var effectElement in channelEffectProp.Value.EnumerateArray())
-                        {
-                            // Parse ChannelEffect if needed, for now assume it's simple
-                            effects.Add(new ChannelEffect()); // Placeholder
-                        }
-
-                        channelEffects[channelEffectProp.Name] = effects;
-                    }
-                }
-            }
-
             return new Core.Models.Fixture
             {
                 FixtureId = fixtureId ?? string.Empty,
@@ -514,8 +471,6 @@ public class FixtureRegistry : IFixtureRegistry
                 Description = description ?? string.Empty,
                 Channels = channels,
                 ChannelDescriptions = channelDescriptions,
-                ChannelTypes = channelTypes,
-                ChannelEffects = channelEffects,
                 StartAddress = startAddress,
             };
         }
