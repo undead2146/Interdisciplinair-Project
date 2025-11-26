@@ -228,7 +228,7 @@ namespace InterdisciplinairProject.ViewModels
 
                     _show = loadedShow;
 
-                    currentShowId = _show.Id;
+                    CurrentShowId = _show.Id;
                     CurrentShowName = _show.Name;
                     _currentShowPath = selectedPath;
 
@@ -259,7 +259,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SaveShowToPath(string path)
         {
             // Zorg dat _show up-to-date is
-            _show.Id = currentShowId ?? GenerateRandomId();
+            _show.Id = CurrentShowId ?? GenerateRandomId();
             _show.Name = CurrentShowName ?? "Unnamed Show";
             _show.Scenes = Scenes.ToList();
 

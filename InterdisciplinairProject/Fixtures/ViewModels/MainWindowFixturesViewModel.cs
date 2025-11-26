@@ -167,7 +167,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void OnFixtureDelete(string fixtureName, string manufacturerName)
         {
-            string filePath = Path.Combine(_fixturesFolder,manufacturerName, fixtureName + ".json");
+            string filePath = Path.Combine(_fixturesFolder, manufacturerName, fixtureName + ".json");
 
             if (!File.Exists(filePath))
             {
@@ -245,7 +245,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     missingFields.Add("'name'");
                 }
 
-                if (string.IsNullOrWhiteSpace(manufacturer)) 
+                if (string.IsNullOrWhiteSpace(manufacturer))
                 {
                     manufacturer = "Unknown";
                     root["manufacturer"] = manufacturer;
