@@ -87,10 +87,8 @@
             <!-- Timeline Area (Top Left White Space) -->
             <Border Grid.Column="0" 
                     Grid.Row="0" 
-                    Margin="10" 
                     BorderBrush="#B0B0B0" 
                     BorderThickness="2" 
-                    CornerRadius="8"
                     Background="White">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -101,12 +99,12 @@
 
                     <!-- Timeline Header -->
                     <Border Grid.Row="0" 
-                            Background="#2196F3" 
-                            CornerRadius="6,6,0,0" 
-                            Padding="10,8">
+                            Background="#2196F3"
+                            Height="25"
+                            Padding="5,2">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Timeline" 
-                                       FontSize="18" 
+                            <TextBlock Text="Show timeline" 
+                                       FontSize="14" 
                                        FontWeight="Bold" 
                                        Foreground="White" 
                                        VerticalAlignment="Center"/>
@@ -144,7 +142,7 @@
                                 </StackPanel>
 
                                 <ListBox x:Name="sceneTimeLineListView"
-                                      Margin="0,0,5,0"
+                                      Margin="0,0,0,0"
                                       Grid.Column="0"
                                       Grid.Row="1"
                                       ItemsSource="{Binding TimeLineScenes}"
@@ -154,18 +152,18 @@
                                       SelectionMode="Single"
                                       HorizontalContentAlignment="Center"
                                       VirtualizingStackPanel.IsVirtualizing="False">
-    <i:Interaction.Behaviors>
-        <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
-    </i:Interaction.Behaviors>
+                                    <i:Interaction.Behaviors>
+                                        <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
+                                    </i:Interaction.Behaviors>
 
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-    <StackPanel Orientation="Horizontal">
-        <i:Interaction.Behaviors>
-            <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
-        </i:Interaction.Behaviors>
-    </StackPanel>
-</ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <i:Interaction.Behaviors>
+                                                    <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
+                                                </i:Interaction.Behaviors>
+                                            </StackPanel>
+                                        </ItemsPanelTemplate>
                                     </ListBox.ItemsPanel>
 
                                     <ListBox.ItemTemplate>
@@ -314,37 +312,51 @@
                 </Grid>
             </Border>
 
+            <!-- New title + Scene list (stacked) -->
+            <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,5,0">
+                <!-- New Title: same style as Timeline header -->
+                <Border Background="#2196F3"
+                        Height="25"
+                        Padding="5,2">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Scenes panel"
+                                   FontSize="14"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
 
-            <ListBox x:Name="sceneListView"
-                     Margin="0,0,5,0"
-                     Grid.Column="0"
-                     Grid.Row="1"
-                     ItemsSource="{Binding Scenes}"
-                     BorderBrush="#CCC"
-                     BorderThickness="1"
-                     Background="#FAFAFA"
-                     SelectionMode="Single"
-                     HorizontalContentAlignment="Center">
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
+                <!-- Scenes list -->
+                <ListBox x:Name="sceneListView"
+                         Margin="0"
+                         ItemsSource="{Binding Scenes}"
+                         BorderBrush="#CCC"
+                         BorderThickness="1"
+                         Background="#FAFAFA"
+                         SelectionMode="Single"
+                         HorizontalContentAlignment="Center">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
 
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <!-- Let the Scene item be the DataContext for SceneControl -->
-                        <views:SceneControl x:Name="scenecontrol" Margin="0" DataContext="{Binding}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Let the Scene item be the DataContext for SceneControl -->
+                            <views:SceneControl x:Name="scenecontrol" Margin="0" DataContext="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}"
-                                                   CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}"
+                                                       CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+            </StackPanel>
 
             <GridSplitter Grid.Column="0"
                           Grid.RowSpan="2"
@@ -355,7 +367,6 @@
             <ListBox x:Name="fixtureListView"
                  Grid.Column="1"
                  Grid.RowSpan="2"
-                 Margin="5"
                  BorderBrush="#DDD"
                  BorderThickness="1"
                  Background="WhiteSmoke"

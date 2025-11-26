@@ -287,7 +287,7 @@
                 </Border>
 
                 <!-- Settings button: wired to OpenSettingsCommand on the SceneControlViewModel -->
-                <Button Width="40" Height="40" ToolTip="Settings"
+                <!--<Button Width="40" Height="40" ToolTip="Settings"
                         Command="{Binding OpenSettingsCommand}"
                         CommandParameter="{Binding SceneModel}">
                     <Button.Style>
@@ -316,7 +316,7 @@
                             </Setter>
                         </Style>
                     </Button.Style>
-                </Button>
+                </Button>-->
 
             </StackPanel>
         </Grid>
