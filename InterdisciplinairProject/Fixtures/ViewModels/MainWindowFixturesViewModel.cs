@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.IO;
@@ -16,14 +16,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private FixtureJSON? _selectedFixture;
+        private Fixture? _selectedFixture;
 
         [ObservableProperty]
         private object currentViewModel;
 
         public event EventHandler? DeleteRequested;
 
-        public FixtureJSON? SelectedFixture
+        public Fixture? SelectedFixture
         {
             get => _selectedFixture;
             set
@@ -167,7 +167,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void OnFixtureDelete(string fixtureName, string manufacturerName)
         {
-            string filePath = Path.Combine(_fixturesFolder,manufacturerName, fixtureName + ".json");
+            string filePath = Path.Combine(_fixturesFolder, manufacturerName, fixtureName + ".json");
 
             if (!File.Exists(filePath))
             {
@@ -245,7 +245,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     missingFields.Add("'name'");
                 }
 
-                if (string.IsNullOrWhiteSpace(manufacturer)) 
+                if (string.IsNullOrWhiteSpace(manufacturer))
                 {
                     manufacturer = "Unknown";
                     root["manufacturer"] = manufacturer;

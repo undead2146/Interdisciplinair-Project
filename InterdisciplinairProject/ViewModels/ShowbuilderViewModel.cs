@@ -104,20 +104,13 @@ namespace InterdisciplinairProject.ViewModels
                             Dimmer = 0,
                             FadeInMs = scene.FadeInMs,
                             FadeOutMs = scene.FadeOutMs,
-                            Fixtures = scene.Fixtures?.Select(f => {
-                                var showFixture = new ShowFixture
-                                {
-                                    Id = f.Id,
-                                    InstanceId = f.Id, // Use fixture ID as instance ID for now
-                                    Name = f.Name,
-                                    Dimmer = 0,
-                                    Channels = new Dictionary<string, byte?>(f.Channels ?? new Dictionary<string, byte?>())
-                                };
-                                
-                                // Calculate channel ratios from loaded JSON values
-                                showFixture.CalculateChannelRatios();
-                                
-                                return showFixture;
+                            Fixtures = scene.Fixtures?.Select(f => new Fixture
+                            {
+                                InstanceId = f.InstanceId,
+                                FixtureId = f.FixtureId,
+                                Name = f.Name,
+                                Manufacturer = f.Manufacturer,
+                                Dimmer = 0
                             }).ToList()
                         };
                         Scenes.Add(showScene);
@@ -247,7 +240,7 @@ namespace InterdisciplinairProject.ViewModels
 
                     _show = loadedShow;
 
-                    currentShowId = _show.Id;
+                    CurrentShowId = _show.Id;
                     CurrentShowName = _show.Name;
                     _currentShowPath = selectedPath;
 
@@ -288,7 +281,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SaveShowToPath(string path)
         {
             // Zorg dat _show up-to-date is
-            _show.Id = currentShowId ?? GenerateRandomId();
+            _show.Id = CurrentShowId ?? GenerateRandomId();
             _show.Name = CurrentShowName ?? "Unnamed Show";
             _show.Scenes = Scenes.ToList();
 

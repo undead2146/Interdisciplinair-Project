@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Converters;
-using InterdisciplinairProject.Fixtures.Models;
 using InterdisciplinairProject.Fixtures.Services;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
@@ -48,7 +48,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        private FixtureJSON _currentFixture = new FixtureJSON();
+        private Fixture _currentFixture = new Fixture();
 
         public event EventHandler? FixtureSaved;
 
@@ -70,7 +70,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddTypeBtn { get; }
 
-        public FixtureJSON CurrentFixture
+        public Fixture CurrentFixture
         {
             get => _currentFixture;
             set
@@ -112,7 +112,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<FixtureJSON>(AddImage);
+            AddImageCommand = new RelayCommand<Fixture>(AddImage);
 
             if (existing != null)
             {
@@ -181,7 +181,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             try
             {
                 string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
-
                 Directory.CreateDirectory(_dataDir);
 
                 var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
@@ -265,8 +264,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
 
-                if (!_isEditing) {  //only go back if you were editing
-                BackRequested?.Invoke(this, EventArgs.Empty); 
+                if (!_isEditing) {  // only go back if you were editing
+                BackRequested?.Invoke(this, EventArgs.Empty);
                 }
             }
             catch (IOException ioEx)
@@ -281,7 +280,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 Name = "Lamp",
                 Type = "Lamp",
-                Value = "0"
+                Value = "0",
             };
             Channels.Add(new ChannelItem(newModel));
             (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
@@ -310,7 +309,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void AddImage(FixtureJSON fixture)
+        private void AddImage(Fixture fixture)
         {
             var dlg = new OpenFileDialog
             {
@@ -492,17 +491,40 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             public IRelayCommand AddCustomTypeCommand { get; }
 
+            private static int Snap(int value, int divisions, int max)
+            {
+                var step = Math.Max(1, max / Math.Max(1, divisions));
+                var snapped = (int)Math.Round((double)value / step) * step;
+                return Math.Max(0, Math.Min(max, snapped));
+            }
+
             private void DoAddCustomType()
             {
                 var name = (CustomTypeName ?? "").Trim();
                 var divisions = CustomTypeSliderValue;
 
-                if (string.IsNullOrWhiteSpace(name)) { MessageBox.Show("Type name is empty."); return; }
-                if (divisions <= 0 || divisions > 255) { MessageBox.Show("Step value must be between 1 and 255."); return; }
-                if (string.Equals(name, "Custom", StringComparison.OrdinalIgnoreCase)) { MessageBox.Show("Choose another name than 'Custom'."); return; }
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    MessageBox.Show("Type name is empty.");
+                    return;
+                }
+                if (divisions <= 0 || divisions > 255)
+                {
+                    MessageBox.Show("Step value must be between 1 and 255.");
+                    return;
+                }
+                if (string.Equals(name, "Custom", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("Choose another name than 'Custom'.");
+                    return;
+                }
 
                 var spec = new TypeSpecification { name = name, input = "slider", divisions = divisions };
-                if (!TypeCatalogService.AddOrUpdate(spec)) { MessageBox.Show("Failed to save the type."); return; }
+                if (!TypeCatalogService.AddOrUpdate(spec))
+                {
+                    MessageBox.Show("Failed to save the type.");
+                    return;
+                }
 
                 OnPropertyChanged(nameof(AvailableTypes)); // refresh ComboBox
                 SelectedType = name;                       // becomes slider with divisions
@@ -526,6 +548,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     SliderDivisions = spec.divisions.GetValueOrDefault(255);
                 }
+
                 if (spec.input.Equals("degreeH", StringComparison.OrdinalIgnoreCase))
                 {
                     IsDegreeHType = true;
@@ -533,6 +556,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     SliderDivisions = spec.divisions.GetValueOrDefault(180);
                 }
+
                 if (spec.input.Equals("degreeF", StringComparison.OrdinalIgnoreCase))
                 {
                     IsDegreeFType = true;
@@ -544,14 +568,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     IsCustomType = true;
                 }
-                // "text" -> panels remain collapsed by XAML triggers
-            }
 
-            private static int Snap(int value, int divisions, int max)
-            {
-                var step = Math.Max(1, max / Math.Max(1, divisions));
-                var snapped = (int)Math.Round((double)value / step) * step;
-                return Math.Max(0, Math.Min(max, snapped));
+                // "text" -> panels remain collapsed by XAML triggers
             }
 
         }
