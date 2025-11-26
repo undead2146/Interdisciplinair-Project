@@ -4,8 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:InterdisciplinairProject.Views"
+             xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:FixtureEndAddressConverter x:Key="EndAddressConverter"/>
+    </UserControl.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,12 +19,21 @@
         </Grid.RowDefinitions>
       
         <!-- Scene naam -->
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-            <TextBlock Text="Scène Naam:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBlock Text="{Binding Scene.Name}" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <Button Content="Opslaan" Command="{Binding SaveSceneCommand}" Padding="10,5"/>
-            <Button Command="{Binding EditSceneNameCommand}" 
-                    Padding="8,5" 
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="0"
+                    Margin="0,0,0,10">
+            <TextBlock Text="Scène Naam:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"/>
+            <TextBox Text="{Binding Scene.Name}"
+                     Width="200"
+                     Margin="0,0,10,0"
+                     IsReadOnly="True"/>
+            <Button Content="Opslaan"
+                    Command="{Binding SaveSceneCommand}"
+                    Padding="10,5"/>
+            <Button Command="{Binding EditSceneNameCommand}"
+                    Padding="8,5"
                     Margin="0,0,10,0"
                     ToolTip="Scène naam bewerken"
                     Background="#007ACC"
@@ -28,21 +42,25 @@
                     Cursor="Hand">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
+                        <Border Background="{TemplateBinding Background}"
                                 CornerRadius="3"
                                 Padding="{TemplateBinding Padding}">
-                            <TextBlock Text="✏" 
-                                       FontSize="16" 
+                            <TextBlock Text="✏"
+                                       FontSize="16"
                                        Foreground="{TemplateBinding Foreground}"
-                                       HorizontalAlignment="Center" 
+                                       HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#005A9E"/>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter Property="Background"
+                                        Value="#005A9E"/>
                             </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#004578"/>
+                            <Trigger Property="IsPressed"
+                                     Value="True">
+                                <Setter Property="Background"
+                                        Value="#004578"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -51,8 +69,12 @@
         </StackPanel>
        
         <!-- Fixture toevoegen knop -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
-            <Button Content="Fixture Toevoegen" Command="{Binding AddFixtureCommand}" Padding="10,5"/>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1"
+                    Margin="0,0,0,10">
+            <Button Content="Fixture Toevoegen"
+                    Command="{Binding AddFixtureCommand}"
+                    Padding="10,5"/>
         </StackPanel>
 
         <!-- Hoofd content: Fixture lijst links, settings rechts -->
@@ -63,12 +85,12 @@
             </Grid.ColumnDefinitions>
           
             <!-- Fixture lijst -->
-            <Border Grid.Column="0" 
-                    BorderBrush="#FFE0E0E0" 
-                    BorderThickness="1" 
+            <Border Grid.Column="0"
+                    BorderBrush="#FFE0E0E0"
+                    BorderThickness="1"
                     CornerRadius="4"
                     Margin="0,0,10,0">
-                <ListBox ItemsSource="{Binding SceneFixtures}" 
+                <ListBox ItemsSource="{Binding SceneFixtures}"
                          SelectedItem="{Binding SelectedFixture}"
                          BorderThickness="0"
                          Margin="5"
@@ -83,24 +105,49 @@
                         <DataTemplate>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" 
-                                           Text="{Binding Fixture.Name}" 
-                                           Padding="5" 
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Left"/>
-                                <Button Grid.Column="1" 
-                                        Content="X" 
+
+                                <!-- Fixture Name -->
+                                <StackPanel Grid.Column="0"
+                                            Orientation="Vertical"
+                                            VerticalAlignment="Center"
+                                            Margin="5">
+                                    <TextBlock Text="{Binding Fixture.Name}"
+                                               FontWeight="SemiBold"
+                                               FontSize="14"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="DMX: "
+                                                   FontSize="11"
+                                                   Foreground="Gray"/>
+                                        <TextBlock Text="{Binding Fixture.StartAddress}"
+                                                   FontSize="11"
+                                                   Foreground="Gray"/>
+                                        <TextBlock Text=" - "
+                                                   FontSize="11"
+                                                   Foreground="Gray"/>
+                                        <TextBlock FontSize="11"
+                                                   Foreground="Gray">
+                                            <TextBlock.Text>
+                                                <Binding Path="Fixture"
+                                                         Converter="{StaticResource EndAddressConverter}"/>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Remove Button -->
+                                <Button Grid.Column="2"
+                                        Content="X"
                                         Foreground="Red"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        FontSize="14"
-                                        Padding="5,0"
+                                        FontWeight="Bold"
+                                        Width="20"
+                                        Height="20"
+                                        Padding="0"
                                         Margin="5,0,0,0"
-                                        Cursor="Hand"
-                                        HorizontalAlignment="Right" 
+                                        HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
                                         ToolTip="Verwijder deze fixture"
                                         Command="{Binding DataContext.RemoveFixtureCommand, 
@@ -138,10 +185,11 @@
             </Border>
             <!-- Fixture settings view -->
             <Border Grid.Column="1"
-                    BorderBrush="#FFE0E0E0" 
-                    BorderThickness="1" 
+                    BorderBrush="#FFE0E0E0"
+                    BorderThickness="1"
                     CornerRadius="4">
-                <ContentControl Content="{Binding CurrentView}" Margin="5"/>
+                <ContentControl Content="{Binding CurrentView}"
+                                Margin="5"/>
             </Border>
         </Grid>
     </Grid>

@@ -49,29 +49,15 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     public string FixtureName => _currentFixture?.Name ?? "Selecteer een fixture";
 
     /// <summary>
-    /// Gets or sets the dimmer percentage (0-100).
+    /// Gets the DMX start address of the current fixture.
     /// </summary>
-    private int _dimmerPercentage;
-    public int DimmerPercentage
-    {
-        get => _dimmerPercentage;
-        set
-        {
-            if (_dimmerPercentage != value && _currentFixture != null)
-            {
-                _dimmerPercentage = value;
-                
-                // Convert percentage to 0-255 byte value
-                byte dimmerValue = (byte)Math.Round(value * 255.0 / 100.0);
-                _currentFixture.Dimmer = dimmerValue;
-                
-                // Update UI channels to reflect the proportional changes
-                UpdateChannelViewModelsFromFixture();
-                
-                OnPropertyChanged(nameof(DimmerPercentage));
-            }
-        }
-    }
+    public int StartAddress => _currentFixture?.StartAddress ?? 1;
+
+    /// <summary>
+    /// Gets the DMX end address of the current fixture.
+    /// </summary>
+    public int EndAddress => _currentFixture != null ?
+        _currentFixture.StartAddress + _currentFixture.ChannelCount - 1 : 1;
 
     /// <summary>
     /// Loads a new fixture into the view model.
@@ -100,7 +86,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
         OnPropertyChanged(nameof(CurrentFixture));
-        OnPropertyChanged(nameof(DimmerPercentage));
+        OnPropertyChanged(nameof(StartAddress));
+        OnPropertyChanged(nameof(EndAddress));
     }
 
     /// <summary>
