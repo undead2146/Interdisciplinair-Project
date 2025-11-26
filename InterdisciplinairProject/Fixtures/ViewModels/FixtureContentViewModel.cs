@@ -18,7 +18,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private string? _manufacturer;
         private string? _imagePath;
         private string? _comPort;
-        private string? _selectedMethod = "DMX";
+
+        // UPDATED DEFAULT METHOD
+        private string? _selectedMethod = "Standard DMX";
 
         public event EventHandler? DeleteRequested;
         public event EventHandler? BackRequested;
@@ -30,7 +32,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public string? ImageBase64 { get; set; }
         public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
 
-        public ObservableCollection<string> LampMethods { get; set; } = new() { "DMX", "ELO" };
+        // UPDATED LABELS
+        public ObservableCollection<string> LampMethods { get; set; } = new()
+        {
+            "Standard DMX",
+            "ELO (Cable)"
+        };
+
         public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
 
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
@@ -56,7 +64,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(json)) return;
 
-            var parsed = JsonSerializer.Deserialize<Fixture>(json);
+            var parsed = JsonSerializer.Deserialize<FixtureJSON>(json);
 
             if (parsed != null)
             {
@@ -94,7 +102,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private bool ValidateChannel(Channel channel, out string error)
         {
             error = "";
-            if (channel.Parameter < 0 || channel.Parameter > 255)
+            if (channel.Parameter < 0 || channel.Parameter > 1024)
             {
                 error = channel.Name;
                 return false;
@@ -122,15 +130,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             int index = Channels.IndexOf(channel);
             if (index < 0) return;
 
-            if (SelectedMethod == "DMX")
+            if (SelectedMethod == "Standard DMX")
             {
                 byte[] dmx = new byte[512];
                 dmx[index] = (byte)channel.Parameter;
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO
+            else // ELO (Cable)
             {
-                // Only include the exact channel value
                 byte[] eloData = { (byte)channel.Parameter };
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
             }
@@ -156,7 +163,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
 
-            if (SelectedMethod == "DMX")
+            if (SelectedMethod == "Standard DMX")
             {
                 byte[] dmx = new byte[512];
                 for (int i = 0; i < Channels.Count && i < 512; i++)
@@ -164,7 +171,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO
+            else // ELO (Cable)
             {
                 byte[] eloData = new byte[Channels.Count];
                 for (int i = 0; i < Channels.Count; i++)
