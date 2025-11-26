@@ -194,7 +194,7 @@ public partial class SceneEditorViewModel : ObservableObject
         try
         {
             // Deserialiseer de JSON naar het Fixtures.Models.Fixture type
-            var tempFixture = JsonSerializer.Deserialize<InterdisciplinairProject.Fixtures.Models.Fixture>(json);
+            var tempFixture = JsonSerializer.Deserialize<InterdisciplinairProject.Fixtures.Models.FixtureJSON>(json);
 
             if (tempFixture != null)
             {

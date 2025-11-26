@@ -16,14 +16,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private Fixture? _selectedFixture;
+        private FixtureJSON? _selectedFixture;
 
         [ObservableProperty]
         private object currentViewModel;
 
         public event EventHandler? DeleteRequested;
 
-        public Fixture? SelectedFixture
+        public FixtureJSON? SelectedFixture
         {
             get => _selectedFixture;
             set
@@ -84,11 +84,66 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             detailVm.EditRequested += (_, contentVm) =>
             {
                 var editVm = new FixtureCreateViewModel(contentVm);
-                editVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
+                //editVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
+                //editVm.FixtureSaved += (_, __) =>
+                //{
+                //    fixtureListVm.ReloadFixturesFromFiles();
+                //    CurrentViewModel = fixtureListVm;
+                //};
+
+                // CANCEL while editing → back to content view of original fixture
+                editVm.BackRequested += (_, __) =>
+                {
+                    try
+                    {
+                        // use the ORIGINAL name/manufacturer from the content VM (before editing)
+                        string manufacturer = contentVm.Manufacturer ?? "Unknown";
+                        string name = contentVm.Name ?? string.Empty;
+                        string filePath = Path.Combine(_fixturesFolder, manufacturer, name + ".json");
+
+                        if (File.Exists(filePath))
+                        {
+                            string json2 = File.ReadAllText(filePath);
+                            OnFixtureSelected(this, json2);   // reopen FixtureContentView
+                        }
+                        else
+                        {
+                            // if file somehow missing, fall back to list
+                            CurrentViewModel = fixtureListVm;
+                        }
+                    }
+                    catch
+                    {
+                        CurrentViewModel = fixtureListVm;
+                    }
+                };
+
                 editVm.FixtureSaved += (_, __) =>
                 {
                     fixtureListVm.ReloadFixturesFromFiles();
-                    CurrentViewModel = fixtureListVm;
+
+                    try
+                    {
+                        // use the (possibly changed) name/manufacturer from the editor
+                        string manufacturer = editVm.SelectedManufacturer ?? "Unknown";
+                        string name = editVm.FixtureName;
+                        string filePath = Path.Combine(_fixturesFolder, manufacturer, name + ".json");
+
+                        if (File.Exists(filePath))
+                        {
+                            string json2 = File.ReadAllText(filePath);
+                            OnFixtureSelected(this, json2);   // <-- go back to FixtureContentView
+                        }
+                        else
+                        {
+                            // fallback if something went wrong
+                            CurrentViewModel = fixtureListVm;
+                        }
+                    }
+                    catch
+                    {
+                        CurrentViewModel = fixtureListVm;
+                    }
                 };
 
                 CurrentViewModel = editVm;
