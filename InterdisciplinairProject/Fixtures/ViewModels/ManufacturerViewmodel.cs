@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Fixtures.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -50,6 +51,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         );
 
         private readonly string _centralJsonPath;
+        private readonly ManufacturerService _manufacturerService;
 
         [ObservableProperty]
         private ObservableCollection<ManufacturerItem> manufacturers = new();
@@ -65,6 +67,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ManufacturerViewModel()
         {
+            _manufacturerService = new ManufacturerService();
+
             _centralJsonPath = Path.Combine(_rootDirectory, "manufacturers.json");
 
             if (!Directory.Exists(_rootDirectory))
@@ -87,15 +91,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             try
             {
-                var names = Directory.GetDirectories(_rootDirectory)
-                                             .Select(Path.GetFileName)
-                                             .Where(name => name != null)
-                                             .ToList();
+                var names = _manufacturerService.GetManufacturers();
 
                 var items = names.Select(name =>
                 {
-                    bool isEmpty = IsManufacturerEmpty(name!);
-                    return new ManufacturerItem(name!, isEmpty);
+                    bool isEmpty = IsManufacturerEmpty(name);
+                    return new ManufacturerItem(name, isEmpty);
                 }).ToList();
 
                 var unknownItem = items.FirstOrDefault(i => i.IsSystemItem);
@@ -117,12 +118,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading manufacturers: {ex.Message}", "Loading Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading manufacturers: {ex.Message}",
+                                "Loading Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             _deleteManufacturerCommand.NotifyCanExecuteChanged();
             _startEditCommand.NotifyCanExecuteChanged();
         }
+
 
         private bool IsManufacturerEmpty(string name)
         {
