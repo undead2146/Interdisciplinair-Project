@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public class ManufacturerGroup : INotifyPropertyChanged
     {
         public string Manufacturer { get; set; } = "";
-        public ObservableCollection<FixtureJSON> Fixtures { get; set; } = new();
-        public ObservableCollection<FixtureJSON> FilteredFixtures { get; set; } = new();
+        public ObservableCollection<Fixture> Fixtures { get; set; } = new();
+        public ObservableCollection<Fixture> FilteredFixtures { get; set; } = new();
 
         private bool _isVisible = true;
         public bool IsVisible
@@ -32,7 +32,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public void RefreshFilteredFixtures(string searchText)
         {
             FilteredFixtures.Clear();
-            IEnumerable<FixtureJSON> filtered;
+            IEnumerable<Fixture> filtered;
 
             if (string.IsNullOrWhiteSpace(searchText))
                 filtered = Fixtures;

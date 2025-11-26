@@ -98,11 +98,12 @@ namespace InterdisciplinairProject.ViewModels
                             Dimmer = 0,
                             FadeInMs = scene.FadeInMs,
                             FadeOutMs = scene.FadeOutMs,
-                            Fixtures = scene.Fixtures?.Select(f => new ShowFixture
+                            Fixtures = scene.Fixtures?.Select(f => new Fixture
                             {
-                                Id = f.Id,
-                                InstanceId = f.Id, // Use fixture ID as instance ID for now
+                                InstanceId = f.InstanceId,
+                                FixtureId = f.FixtureId,
                                 Name = f.Name,
+                                Manufacturer = f.Manufacturer,
                                 Dimmer = 0
                             }).ToList()
                         };
@@ -227,7 +228,7 @@ namespace InterdisciplinairProject.ViewModels
 
                     _show = loadedShow;
 
-                    currentShowId = _show.Id;
+                    CurrentShowId = _show.Id;
                     CurrentShowName = _show.Name;
                     _currentShowPath = selectedPath;
 
@@ -258,7 +259,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SaveShowToPath(string path)
         {
             // Zorg dat _show up-to-date is
-            _show.Id = currentShowId ?? GenerateRandomId();
+            _show.Id = CurrentShowId ?? GenerateRandomId();
             _show.Name = CurrentShowName ?? "Unnamed Show";
             _show.Scenes = Scenes.ToList();
 

@@ -86,7 +86,7 @@ public class ShowScene : INotifyPropertyChanged
     /// Gets or sets the fixtures in this scene.
     /// </summary>
     [JsonPropertyName("fixtures")]
-    public List<ShowFixture>? Fixtures { get; set; }
+    public List<Fixture>? Fixtures { get; set; }
 
     /// <summary>
     /// Gets the display text for this scene.

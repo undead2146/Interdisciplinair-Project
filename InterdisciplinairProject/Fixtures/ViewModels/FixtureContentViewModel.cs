@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
@@ -64,7 +64,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(json)) return;
 
-            var parsed = JsonSerializer.Deserialize<FixtureJSON>(json);
+            var parsed = JsonSerializer.Deserialize<Fixture>(json);
 
             if (parsed != null)
             {
@@ -73,7 +73,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.Channels)
+                foreach (var c in parsed.DefinitionChannels)
                 {
                     // FIX: capture local variable for correct TestCommand
                     var channelCopy = c;
