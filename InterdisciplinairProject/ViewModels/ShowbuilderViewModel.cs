@@ -587,7 +587,6 @@ namespace InterdisciplinairProject.ViewModels
                 if (selectedScene != null)
                 {
                     TimeLineScenes.Add(selectedScene);
-                    selectedScene = null;
                 }
             }
             catch (OperationCanceledException) { }

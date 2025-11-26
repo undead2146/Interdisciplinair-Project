@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
+using System.Reflection;
 
 namespace InterdisciplinairProject.Views
 {
@@ -17,52 +18,62 @@ namespace InterdisciplinairProject.Views
         {
             InitializeComponent();
             Loaded += SceneControl_Loaded;
+
+            // Handle clicks on the control body so clicking anywhere selects the scene.
+            PreviewMouseLeftButtonDown += SceneControl_PreviewMouseLeftButtonDown;
         }
 
         private void SceneControl_Loaded(object? sender, RoutedEventArgs e)
         {
-            // If the DataContext is already a SceneControlViewModel, do nothing.
-            if (DataContext is SceneControlViewModel)
-            {
-                AttachSliderHandlers();
-                return;
-            }
-
-            // If the DataContext provided by the ItemsControl is a ShowScene model,
-            // replace it with a SceneControlViewModel that wraps the model and
-            // has a reference to the parent ShowbuilderViewModel.
             if (DataContext is ShowScene sceneModel)
             {
                 var parentShowVm = FindParentShowbuilderViewModel();
                 this.DataContext = new SceneControlViewModel(sceneModel, parentShowVm);
             }
-
-            AttachSliderHandlers();
         }
 
-        private void AttachSliderHandlers()
+        // Select the scene when clicking the control body (but ignore clicks that originate on interactive children).
+        private void SceneControl_PreviewMouseLeftButtonDown(object? sender, MouseButtonEventArgs e)
         {
-            var slider = this.FindName("PART_DimmerSlider") as Slider;
-            if (slider != null)
-            {
-                // when user presses the slider, select this scene so fixture details show
-                slider.PreviewMouseLeftButtonDown -= Slider_PreviewMouseLeftButtonDown;
-                slider.PreviewMouseLeftButtonDown += Slider_PreviewMouseLeftButtonDown;
+            if (e?.OriginalSource is not DependencyObject src)
+                return;
 
-                // also handle keyboard focus/clicks
-                slider.PreviewMouseDown -= Slider_PreviewMouseLeftButtonDown;
-                slider.PreviewMouseDown += Slider_PreviewMouseLeftButtonDown;
-            }
-        }
-
-        private void Slider_PreviewMouseLeftButtonDown(object? sender, MouseButtonEventArgs e)
-        {
             var parentShowVm = FindParentShowbuilderViewModel();
             if (parentShowVm == null) return;
 
             if (DataContext is SceneControlViewModel vm && vm.SceneModel != null)
             {
                 parentShowVm.SelectedScene = vm.SceneModel;
+                ExecuteSceneSelectionCommand(parentShowVm, vm.SceneModel);
+            }
+        }
+
+        private static void ExecuteSceneSelectionCommand(ShowbuilderViewModel parentShowVm, ShowScene scene)
+        {
+            if (parentShowVm == null || scene == null) return;
+
+            try
+            {
+                var cmdProp = parentShowVm.GetType().GetProperty("SceneSelectionChangedCommand", BindingFlags.Public | BindingFlags.Instance);
+                if (cmdProp != null)
+                {
+                    var cmdVal = cmdProp.GetValue(parentShowVm);
+                    if (cmdVal is System.Windows.Input.ICommand cmd && cmd.CanExecute(scene))
+                    {
+                        cmd.Execute(scene);
+                        return;
+                    }
+                }
+
+                // Fallback: call the method (may be private) via reflection
+                var method = parentShowVm.GetType().GetMethod("SceneSelectionChanged", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (method != null)
+                {
+                    method.Invoke(parentShowVm, new object[] { scene });
+                }
+            }
+            catch
+            {
             }
         }
 
