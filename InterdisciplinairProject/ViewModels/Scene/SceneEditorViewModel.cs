@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
@@ -23,6 +24,7 @@ public partial class SceneEditorViewModel : ObservableObject
     private readonly IFixtureRepository _fixtureRepository;
     private readonly IFixtureRegistry _fixtureRegistry;
     private readonly IHardwareConnection _hardwareConnection;
+    private readonly IDmxAddressValidator _dmxAddressValidator;
 
     [ObservableProperty]
     private SceneModel _scene = new();
@@ -32,11 +34,6 @@ public partial class SceneEditorViewModel : ObservableObject
 
     [ObservableProperty]
     private SceneFixture? _selectedFixture;
-
-    /// <summary>
-    /// Event raised when the scene has been updated.
-    /// </summary>
-    public event EventHandler<Scene>? SceneUpdated;
 
     [ObservableProperty]
     private object? _currentView;
@@ -49,11 +46,25 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <param name="fixtureRegistry">The fixture registry.</param>
     /// <param name="hardwareConnection">The hardware connection.</param>
     public SceneEditorViewModel(ISceneRepository sceneRepository, IFixtureRepository fixtureRepository, IFixtureRegistry fixtureRegistry, IHardwareConnection hardwareConnection)
+        : this(sceneRepository, fixtureRepository, fixtureRegistry, hardwareConnection, new DmxAddressValidator())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SceneEditorViewModel"/> class.
+    /// </summary>
+    /// <param name="sceneRepository">The scene repository.</param>
+    /// <param name="fixtureRepository">The fixture repository.</param>
+    /// <param name="fixtureRegistry">The fixture registry.</param>
+    /// <param name="hardwareConnection">The hardware connection.</param>
+    /// <param name="dmxAddressValidator">The DMX address validator.</param>
+    public SceneEditorViewModel(ISceneRepository sceneRepository, IFixtureRepository fixtureRepository, IFixtureRegistry fixtureRegistry, IHardwareConnection hardwareConnection, IDmxAddressValidator dmxAddressValidator)
     {
         _sceneRepository = sceneRepository;
         _fixtureRepository = fixtureRepository;
         _fixtureRegistry = fixtureRegistry;
         _hardwareConnection = hardwareConnection;
+        _dmxAddressValidator = dmxAddressValidator;
     }
 
     /// <summary>
@@ -228,6 +239,9 @@ public partial class SceneEditorViewModel : ObservableObject
                     channelIndex++;
                 }
 
+                // Bereken het volgende beschikbare DMX adres
+                var nextAvailableAddress = GetNextAvailableChannel();
+
                 // Maak de Core Fixture aan
                 var newCoreFixture = new InterdisciplinairProject.Core.Models.Fixture
                 {
@@ -245,18 +259,61 @@ public partial class SceneEditorViewModel : ObservableObject
                     FixtureId = tempFixture.Name,
 
                     // Bereken het volgende beschikbare DMX adres
-                    StartAddress = GetNextAvailableChannel(),
+                    StartAddress = nextAvailableAddress,
                 };
 
+                // Valideer het DMX adres voordat de fixture wordt toegevoegd
+                var existingFixtures = SceneFixtures.Select(sf => sf.Fixture).ToList();
+                var validationResult = _dmxAddressValidator.ValidateFixtureAddress(newCoreFixture, existingFixtures);
+
+                if (!validationResult.IsValid)
+                {
+                    // Er zijn conflicten gevonden
+                    var message = $"DMX adres conflict gedetecteerd!\n\n{validationResult.Summary}";
+
+                    if (validationResult.SuggestedStartAddress.HasValue)
+                    {
+                        message += $"\n\nSuggestie: Gebruik startadres {validationResult.SuggestedStartAddress.Value}.";
+
+                        var result = MessageBox.Show(
+                            message + "\n\nWilt u het gesuggereerde adres gebruiken?",
+                            "Adres Conflict",
+                            MessageBoxButton.YesNoCancel,
+                            MessageBoxImage.Warning);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            // Gebruik het gesuggereerde adres
+                            newCoreFixture.StartAddress = validationResult.SuggestedStartAddress.Value;
+                        }
+                        else if (result == MessageBoxResult.Cancel)
+                        {
+                            // Annuleer het toevoegen
+                            Debug.WriteLine($"[DEBUG] User cancelled adding fixture due to address conflict");
+                            return;
+                        }
+
+                        // Bij No: voeg toe met het conflicterende adres (gebruiker weet wat hij doet)
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            message + "\n\nEr is geen ruimte meer beschikbaar in het DMX universum.",
+                            "Adres Conflict",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
                 // Voeg de nieuwe fixture toe aan de scene
-                var nextChannel = GetNextAvailableChannel();
-                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = nextChannel };
+                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = newCoreFixture.StartAddress };
 
                 SceneFixtures.Add(sceneFixture);
                 SelectedFixture = sceneFixture;
 
-                Debug.WriteLine($"[DEBUG] Added fixture '{newCoreFixture.Name}' to scene at channel {nextChannel}");
-                MessageBox.Show($"Fixture '{newCoreFixture.Name}' succesvol toegevoegd aan de lijst!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                Debug.WriteLine($"[DEBUG] Added fixture '{newCoreFixture.Name}' to scene at channel {newCoreFixture.StartAddress}");
+                MessageBox.Show($"Fixture '{newCoreFixture.Name}' succesvol toegevoegd aan de lijst op adres {newCoreFixture.StartAddress}!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
