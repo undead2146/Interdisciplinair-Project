@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Repositories;
+using InterdisciplinairProject.Features.Scene;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
@@ -30,6 +31,8 @@ public partial class MainViewModel : ObservableObject
     private readonly IFixtureRepository _fixtureRepository = null!;
     private readonly IHardwareConnection _hardwareConnection = null!;
 
+    private readonly IFixtureRegistry _fixtureRegistry = null!;
+
     /// <summary>
     /// Gets or sets the window title.
     /// </summary>
@@ -41,8 +44,6 @@ public partial class MainViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     private UserControl? currentView;
-
-    
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -74,6 +75,8 @@ public partial class MainViewModel : ObservableObject
             // Initialiseer HardwareConnection (dummy voor nu)
             _hardwareConnection = new DummyHardwareConnection();
             Debug.WriteLine("[DEBUG] DummyHardwareConnection initialized");
+
+            _fixtureRegistry = new FixtureRegistry(_fixtureRepository);
 
             OpenFixtureSettingsCommand = new RelayCommand(OpenFixtureSettings);
             Debug.WriteLine("[DEBUG] MainViewModel initialized successfully");
@@ -151,6 +154,7 @@ public partial class MainViewModel : ObservableObject
             var sceneBuilderViewModel = new ScenebuilderViewModel(
                 _sceneRepository,
                 _fixtureRepository,
+                _fixtureRegistry,
                 _hardwareConnection);
 
             // Maak de view en geef de ViewModel mee
