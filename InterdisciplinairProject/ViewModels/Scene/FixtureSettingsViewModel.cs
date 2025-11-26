@@ -49,6 +49,17 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     public string FixtureName => _currentFixture?.Name ?? "Selecteer een fixture";
 
     /// <summary>
+    /// Gets the DMX start address of the current fixture.
+    /// </summary>
+    public int StartAddress => _currentFixture?.StartAddress ?? 1;
+
+    /// <summary>
+    /// Gets the DMX end address of the current fixture.
+    /// </summary>
+    public int EndAddress => _currentFixture != null ?
+        _currentFixture.StartAddress + _currentFixture.ChannelCount - 1 : 1;
+
+    /// <summary>
     /// Loads a new fixture into the view model.
     /// </summary>
     /// <param name="fixture">The fixture to load.</param>
@@ -69,6 +80,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
         OnPropertyChanged(nameof(CurrentFixture));
+        OnPropertyChanged(nameof(StartAddress));
+        OnPropertyChanged(nameof(EndAddress));
     }
 
     /// <summary>
