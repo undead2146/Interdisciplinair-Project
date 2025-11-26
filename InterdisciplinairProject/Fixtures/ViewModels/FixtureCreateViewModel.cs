@@ -48,6 +48,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
+        [ObservableProperty]
+        private string? newManufacturerName;
+
         private FixtureJSON _currentFixture = new FixtureJSON();
 
         public event EventHandler? FixtureSaved;
@@ -141,42 +144,60 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void LoadManufacturers()
         {
-            var directoryInfo = new DirectoryInfo(_dataDir);
-            var currentManufacturers = directoryInfo.GetDirectories()
-                                                    .Select(d => d.Name)
-                                                    .ToList();
-            currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
-            var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
-            var finalManufacturerList = new List<string> { "Unknown" };
-            finalManufacturerList.AddRange(sortedOtherManufacturers);
-            AvailableManufacturers = finalManufacturerList;
+            string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
+
+            if (File.Exists(jsonPath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(jsonPath);
+                    var manufacturers = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+                    AvailableManufacturers = manufacturers;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to load manufacturers JSON:\n{ex.Message}",
+                                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    AvailableManufacturers = new List<string> { "Unknown" };
+                }
+            }
+            else
+            {
+                AvailableManufacturers = new List<string> { "Unknown" };
+            }
+
         }
 
         private void ExecuteRegisterManufacturer()
         {
-            var registerWindow = new RegisterManufacturerWindow();
-            if (Application.Current.MainWindow != null)
-                registerWindow.Owner = Application.Current.MainWindow;
+            string name = NewManufacturerName?.Trim() ?? string.Empty;
 
-            if (registerWindow.ShowDialog() == true)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                string newManufacturerName = registerWindow.ManufacturerName;
-                if (_manufacturerService.RegisterManufacturer(newManufacturerName))
-                {
-                    LoadManufacturers();
-                    SelectedManufacturer = newManufacturerName;
-                    SaveManufacturersToJson();
+                MessageBox.Show("Manufacturer can't be empty.", "Error",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            if (_manufacturerService.RegisterManufacturer(name))
+            {
+                LoadManufacturers();
+                SelectedManufacturer = name;
+                SaveManufacturersToJson();
+
+                MessageBox.Show($"Manufacturer '{name}' saved succesfully.",
+                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                NewManufacturerName = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show($"Manufacturer '{name}' can't be saved. Name is empty or duplicate.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void SaveManufacturersToJson() 
+        private void SaveManufacturersToJson()
         {
             try
             {
@@ -303,8 +324,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void Cancel()
         {
-           
-
             var result = MessageBox.Show("Are you sure that you want to cancel making this fixture?", "Confirm & exit", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
                 BackRequested?.Invoke(this, EventArgs.Empty);
