@@ -19,7 +19,7 @@
 
         <Grid>
             <!-- Left arrow button (correct left pointing icon) -->
-            <Button Height="20" Width="20"
+            <Button Height="25" Width="25"
      HorizontalAlignment="Left"
      VerticalAlignment="Top"
      Margin="0,0,0,0"
@@ -53,7 +53,7 @@
 
 
             <!-- Right arrow button (correct right pointing icon) -->
-            <Button Height="20" Width="20"
+            <Button Height="25" Width="25"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
             Margin="54,0,0,0"
@@ -87,41 +87,32 @@
 
 
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,28,0,0">
-                <Button Width="40" Height="40" ToolTip="Play scene" x:Name="PART_PlayButton"
-                        Command="{Binding PlayCommand}">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type Button}">
-                                        <Border x:Name="border" Background="#607D8B" CornerRadius="20" BorderBrush="#546E7A" BorderThickness="1.5">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="#000000" Opacity="0.15" BlurRadius="6" ShadowDepth="3" Direction="270"/>
-                                            </Border.Effect>
-                                            <Viewbox Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Canvas Width="24" Height="24">
-                                                    <Path Fill="White" Stroke="White" StrokeThickness="1.9"
-                                                          StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                                                          Data="M7,5 L19,12 L7,19 Z"
-                                                          RenderTransformOrigin="0.5,0.5">
-                                                        <Path.RenderTransform>
-                                                            <TranslateTransform X="0.5" Y="0"/>
-                                                        </Path.RenderTransform>
-                                                    </Path>
-                                                </Canvas>
-                                            </Viewbox>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="border" Property="Background" Value="#78909C"/>
-                                                <Setter TargetName="border" Property="BorderBrush" Value="#607D8B"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </Button.Style>
+                <Button Height="25" Width="25" VerticalAlignment="Top" HorizontalAlignment="Center"
+                Margin="0,0,0,0"
+                Command="{Binding DataContext.DeleteTimelineSceneCommand, RelativeSource={RelativeSource AncestorType={x:Type local:ShowbuilderView}}}"
+                CommandParameter="{Binding SceneModel}"
+                ToolTip="Delete scene">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="#FFEBEE" BorderBrush="#F44336" BorderThickness="1" CornerRadius="6">
+                                <Viewbox Width="12" Height="12" Margin="2">
+                                    <!-- simple X icon -->
+                                    <Canvas Width="16" Height="16">
+                                        <Path Data="M2,2 L14,14 M14,2 L2,14"
+                      Stroke="#F44336"
+                      StrokeThickness="2"
+                      StrokeStartLineCap="Round"
+                      StrokeEndLineCap="Round"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.95"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
                 </Button>
 
                 <TextBlock Text="{Binding Id}"
