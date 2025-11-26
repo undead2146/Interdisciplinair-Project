@@ -610,5 +610,28 @@ namespace InterdisciplinairProject.ViewModels
                 TimeLineScenes.Move(index, index + 1);
             }
         }
+
+        [RelayCommand]
+        private void DeleteTimelineScene(ShowScene? scene)
+        {
+            if (scene == null)
+                return;
+
+            // Ask for confirmation before deleting
+            var result = MessageBox.Show(
+                $"Weet je zeker dat je de scene '{scene.Name}' wilt verwijderen?",
+                "Bevestig verwijderen",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            // remove from the UI collection
+            if (TimeLineScenes.Contains(scene))
+                TimeLineScenes.Remove(scene);
+
+            Message = $"Scene '{scene.Name}' verwijderd.";
+        }
     }
 }
