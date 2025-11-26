@@ -19,6 +19,12 @@
         <DataTemplate DataType="{x:Type local:FixtureCreateViewModel}">
             <views:FixtureCreateView />
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:ManufacturerViewModel}">
+            <views:ManufactorerView />
+        </DataTemplate>
+
+
     </UserControl.Resources>
 
     <DockPanel>
@@ -29,7 +35,7 @@
                 <Button Content="Create Fixture" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
             </StackPanel>
             <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                <Button Content="Manufacturer" Command="{Binding CreateFixtureCommand}" Margin="0,0,0,5"/>
+                <Button Content="Manufacturer" Command="{Binding ShowManufacturerCommand}" Margin="0,0,0,5"/>
             </StackPanel>
 
             <!-- Bottom section -->
