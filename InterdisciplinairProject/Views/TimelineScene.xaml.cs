@@ -16,20 +16,6 @@ namespace InterdisciplinairProject.Views
             InitializeComponent();
             Loaded += SceneControl_Loaded;
         }
-
-        public TimelineShowScene TimelineSceneModel
-        {
-            get { return (TimelineShowScene) GetValue(SceneModelProperty); }
-            set { SetValue(SceneModelProperty, value); }
-        }
-
-        public static readonly DependencyProperty SceneModelProperty =
-            DependencyProperty.Register(
-                "sceneModel",
-                typeof(TimelineShowScene),
-                typeof(TimelineScene),
-                new PropertyMetadata(null));
-
         private void SceneControl_Loaded(object? sender, RoutedEventArgs e)
         {
             // If the DataContext provided by the ItemsControl is a ShowScene model,
