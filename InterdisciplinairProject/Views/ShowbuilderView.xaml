@@ -152,11 +152,20 @@
                                       BorderThickness="1"
                                       Background="#FAFAFA"
                                       SelectionMode="Single"
-                                      HorizontalContentAlignment="Center">
+                                      HorizontalContentAlignment="Center"
+                                      VirtualizingStackPanel.IsVirtualizing="False">
+    <i:Interaction.Behaviors>
+        <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
+    </i:Interaction.Behaviors>
+
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
+    <StackPanel Orientation="Horizontal">
+        <i:Interaction.Behaviors>
+            <i:FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.2" />
+        </i:Interaction.Behaviors>
+    </StackPanel>
+</ItemsPanelTemplate>
                                     </ListBox.ItemsPanel>
 
                                     <ListBox.ItemTemplate>
