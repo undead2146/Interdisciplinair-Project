@@ -353,12 +353,5 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
         }
-
-        private string SanitizeFileName(string name)
-        {
-            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
-            string invalidRegex = string.Format(@"[{0}]", invalidChars);
-            return Regex.Replace(name, invalidRegex, "_");
-        }
     }
 }
