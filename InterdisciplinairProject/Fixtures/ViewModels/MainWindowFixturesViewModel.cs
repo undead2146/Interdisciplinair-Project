@@ -16,7 +16,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private FixtureJSON? _selectedFixture;
+        private Fixture? _selectedFixture;
         // ** NIEUW: Field voor de Manufacturer ViewModel **
         private ManufacturerViewModel? _manufacturerViewModel;
 
@@ -25,7 +25,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public event EventHandler? DeleteRequested;
 
-        public FixtureJSON? SelectedFixture
+        public Fixture? SelectedFixture
         {
             get => _selectedFixture;
             set

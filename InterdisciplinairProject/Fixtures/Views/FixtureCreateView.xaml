@@ -228,32 +228,6 @@
                                             <TextBlock x:Name="sliderDegreeFullValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
                                         </StackPanel>
 
-
-
-                                        <StackPanel x:Name="degreePanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <Slider Minimum="0" Maximum="180"
-									            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-									            TickFrequency="{Binding TickFrequency}"
-									            IsSnapToTickEnabled="True"
-									            SmallChange="{Binding TickFrequency}"
-									            LargeChange="{Binding TickFrequency}"
-									            TickPlacement="BottomRight"
-                                                />
-                                            <TextBlock x:Name="sliderDegreeValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-
-                                        <StackPanel x:Name="degreeFullPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                            <Slider Minimum="0" Maximum="360"
-                                                    Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    TickFrequency="{Binding TickFrequency}"
-                                                    IsSnapToTickEnabled="True"
-                                                    SmallChange="{Binding TickFrequency}"
-                                                    LargeChange="{Binding TickFrequency}"
-                                                    TickPlacement="BottomRight"
-                                                    />
-                                            <TextBlock x:Name="sliderDegreeFullValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
-                                        </StackPanel>
-
                                         <StackPanel x:Name="CustomPanel" Margin="0,10,0,0" Visibility="Collapsed">
                                             <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
                                             <StackPanel Orientation="Vertical" Margin="0,0,0,6">

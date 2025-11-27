@@ -51,7 +51,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? newManufacturerName;
 
-        private FixtureJSON _currentFixture = new FixtureJSON();
+        private Fixture _currentFixture = new Fixture();
 
         /// <summary>
         /// Occurs when a fixture is saved.
@@ -100,7 +100,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand AddTypeBtn { get; }
 
-        public FixtureJSON CurrentFixture
+        public Fixture CurrentFixture
         {
             get => _currentFixture;
             set
@@ -144,7 +144,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<FixtureJSON>(AddImage);
+            AddImageCommand = new RelayCommand<Fixture>(AddImage);
 
             if (existing != null)
             {
@@ -510,12 +510,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             public IRelayCommand AddCustomTypeCommand { get; }
 
-            private static int Snap(int value, int divisions, int max)
-            {
-                var step = Math.Max(1, max / Math.Max(1, divisions));
-                var snapped = (int)Math.Round((double)value / step) * step;
-                return Math.Max(0, Math.Min(max, snapped));
-            }
 
             private void DoAddCustomType()
             {
@@ -595,8 +589,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 var snapped = (int)Math.Round((double)value / step) * step;
                 return Math.Max(0, Math.Min(max, snapped));
             }
-
         }
-
     }
 }

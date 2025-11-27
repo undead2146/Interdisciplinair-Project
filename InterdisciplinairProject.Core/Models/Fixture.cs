@@ -57,6 +57,7 @@ public class Fixture : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the manufacturer of the fixture.
     /// </summary>
+    [JsonPropertyName("manufacturer")]
     public string Manufacturer { get; set; }
 
     /// <summary>
