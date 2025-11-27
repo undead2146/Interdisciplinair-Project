@@ -1,12 +1,17 @@
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
 /// Represents a fixture instance in a scene with its current channel values.
 /// </summary>
-public class Fixture
+public class Fixture : INotifyPropertyChanged
 {
+    private byte _dimmer;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Fixture"/> class.
     /// </summary>
@@ -17,11 +22,14 @@ public class Fixture
         Name = string.Empty;
         Manufacturer = string.Empty;
         Description = string.Empty;
-        Channels = new Dictionary<string, byte?>();
         ChannelDescriptions = new Dictionary<string, string>();
-        ChannelTypes = new Dictionary<string, ChannelType>();
-        ChannelEffects = new Dictionary<string, List<ChannelEffect>>();
+        Channels = new ObservableCollection<Channel>();
     }
+
+    /// <summary>
+    /// Occurs when a property value changes.
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Gets or sets the unique identifier of the fixture type.
@@ -49,6 +57,7 @@ public class Fixture
     /// <summary>
     /// Gets or sets the manufacturer of the fixture.
     /// </summary>
+    [JsonPropertyName("manufacturer")]
     public string Manufacturer { get; set; }
 
     /// <summary>
@@ -57,10 +66,10 @@ public class Fixture
     public string Description { get; set; }
 
     /// <summary>
-    /// Gets or sets the channels of the fixture with their current values.
+    /// Gets or sets the definition channels for this fixture.
     /// </summary>
     [JsonPropertyName("channels")]
-    public Dictionary<string, byte?> Channels { get; set; }
+    public ObservableCollection<Channel> Channels { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the channel descriptions (e.g., "Ch1: Dimmer - General intensity").
@@ -70,14 +79,7 @@ public class Fixture
     /// <summary>
     /// Gets or sets the channel types.
     /// </summary>
-    public Dictionary<string, ChannelType> ChannelTypes { get; set; }
-
-    /// <summary>
-    /// Gets or sets the channel effects (e.g., fade-in, fade-out per channel).
-    /// Key is the channel name (e.g., "Ch1"), value is a list of effects.
-    /// </summary>
-    [JsonPropertyName("channelEffects")]
-    public Dictionary<string, List<ChannelEffect>> ChannelEffects { get; set; }
+    public Dictionary<string, ChannelType> ChannelTypes { get; set; } = new();
 
     /// <summary>
     /// Gets the total number of channels in this fixture.
@@ -92,5 +94,42 @@ public class Fixture
     /// <summary>
     /// Gets or sets the dimmer channel value (0..255).
     /// </summary>
-    public byte Dimmer { get; set; }
+    [JsonIgnore]
+    public byte Dimmer
+    {
+        get => _dimmer;
+        set
+        {
+            if (_dimmer == value) return;
+            _dimmer = value;
+            OnPropertyChanged(nameof(Dimmer));
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the DMX start address for this fixture (1-512).
+    /// </summary>
+    [JsonPropertyName("startAddress")]
+    public int StartAddress { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the base64 encoded image for this fixture.
+    /// </summary>
+    [JsonPropertyName("imageBase64")]
+    public string ImageBase64 { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the image path for this fixture.
+    /// </summary>
+    [JsonPropertyName("imagePath")]
+    public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Raises the <see cref="PropertyChanged"/> event.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
+    protected virtual void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

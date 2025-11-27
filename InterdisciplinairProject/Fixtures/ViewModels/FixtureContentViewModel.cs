@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
@@ -64,7 +64,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(json)) return;
 
-            var parsed = JsonSerializer.Deserialize<FixtureJSON>(json);
+            var parsed = JsonSerializer.Deserialize<Fixture>(json);
 
             if (parsed != null)
             {
@@ -77,12 +77,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     // FIX: capture local variable for correct TestCommand
                     var channelCopy = c;
+                    if (int.TryParse(c.Value, out var param))
+                    {
+                        channelCopy.Parameter = param;
+                    }
+
                     channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
                     Channels.Add(channelCopy);
                 }
             }
         }
 
+        // ===========================
+        // Testing
+        // ===========================
         private void RefreshAvailablePorts()
         {
             AvailablePorts.Clear();
@@ -107,12 +115,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 error = channel.Name;
                 return false;
             }
+
             return true;
         }
 
-        // ===========================
-        // SEND SINGLE CHANNEL
-        // ===========================
         public void SendChannelValue(Channel channel)
         {
             if (ComPort == null)
@@ -143,9 +149,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ===========================
-        // SEND ALL CHANNELS
-        // ===========================
         private void SendAllChannels()
         {
             if (ComPort == null)
