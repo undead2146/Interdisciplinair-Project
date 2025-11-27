@@ -64,7 +64,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(json)) return;
 
-            var parsed = JsonSerializer.Deserialize<Fixture>(json);
+            var parsed = JsonSerializer.Deserialize<FixtureJSON>(json);
 
             if (parsed != null)
             {

@@ -16,14 +16,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private readonly string _fixturesFolder;
 
         // Track currently selected fixture
-        private Fixture? _selectedFixture;
+        private FixtureJSON? _selectedFixture;
+        // ** NIEUW: Field voor de Manufacturer ViewModel **
+        private ManufacturerViewModel? _manufacturerViewModel;
 
         [ObservableProperty]
         private object currentViewModel;
 
         public event EventHandler? DeleteRequested;
 
-        public Fixture? SelectedFixture
+        public FixtureJSON? SelectedFixture
         {
             get => _selectedFixture;
             set
@@ -44,6 +46,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand ImportFixtureCommand { get; }
 
         public ICommand ExportFixtureCommand { get; }
+        // ** NIEUW: Command voor de Fabrikanten knop **
+        public ICommand ShowManufacturerCommand { get; }
 
         public MainWindowFixturesViewModel()
         {
@@ -51,6 +55,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
             ImportFixtureCommand = new RelayCommand(ImportFixture);
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
+            // ** NIEUW: Initialiseer het Fabrikanten Command **
+            ShowManufacturerCommand = new RelayCommand(ShowManufacturer);
 
             fixtureListVm = new FixtureListViewModel();
             fixtureListVm.FixtureSelected += OnFixtureSelected;
@@ -76,6 +82,30 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         // VIEW NAVIGATION
         // ------------------------------------------------------------
+
+        // ------------------------------------------------------------
+        // VIEW NAVIGATION
+        // ------------------------------------------------------------
+
+        // ** NIEUW: Methode om de Manufacturer View te tonen **
+        private void ShowManufacturer()
+        {
+            if (_manufacturerViewModel == null)
+            {
+                _manufacturerViewModel = new ManufacturerViewModel();
+                // Abonneer op het update event zodat de hoofdlijst met fixtures herlaadt als een fabrikant wordt hernoemd of verwijderd.
+                _manufacturerViewModel.ManufacturersUpdated += OnManufacturersUpdated;
+            }
+            CurrentViewModel = _manufacturerViewModel;
+        }
+
+        // ** NIEUW: Event Handler om de fixture lijst te herladen **
+        private void OnManufacturersUpdated(object? sender, EventArgs e)
+        {
+            // Zorgt ervoor dat de fabrikantenlijst in de FixtureListViewModel wordt bijgewerkt
+            // en dus de dropdowns in de Create/Edit view ook.
+            fixtureListVm.ReloadFixturesFromFiles();
+        }
         private void OnFixtureSelected(object? sender, string json)
         {
             var detailVm = new FixtureContentViewModel(json);

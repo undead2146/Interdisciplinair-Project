@@ -67,8 +67,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        private Fixture? _selectedFixture;
-        public Fixture? SelectedFixture
+        private FixtureJSON? _selectedFixture;
+        public FixtureJSON? SelectedFixture
         {
             get => _selectedFixture;
             set
@@ -104,14 +104,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             if (!Directory.Exists(_fixturesFolder)) return;
 
-            var allFixtures = new List<Fixture>();
+            var allFixtures = new List<FixtureJSON>();
 
             foreach (var file in Directory.GetFiles(_fixturesFolder, "*.json", SearchOption.AllDirectories))
             {
                 try
                 {
                     string json = File.ReadAllText(file);
-                    var fixture = JsonSerializer.Deserialize<Fixture>(json);
+                    var fixture = JsonSerializer.Deserialize<FixtureJSON>(json);
 
                     if (fixture != null)
                     {
@@ -139,7 +139,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 var mg = new ManufacturerGroup
                 {
                     Manufacturer = group.Key,
-                    Fixtures = new ObservableCollection<Fixture>(group.OrderBy(f => f.Name))
+                    Fixtures = new ObservableCollection<FixtureJSON>(group.OrderBy(f => f.Name))
                 };
                 mg.RefreshFilteredFixtures(SearchText);
                 ManufacturerGroups.Add(mg);

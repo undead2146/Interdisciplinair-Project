@@ -48,7 +48,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private string? _selectedManufacturer;
 
-        private Fixture _currentFixture = new Fixture();
+        [ObservableProperty]
+        private string? newManufacturerName;
+
+        private FixtureJSON _currentFixture = new FixtureJSON();
 
         /// <summary>
         /// Occurs when a fixture is saved.
@@ -95,10 +98,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         /// </summary>
         public ICommand AddImageCommand { get; }
 
-        /// <summary>
-        /// Gets or sets the current fixture.
-        /// </summary>
-        public Fixture CurrentFixture
+        public ICommand AddTypeBtn { get; }
+
+        public FixtureJSON CurrentFixture
         {
             get => _currentFixture;
             set
@@ -130,19 +132,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
             _manufacturerService = new ManufacturerService();
+            LoadManufacturers();
+            RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
                 Directory.CreateDirectory(unknownDir);
-
-            LoadManufacturers();
 
             AddChannelCommand = new RelayCommand(AddChannel);
             DeleteChannelCommand = new RelayCommand<ChannelItem>(DeleteChannel, CanDeleteChannel);
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+            AddImageCommand = new RelayCommand<FixtureJSON>(AddImage);
 
             if (existing != null)
             {
@@ -169,69 +171,52 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /*********** MANUFACTURERS SAVEN & LOADEN ***********/
         private void LoadManufacturers()
         {
-            var directoryInfo = new DirectoryInfo(_dataDir);
-            var currentManufacturers = directoryInfo.GetDirectories()
-                                                    .Select(d => d.Name)
-                                                    .ToList();
-            currentManufacturers.RemoveAll(m => m.Equals("Unknown", StringComparison.OrdinalIgnoreCase));
-            var sortedOtherManufacturers = currentManufacturers.OrderBy(m => m).ToList();
-            var finalManufacturerList = new List<string> { "Unknown" };
-            finalManufacturerList.AddRange(sortedOtherManufacturers);
-            AvailableManufacturers = finalManufacturerList;
+            AvailableManufacturers = _manufacturerService.LoadManufacturersFromJson();
+
+            if (AvailableManufacturers.Count == 0)
+                AvailableManufacturers = _manufacturerService.GetManufacturers();
+
+            if (!AvailableManufacturers.Contains("Unknown"))
+                AvailableManufacturers.Insert(0, "Unknown");
         }
 
         private void ExecuteRegisterManufacturer()
         {
-            var registerWindow = new RegisterManufacturerWindow();
-            if (Application.Current.MainWindow != null)
-                registerWindow.Owner = Application.Current.MainWindow;
+            string name = NewManufacturerName?.Trim() ?? string.Empty;
 
-            if (registerWindow.ShowDialog() == true)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                string newManufacturerName = registerWindow.ManufacturerName;
-                if (_manufacturerService.RegisterManufacturer(newManufacturerName))
-                {
-                    LoadManufacturers();
-                    SelectedManufacturer = newManufacturerName;
-                    SaveManufacturersToJson();
+                MessageBox.Show("Manufacturer can't be empty.", "Error",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-                    MessageBox.Show($"Manufacturer '{newManufacturerName}' saved succesfully.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        $"Manufacturer '{newManufacturerName}' can't be saved. Name is empty or there already exists a manufacturer with the same name.",
-                        "Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
+            if (_manufacturerService.RegisterManufacturer(name))
+            {
+                LoadManufacturers();
+                SelectedManufacturer = name;
+
+                MessageBox.Show($"Manufacturer '{name}' saved succesfully.",
+                                "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                NewManufacturerName = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show($"Manufacturer '{name}' can't be saved. Name is empty or duplicate.",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void SaveManufacturersToJson() 
+        /*********** FIXTURES SAVEN ***********/
+        private string SanitizeFileName(string name)
         {
-            try
-            {
-                string jsonPath = Path.Combine(_dataDir, "manufacturers.json");
-                Directory.CreateDirectory(_dataDir);
-
-                var json = JsonSerializer.Serialize(AvailableManufacturers, new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                });
-
-                File.WriteAllText(jsonPath, json);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to save manufacturers JSON:\n{ex.Message}",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
+            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
+            string invalidRegex = string.Format(@"[{0}]", invalidChars);
+            return Regex.Replace(name, invalidRegex, "_");
         }
 
         private void SaveFixture()
@@ -300,9 +285,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
 
-                if (!_isEditing)
-                {  // only go back if you were editing
-                    BackRequested?.Invoke(this, EventArgs.Empty);
+                if (!_isEditing) {  //only go back if you were editing
+                    BackRequested?.Invoke(this, EventArgs.Empty); 
                 }
             }
             catch (IOException ioEx)
@@ -370,16 +354,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        private string SanitizeFileName(string name)
-        {
-            string invalidChars = Regex.Escape(new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()));
-            string invalidRegex = string.Format(@"[{0}]", invalidChars);
-            return Regex.Replace(name, invalidRegex, "_");
-        }
-
-        /// <summary>
-        /// Represents a channel item in the fixture creation view.
-        /// </summary>
         public partial class ChannelItem : ObservableObject
         {
             private readonly Channel _model;
@@ -448,10 +422,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
 
             private int _maxValue = 255;
-
-            /// <summary>
-            /// Gets or sets the maximum value.
-            /// </summary>
             public int MaxValue
             {
                 get => _maxValue;
@@ -597,7 +567,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     SliderDivisions = spec.divisions.GetValueOrDefault(255);
                 }
-
                 if (spec.input.Equals("degreeH", StringComparison.OrdinalIgnoreCase))
                 {
                     IsDegreeHType = true;
@@ -605,7 +574,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                     SliderDivisions = spec.divisions.GetValueOrDefault(180);
                 }
-
                 if (spec.input.Equals("degreeF", StringComparison.OrdinalIgnoreCase))
                 {
                     IsDegreeFType = true;
@@ -619,6 +587,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
 
                 // "text" -> panels remain collapsed by XAML triggers
+            }
+
+            private static int Snap(int value, int divisions, int max)
+            {
+                var step = Math.Max(1, max / Math.Max(1, divisions));
+                var snapped = (int)Math.Round((double)value / step) * step;
+                return Math.Max(0, Math.Min(max, snapped));
             }
 
         }
