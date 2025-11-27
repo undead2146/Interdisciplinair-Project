@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using static InterdisciplinairProject.Fixtures.ViewModels.FixtureCreateViewModel;
+using InterdisciplinairProject.Fixtures.Services;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
@@ -155,5 +156,20 @@ namespace InterdisciplinairProject.Fixtures.Views
         }
 
         // end of drag drop functionality for reordering channels 
+
+
+        private void NumericOnly(object sender, TextCompositionEventArgs e)
+        {
+            // allow only digits
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void BlockSpace(object sender, KeyEventArgs e)
+        {
+            // prevent spacebar from entering " " which breaks integer parsing
+            if (e.Key == Key.Space)
+                e.Handled = true;
+        }
+
     }
 }

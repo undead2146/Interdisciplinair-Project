@@ -12,6 +12,42 @@
     <UserControl.Resources>
         <converters:Base64ToImageConverter  x:Key="Base64ToImageC"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityC"/>
+
+        <Style x:Key="WatermarkTextBoxStyle" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Gray" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="True">
+                            <Grid>
+                                <!-- real textbox content -->
+                                <ScrollViewer x:Name="PART_ContentHost" />
+
+                                <!-- watermark -->
+                                <TextBlock x:Name="Watermark"
+                                   Text="{TemplateBinding Tag}"
+                                   Margin="4,2,0,0"
+                                   Foreground="Gray"
+                                   IsHitTestVisible="False"
+                                   Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Watermark"
+                                Property="Visibility"
+                                Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="8">
@@ -219,7 +255,48 @@
                                             <StackPanel Orientation="Vertical" Margin="0,0,0,6">
                                                 <TextBlock Text="Type name" Margin="0,0,0,2"/>
                                                 <TextBox Text="{Binding CustomTypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
+                                                <TextBlock Text="Range name" Margin="0,0,0,2"/>
+                                                <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
                                             </StackPanel>
+
+                                            <StackPanel Orientation="Vertical" Margin="0,0,0,6">
+                                                <TextBlock Text="Type Range" Margin="0,0,0,2"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="1*"/>
+                                                        <ColumnDefinition Width="1*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBox Grid.Column="0"
+                                                             Text="{Binding CustomRangeMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             Padding="4"
+                                                             Margin="0,0,6,0"
+                                                             Style="{StaticResource WatermarkTextBoxStyle}"
+                                                             Tag="min"
+                                                             PreviewTextInput="NumericOnly"
+                                                             PreviewKeyDown="BlockSpace"
+                                                             MinWidth="60"
+                                                             MaxWidth="90"
+                                                             HorizontalAlignment="Stretch"
+                                                             TextWrapping="NoWrap"
+                                                             />
+                                                    <!-- MAX -->
+                                                    <TextBox Grid.Column="1"
+                                                             Text="{Binding CustomRangeMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             Padding="4"
+                                                             Style="{StaticResource WatermarkTextBoxStyle}"
+                                                             Tag="max"
+                                                             PreviewTextInput="NumericOnly"
+                                                             PreviewKeyDown="BlockSpace"
+                                                             MinWidth="60"
+                                                             MaxWidth="90"
+                                                             HorizontalAlignment="Stretch"
+                                                             TextWrapping="NoWrap"
+                                                             />
+                                                </Grid>
+                                            </StackPanel>
+                                            
+                                            
 
                                             <StackPanel Orientation="Vertical">
                                                 <TextBlock Text="Step Value" Margin="0,0,0,2"/>
@@ -230,11 +307,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBox Grid.Column="0"
-														 Text="{Binding CustomTypeSliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-														 Padding="4"
-														 Margin="0,0,6,0"
-                                                             />
+                                                    
 
                                                     <Button Grid.Column="1"
 														x:Name="addType"
@@ -246,6 +319,81 @@
                                                 </Grid>
                                             </StackPanel>
                                         </StackPanel>
+
+
+                                        <StackPanel x:Name="RangePanel" Margin="0,10,0,0" Visibility="Collapsed">
+                                            <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                            <StackPanel Orientation="Vertical" Margin="0,0,0,6">
+                                                <TextBlock Text="Type name" Margin="0,0,0,2"/>
+
+                                                <ComboBox ItemsSource="{Binding AvailableTypes}"
+					  SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+					  Width="180"/>
+                                                <TextBlock Text="Range name" Margin="0,0,0,2"/>
+                                                <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Vertical" Margin="0,0,0,6">
+                                                <TextBlock Text="Type Range" Margin="0,0,0,2"/>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="1*"/>
+                                                        <ColumnDefinition Width="1*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBox Grid.Column="0"
+                     Text="{Binding CustomRangeMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Padding="4"
+                     Margin="0,0,6,0"
+                     Style="{StaticResource WatermarkTextBoxStyle}"
+                     Tag="min"
+                     PreviewTextInput="NumericOnly"
+                     PreviewKeyDown="BlockSpace"
+                     MinWidth="60"
+                     MaxWidth="90"
+                     HorizontalAlignment="Stretch"
+                     TextWrapping="NoWrap"
+                     />
+                                                    <!-- MAX -->
+                                                    <TextBox Grid.Column="1"
+                     Text="{Binding CustomRangeMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Padding="4"
+                     Style="{StaticResource WatermarkTextBoxStyle}"
+                     Tag="max"
+                     PreviewTextInput="NumericOnly"
+                     PreviewKeyDown="BlockSpace"
+                     MinWidth="60"
+                     MaxWidth="90"
+                     HorizontalAlignment="Stretch"
+                     TextWrapping="NoWrap"
+                     />
+                                                </Grid>
+                                            </StackPanel>
+
+
+
+                                            <StackPanel Orientation="Vertical">
+                                                <TextBlock Text="Step Value" Margin="0,0,0,2"/>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+
+
+                                                    <Button Grid.Column="1"
+													x:Name="addRange"
+													Content="Add type"
+													Padding="6,2"
+													Visibility="Collapsed"
+													Command="{Binding AddCustomRangeCommand}"
+													CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </StackPanel>
+
                                     </StackPanel>
                                 </Border>
 
@@ -284,6 +432,13 @@
                                 <Setter TargetName="CustomPanel" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
                                 <Setter TargetName="addType" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding IsAddRangeType}" Value="True">
+                                <Setter TargetName="RangePanel" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="addRange" Property="Visibility" Value="Visible"/>
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsDegreeHType}" Value="True">

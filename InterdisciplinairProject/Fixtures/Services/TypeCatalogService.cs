@@ -29,6 +29,7 @@ namespace InterdisciplinairProject.Fixtures.Services
         private static readonly List<TypeSpecification> _defaults = new()
         {
             new TypeSpecification{ name="Custom", input="custom"},
+            new TypeSpecification{ name="Add Range To Type", input="rangeToType"},
             new TypeSpecification{ name="Lamp", input="slider", divisions=255},
             new TypeSpecification{ name="Star", input="slider", divisions=255},
             new TypeSpecification{ name="clock", input="slider", divisions=255},
