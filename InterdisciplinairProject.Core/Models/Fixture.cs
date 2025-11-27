@@ -46,6 +46,7 @@ public class Fixture : INotifyPropertyChanged
     /// <summary>
     /// Gets the unique identifier of the fixture instance (alias for InstanceId).
     /// </summary>
+    [JsonPropertyName("id")]
     public string Id => InstanceId;
 
     /// <summary>
@@ -63,6 +64,7 @@ public class Fixture : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the description of the fixture.
     /// </summary>
+    [JsonPropertyName("description")]
     public string Description { get; set; }
 
     /// <summary>
@@ -74,21 +76,25 @@ public class Fixture : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the channel descriptions (e.g., "Ch1: Dimmer - General intensity").
     /// </summary>
+    [JsonIgnore]
     public Dictionary<string, string> ChannelDescriptions { get; set; }
 
     /// <summary>
     /// Gets or sets the channel types.
     /// </summary>
+    [JsonIgnore]
     public Dictionary<string, ChannelType> ChannelTypes { get; set; } = new();
 
     /// <summary>
     /// Gets the total number of channels in this fixture.
     /// </summary>
+    [JsonIgnore]
     public int ChannelCount => Channels?.Count ?? 0;
 
     /// <summary>
     /// Gets a value indicating whether this fixture is complex (more than 16 channels).
     /// </summary>
+    [JsonIgnore]
     public bool IsComplex => ChannelCount > 16;
 
     /// <summary>
@@ -117,12 +123,6 @@ public class Fixture : INotifyPropertyChanged
     /// </summary>
     [JsonPropertyName("imageBase64")]
     public string ImageBase64 { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the image path for this fixture.
-    /// </summary>
-    [JsonPropertyName("imagePath")]
-    public string ImagePath { get; set; } = string.Empty;
 
     /// <summary>
     /// Raises the <see cref="PropertyChanged"/> event.

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
@@ -26,7 +27,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                                            "InterdisciplinairProject",
                                            "Fixtures");
         private readonly bool _isEditing;
-
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
         private readonly ManufacturerService _manufacturerService;
@@ -34,11 +34,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         [ObservableProperty]
         private ChannelItem? selectedChannel;
 
-        //partial void OnSliderDivisionsChanged(int value) => OnPropertyChanged(nameof(TickFrequency));
-
-        /// <summary>
-        /// Separator.
-        /// </summary>
+        // partial void OnSliderDivisionsChanged(int value) => OnPropertyChanged(nameof(TickFrequency));
         [ObservableProperty]
         private string fixtureName = "New Fixture";
 
@@ -221,9 +217,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void SaveFixture()
         {
-            if (string.IsNullOrEmpty(FixtureName) || Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
+            if (string.IsNullOrEmpty(FixtureName) ||
+                Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
             {
-                MessageBox.Show("Please fill in the following (Name Fixture, Name channel, Channel type).", "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please fill in the following (Name Fixture, Name channel, Channel type).",
+                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -239,33 +237,32 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             if (!_isEditing && File.Exists(newFilePath))
             {
-                MessageBox.Show($"There already exist a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"There already exist a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.",
+                    "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            var channelsArray = new JsonArray();
-            foreach (var ch in Channels)
-            {
-                var channelObj = new JsonObject
-                {
-                    ["Name"] = ch.Name,
-                    ["Type"] = ch.SelectedType,
-                    ["value"] = ch.Level.ToString(),
-                };
-                channelsArray.Add(channelObj);
-            }
+            // Vul het Fixture model
+            _currentFixture.Name = FixtureName;
+            _currentFixture.Manufacturer = manufacturer;
+            _currentFixture.ImageBase64 = !string.IsNullOrEmpty(ImageBase64)
+                ? ImageCompressionHelpers.CompressBase64(ImageBase64)
+                : string.Empty;
 
-            // json root
-            var root = new JsonObject
+            // Zet ChannelItems terug naar Channels
+            _currentFixture.Channels = new ObservableCollection<Channel>(
+                Channels.Select(ci => ci.ToModel())
+            );
+
+            // Serialiseer met camelCase + enum converter
+            var options = new JsonSerializerOptions
             {
-                ["name"] = FixtureName,
-                ["manufacturer"] = manufacturer,
-                ["channels"] = channelsArray,
-                ["imageBase64"] = !string.IsNullOrEmpty(ImageBase64) ? ImageCompressionHelpers.CompressBase64(ImageBase64) : _currentFixture.ImageBase64,
+                WriteIndented = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
+            options.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string json = root.ToJsonString(options);
+            string json = JsonSerializer.Serialize(_currentFixture, options);
 
             try
             {
@@ -279,21 +276,22 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
 
                 File.WriteAllText(newFilePath, json);
-                MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.",
+                    "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 LoadManufacturers();
-
                 FixtureSaved?.Invoke(this, EventArgs.Empty);
 
-                if (!_isEditing) {  //only go back if you were editing
-                    BackRequested?.Invoke(this, EventArgs.Empty); 
-                }
+                if (!_isEditing)
+                    BackRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (IOException ioEx)
             {
-                MessageBox.Show($"Error with saving fixture: {ioEx.Message}", "Save error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error with saving fixture: {ioEx.Message}", "Save error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void AddChannel()
         {
