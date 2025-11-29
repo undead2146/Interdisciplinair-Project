@@ -4,6 +4,10 @@
     "input": "custom"
   },
   {
+    "name": "Add Range To Type",
+    "input": "rangeToType"
+  },
+  {
     "name": "Lamp",
     "input": "slider",
     "divisions": 255

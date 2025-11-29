@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using static InterdisciplinairProject.Fixtures.ViewModels.FixtureCreateViewModel;
+using InterdisciplinairProject.Fixtures.Services;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
@@ -95,14 +96,13 @@ namespace InterdisciplinairProject.Fixtures.Views
         // start of drag drop functionality for reordering channels 
         private void ChannelsListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _dragInitiatedFromHandle = false; // << toegevoegd
             _dragStartPoint = e.GetPosition(null);
         }
 
         private void ChannelsListBox_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (!_dragInitiatedFromHandle) return; // << toegevoegd
-            if (e.LeftButton != MouseButtonState.Pressed) return;
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
 
             Point mousePos = e.GetPosition(null);
             Vector diff = _dragStartPoint - mousePos;
@@ -110,7 +110,8 @@ namespace InterdisciplinairProject.Fixtures.Views
             if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
             {
-                if (sender is not ListBox listBox || listBox.SelectedItem == null) return;
+                if (sender is not ListBox listBox || listBox.SelectedItem == null)
+                    return;
 
                 DragDrop.DoDragDrop(listBox, listBox.SelectedItem, DragDropEffects.Move);
             }
@@ -123,15 +124,19 @@ namespace InterdisciplinairProject.Fixtures.Views
 
         private void ChannelsListBox_Drop(object sender, DragEventArgs e)
         {
-            if (sender is not ListBox listBox) return;
+            if (sender is not ListBox listBox)
+                return;
 
             var source = e.Data.GetData(typeof(ChannelItem)) as ChannelItem;
-            if (source == null) return;
+            if (source == null)
+                return;
 
             var target = GetNearestContainer(listBox, e.GetPosition(listBox))?.DataContext as ChannelItem;
-            if (target == null || ReferenceEquals(source, target)) return;
+            if (target == null || ReferenceEquals(source, target))
+                return;
 
-            if (DataContext is not FixtureCreateViewModel vm) return;
+            if (DataContext is not FixtureCreateViewModel vm)
+                return;
 
             int oldIndex = vm.Channels.IndexOf(source);
             int newIndex = vm.Channels.IndexOf(target);
@@ -143,31 +148,28 @@ namespace InterdisciplinairProject.Fixtures.Views
         private ListBoxItem GetNearestContainer(ListBox listBox, Point position)
         {
             var element = listBox.InputHitTest(position) as DependencyObject;
+
             while (element != null && element is not ListBoxItem)
                 element = VisualTreeHelper.GetParent(element);
+
             return element as ListBoxItem;
         }
 
-        private void DragHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) // << toegevoegd
-        {
-            _dragInitiatedFromHandle = true;
-            _dragStartPoint = e.GetPosition(null);
-
-            if (sender is DependencyObject d)
-            {
-                var item = FindParent<ListBoxItem>(d);
-                if (item != null)
-                {
-                    item.IsSelected = true;
-                    item.Focus();
-                }
-            }
-        }
-
-        private void ChannelsListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) // << toegevoegd
-        {
-            _dragInitiatedFromHandle = false;
-        }
         // end of drag drop functionality for reordering channels 
+
+
+        private void NumericOnly(object sender, TextCompositionEventArgs e)
+        {
+            // allow only digits
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void BlockSpace(object sender, KeyEventArgs e)
+        {
+            // prevent spacebar from entering " " which breaks integer parsing
+            if (e.Key == Key.Space)
+                e.Handled = true;
+        }
+
     }
 }

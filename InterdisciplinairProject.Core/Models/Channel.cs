@@ -11,21 +11,25 @@ public class Channel
     /// <summary>
     /// Gets or sets the name of the channel.
     /// </summary>
+    [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the type of the channel.
     /// </summary>
+    [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the value of the channel.
     /// </summary>
+    [JsonPropertyName("value")]
     public string Value { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the parameter of the channel.
     /// </summary>
+    [JsonIgnore]
     public int Parameter { get; set; }
 
     /// <summary>
