@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -54,10 +55,17 @@ public class SceneManager
             Name = fixture.Name,
             Manufacturer = fixture.Manufacturer,
             Description = fixture.Description,
-            Channels = new Dictionary<string, byte?>(fixture.Channels),
+            Channels = new ObservableCollection<Channel>(fixture.Channels.Select(c => new Channel
+            {
+                Name = c.Name,
+                Type = c.Type,
+                Value = c.Value,
+                Min = c.Min,
+                Max = c.Max,
+                Time = c.Time,
+                ChannelEffect = c.ChannelEffect,
+            })),
             ChannelDescriptions = new Dictionary<string, string>(fixture.ChannelDescriptions),
-            ChannelTypes = new Dictionary<string, ChannelType>(fixture.ChannelTypes),
-            ChannelEffects = new Dictionary<string, List<ChannelEffect>>(fixture.ChannelEffects),
             StartAddress = fixture.StartAddress,
         };
 
@@ -102,7 +110,7 @@ public class SceneManager
                                 FixtureId = fixtureId,
                                 InstanceId = instanceId,
                                 Name = nameProp,
-                                Channels = new Dictionary<string, byte?>(),
+                                Channels = new ObservableCollection<Channel>(),
                             };
 
                             if (fixEl.TryGetProperty("channels", out var channelsEl) && channelsEl.ValueKind == JsonValueKind.Object)
@@ -112,11 +120,32 @@ public class SceneManager
                                     if (chan.Value.ValueKind == JsonValueKind.Number)
                                     {
                                         var intVal = chan.Value.GetInt32();
-                                        sceneFix.Channels[chan.Name] = (byte)Math.Max(0, Math.Min(255, intVal));
+                                        var param = (byte)Math.Max(0, Math.Min(255, intVal));
+                                        sceneFix.Channels.Add(new Channel
+                                        {
+                                            Name = chan.Name,
+                                            Value = chan.Value.ToString(),
+                                            Parameter = param,
+                                            Type = "Unknown",
+                                            Min = 0,
+                                            Max = 255,
+                                            Time = 0,
+                                            ChannelEffect = new ChannelEffect(),
+                                        });
                                     }
                                     else
                                     {
-                                        sceneFix.Channels[chan.Name] = 0;
+                                        sceneFix.Channels.Add(new Channel
+                                        {
+                                            Name = chan.Name,
+                                            Value = "0",
+                                            Parameter = 0,
+                                            Type = "Unknown",
+                                            Min = 0,
+                                            Max = 255,
+                                            Time = 0,
+                                            ChannelEffect = new ChannelEffect(),
+                                        });
                                     }
                                 }
                             }
@@ -229,7 +258,7 @@ public class SceneManager
                         fixtureId = f.FixtureId,
                         instanceId = f.InstanceId,
                         name = f.Name,
-                        channels = f.Channels.ToDictionary(kvp => kvp.Key, kvp => (int)(kvp.Value ?? 0)),
+                        channels = f.Channels.ToDictionary(c => c.Name, c => c.Parameter),
                     }).ToArray() ?? Array.Empty<object>(),
                 },
             };
