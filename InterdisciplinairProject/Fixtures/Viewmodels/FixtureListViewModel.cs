@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Converters;
-using InterdisciplinairProject.Fixtures.Models;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -111,7 +112,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 try
                 {
                     string json = File.ReadAllText(file);
-                    var fixture = JsonSerializer.Deserialize<Fixture>(json);
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+                    };
+                    var fixture = JsonSerializer.Deserialize<Fixture>(json, options);
 
                     if (fixture != null)
                     {
@@ -180,7 +187,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string filePath = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
             if (!File.Exists(filePath))
             {
-                MessageBox.Show("Fixture JSON-bestand niet gevonden.");
+                MessageBox.Show("Fixture JSON-file not found.");
                 return;
             }
 
@@ -191,7 +198,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Fout bij het laden van fixture: " + ex.Message);
+                MessageBox.Show("Error loading fixture: " + ex.Message);
             }
         }
 

@@ -1,6 +1,6 @@
-using InterdisciplinairProject.Core.Models;
+using System;
 
-namespace InterdisciplinairProject.Features.Fixture;
+namespace InterdisciplinairProject.Core.Models;
 
 /// <summary>
 /// Helper class for working with channel types.
@@ -77,6 +77,7 @@ public static class ChannelTypeHelper
             "power" => ChannelType.Power,
             "rate" => ChannelType.Rate,
             "brightness" => ChannelType.Brightness,
+
             // Handle generic channel names like Ch1, Ch2, etc. as Dimmer
             var name when name.StartsWith("ch") && int.TryParse(name[2..], out _) => ChannelType.Dimmer,
             var name when name.StartsWith("channel") && int.TryParse(name[7..], out _) => ChannelType.Dimmer,

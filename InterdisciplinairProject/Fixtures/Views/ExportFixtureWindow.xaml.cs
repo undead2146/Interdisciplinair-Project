@@ -1,30 +1,35 @@
-﻿using System.Windows;
+using System.Windows;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.Views
 {
+    /// <summary>
+    /// Interaction logic for ExportFixtureWindow.xaml
+    /// </summary>
     public partial class ExportFixtureWindow : Window
     {
-        public string FixtureName { get; set; }
-
-        public ExportFixtureWindow(string currentName)
+        public ExportFixtureWindow(string fixtureName)
         {
             InitializeComponent();
-            FixtureName = currentName;
-            NameTextBox.Text = currentName;
-            NameTextBox.Focus();
+            NameTextBox.Text = fixtureName;
             NameTextBox.SelectAll();
+            NameTextBox.Focus();
         }
 
-        private void Submit_Click(object sender, RoutedEventArgs e)
+        public string FixtureName => NameTextBox.Text;
+
+        private void Export_Click(object sender, RoutedEventArgs e)
         {
-            FixtureName = NameTextBox.Text.Trim();
-            if (string.IsNullOrWhiteSpace(FixtureName))
-            {
-                MessageBox.Show("Fixture name cannot be empty.");
-                return;
-            }
             DialogResult = true;
             Close();
+        }
+
+        private void NameTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Export_Click(sender, e);
+            }
         }
     }
 }

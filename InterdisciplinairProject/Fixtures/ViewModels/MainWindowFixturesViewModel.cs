@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.IO;
@@ -17,6 +17,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         // Track currently selected fixture
         private Fixture? _selectedFixture;
+        // ** NIEUW: Field voor de Manufacturer ViewModel **
+        private ManufacturerViewModel? _manufacturerViewModel;
 
         [ObservableProperty]
         private object currentViewModel;
@@ -44,6 +46,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public ICommand ImportFixtureCommand { get; }
 
         public ICommand ExportFixtureCommand { get; }
+        // ** NIEUW: Command voor de Fabrikanten knop **
+        public ICommand ShowManufacturerCommand { get; }
 
         public MainWindowFixturesViewModel()
         {
@@ -51,6 +55,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
             ImportFixtureCommand = new RelayCommand(ImportFixture);
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
+            // ** NIEUW: Initialiseer het Fabrikanten Command **
+            ShowManufacturerCommand = new RelayCommand(ShowManufacturer);
 
             fixtureListVm = new FixtureListViewModel();
             fixtureListVm.FixtureSelected += OnFixtureSelected;
@@ -76,6 +82,30 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
         // VIEW NAVIGATION
         // ------------------------------------------------------------
+
+        // ------------------------------------------------------------
+        // VIEW NAVIGATION
+        // ------------------------------------------------------------
+
+        // ** NIEUW: Methode om de Manufacturer View te tonen **
+        private void ShowManufacturer()
+        {
+            if (_manufacturerViewModel == null)
+            {
+                _manufacturerViewModel = new ManufacturerViewModel();
+                // Abonneer op het update event zodat de hoofdlijst met fixtures herlaadt als een fabrikant wordt hernoemd of verwijderd.
+                _manufacturerViewModel.ManufacturersUpdated += OnManufacturersUpdated;
+            }
+            CurrentViewModel = _manufacturerViewModel;
+        }
+
+        // ** NIEUW: Event Handler om de fixture lijst te herladen **
+        private void OnManufacturersUpdated(object? sender, EventArgs e)
+        {
+            // Zorgt ervoor dat de fabrikantenlijst in de FixtureListViewModel wordt bijgewerkt
+            // en dus de dropdowns in de Create/Edit view ook.
+            fixtureListVm.ReloadFixturesFromFiles();
+        }
         private void OnFixtureSelected(object? sender, string json)
         {
             var detailVm = new FixtureContentViewModel(json);
@@ -84,11 +114,66 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             detailVm.EditRequested += (_, contentVm) =>
             {
                 var editVm = new FixtureCreateViewModel(contentVm);
-                editVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
+                //editVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
+                //editVm.FixtureSaved += (_, __) =>
+                //{
+                //    fixtureListVm.ReloadFixturesFromFiles();
+                //    CurrentViewModel = fixtureListVm;
+                //};
+
+                // CANCEL while editing → back to content view of original fixture
+                editVm.BackRequested += (_, __) =>
+                {
+                    try
+                    {
+                        // use the ORIGINAL name/manufacturer from the content VM (before editing)
+                        string manufacturer = contentVm.Manufacturer ?? "Unknown";
+                        string name = contentVm.Name ?? string.Empty;
+                        string filePath = Path.Combine(_fixturesFolder, manufacturer, name + ".json");
+
+                        if (File.Exists(filePath))
+                        {
+                            string json2 = File.ReadAllText(filePath);
+                            OnFixtureSelected(this, json2);   // reopen FixtureContentView
+                        }
+                        else
+                        {
+                            // if file somehow missing, fall back to list
+                            CurrentViewModel = fixtureListVm;
+                        }
+                    }
+                    catch
+                    {
+                        CurrentViewModel = fixtureListVm;
+                    }
+                };
+
                 editVm.FixtureSaved += (_, __) =>
                 {
                     fixtureListVm.ReloadFixturesFromFiles();
-                    CurrentViewModel = fixtureListVm;
+
+                    try
+                    {
+                        // use the (possibly changed) name/manufacturer from the editor
+                        string manufacturer = editVm.SelectedManufacturer ?? "Unknown";
+                        string name = editVm.FixtureName;
+                        string filePath = Path.Combine(_fixturesFolder, manufacturer, name + ".json");
+
+                        if (File.Exists(filePath))
+                        {
+                            string json2 = File.ReadAllText(filePath);
+                            OnFixtureSelected(this, json2);   // <-- go back to FixtureContentView
+                        }
+                        else
+                        {
+                            // fallback if something went wrong
+                            CurrentViewModel = fixtureListVm;
+                        }
+                    }
+                    catch
+                    {
+                        CurrentViewModel = fixtureListVm;
+                    }
                 };
 
                 CurrentViewModel = editVm;
@@ -112,7 +197,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void OnFixtureDelete(string fixtureName, string manufacturerName)
         {
-            string filePath = Path.Combine(_fixturesFolder,manufacturerName, fixtureName + ".json");
+            string filePath = Path.Combine(_fixturesFolder, manufacturerName, fixtureName + ".json");
 
             if (!File.Exists(filePath))
             {
@@ -190,7 +275,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     missingFields.Add("'name'");
                 }
 
-                if (string.IsNullOrWhiteSpace(manufacturer)) 
+                if (string.IsNullOrWhiteSpace(manufacturer))
                 {
                     manufacturer = "Unknown";
                     root["manufacturer"] = manufacturer;

@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
@@ -18,7 +18,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private string? _manufacturer;
         private string? _imagePath;
         private string? _comPort;
-        private string? _selectedMethod = "DMX";
+
+        // UPDATED DEFAULT METHOD
+        private string? _selectedMethod = "Standard DMX";
 
         public event EventHandler? DeleteRequested;
         public event EventHandler? BackRequested;
@@ -30,7 +32,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public string? ImageBase64 { get; set; }
         public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
 
-        public ObservableCollection<string> LampMethods { get; set; } = new() { "DMX", "ELO" };
+        // UPDATED LABELS
+        public ObservableCollection<string> LampMethods { get; set; } = new()
+        {
+            "Standard DMX",
+            "ELO (Cable)"
+        };
+
         public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
 
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
@@ -65,16 +73,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.Channels)
+                foreach (var channel in parsed.Channels)
                 {
-                    // FIX: capture local variable for correct TestCommand
-                    var channelCopy = c;
-                    channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
-                    Channels.Add(channelCopy);
+                    if (int.TryParse(channel.Value, out var param))
+                        channel.Parameter = param;
+
+                    channel.TestCommand = new RelayCommand(() => SendChannelValue(channel));
+                    Channels.Add(channel);
                 }
             }
         }
 
+        // ===========================
+        // Testing
+        // ===========================
         private void RefreshAvailablePorts()
         {
             AvailablePorts.Clear();
@@ -94,17 +106,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         private bool ValidateChannel(Channel channel, out string error)
         {
             error = "";
-            if (channel.Parameter < 0 || channel.Parameter > 255)
+            if (channel.Parameter < 0 || channel.Parameter > 1024)
             {
                 error = channel.Name;
                 return false;
             }
+
             return true;
         }
 
-        // ===========================
-        // SEND SINGLE CHANNEL
-        // ===========================
         public void SendChannelValue(Channel channel)
         {
             if (ComPort == null)
@@ -122,23 +132,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             int index = Channels.IndexOf(channel);
             if (index < 0) return;
 
-            if (SelectedMethod == "DMX")
+            if (SelectedMethod == "Standard DMX")
             {
                 byte[] dmx = new byte[512];
                 dmx[index] = (byte)channel.Parameter;
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO
+            else // ELO (Cable)
             {
-                // Only include the exact channel value
                 byte[] eloData = { (byte)channel.Parameter };
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
             }
         }
 
-        // ===========================
-        // SEND ALL CHANNELS
-        // ===========================
         private void SendAllChannels()
         {
             if (ComPort == null)
@@ -156,7 +162,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
             }
 
-            if (SelectedMethod == "DMX")
+            if (SelectedMethod == "Standard DMX")
             {
                 byte[] dmx = new byte[512];
                 for (int i = 0; i < Channels.Count && i < 512; i++)
@@ -164,7 +170,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO
+            else // ELO (Cable)
             {
                 byte[] eloData = new byte[Channels.Count];
                 for (int i = 0; i < Channels.Count; i++)

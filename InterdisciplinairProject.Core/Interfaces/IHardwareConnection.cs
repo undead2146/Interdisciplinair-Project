@@ -1,4 +1,10 @@
-﻿namespace InterdisciplinairProject.Core.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace InterdisciplinairProject.Core.Interfaces;
 
 /// <summary>
 /// Interface for hardware connection operations.

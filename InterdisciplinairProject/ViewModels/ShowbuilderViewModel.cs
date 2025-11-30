@@ -1,26 +1,31 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
+using InterdisciplinairProject.Core.Models;
 using Show;
-using Show.Model;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
-using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace InterdisciplinairProject.ViewModels
 {
     public partial class ShowbuilderViewModel : ObservableObject
     {
-
-        private Shows _show = new Shows();
+        private InterdisciplinairProject.Core.Models.Show _show = new InterdisciplinairProject.Core.Models.Show();
         private string? _currentShowPath;
 
-        public ObservableCollection<Scene> Scenes { get; } = new();
+        public ObservableCollection<ShowScene> Scenes { get; } = new();
 
         [ObservableProperty]
-        private Scene? selectedScene;
+        private ShowScene? selectedScene;
 
         [ObservableProperty]
         private string? currentShowId;
@@ -30,6 +35,9 @@ namespace InterdisciplinairProject.ViewModels
 
         [ObservableProperty]
         private string? message;
+
+        // new: per-scene fade cancellation tokens
+        private readonly Dictionary<ShowScene, CancellationTokenSource> _fadeCts = new();
 
         // ============================================================
         // CREATE SHOW
@@ -48,10 +56,10 @@ namespace InterdisciplinairProject.ViewModels
                 CurrentShowName = vm.ShowName;
                 Scenes.Clear();
 
-                _show = new Shows
+                _show = new InterdisciplinairProject.Core.Models.Show
                 {
                     Name = vm.ShowName,
-                    Scenes = new List<Scene>()
+                    Scenes = new List<ShowScene>()
                 };
 
                 _currentShowPath = null;
@@ -83,8 +91,23 @@ namespace InterdisciplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         // ensure imported scene slider starts at 0
-                        scene.Dimmer = 0;
-                        Scenes.Add(scene);
+                        var showScene = new ShowScene
+                        {
+                            Id = scene.Id,
+                            Name = scene.Name,
+                            Dimmer = 0,
+                            FadeInMs = scene.FadeInMs,
+                            FadeOutMs = scene.FadeOutMs,
+                            Fixtures = scene.Fixtures?.Select(f => new Fixture
+                            {
+                                InstanceId = f.InstanceId,
+                                FixtureId = f.FixtureId,
+                                Name = f.Name,
+                                Manufacturer = f.Manufacturer,
+                                Dimmer = 0
+                            }).ToList()
+                        };
+                        Scenes.Add(showScene);
                         Message = $"Scene '{scene.Name}' imported successfully!";
                     }
                     else
@@ -104,7 +127,7 @@ namespace InterdisciplinairProject.ViewModels
         // SCENE SELECTION
         // ============================================================
         [RelayCommand]
-        private void SceneSelectionChanged(Scene selectedScene)
+        private void SceneSelectionChanged(ShowScene selectedScene)
         {
             SelectedScene = selectedScene;
         }
@@ -196,7 +219,7 @@ namespace InterdisciplinairProject.ViewModels
                         return;
                     }
 
-                    var loadedShow = JsonSerializer.Deserialize<Shows>(showElement.GetRawText());
+                    var loadedShow = JsonSerializer.Deserialize<InterdisciplinairProject.Core.Models.Show>(showElement.GetRawText());
                     if (loadedShow == null)
                     {
                         Message = "Kon show niet deserialiseren. Bestand mogelijk corrupt.";
@@ -205,7 +228,7 @@ namespace InterdisciplinairProject.ViewModels
 
                     _show = loadedShow;
 
-                    currentShowId = _show.Id;
+                    CurrentShowId = _show.Id;
                     CurrentShowName = _show.Name;
                     _currentShowPath = selectedPath;
 
@@ -236,7 +259,7 @@ namespace InterdisciplinairProject.ViewModels
         private void SaveShowToPath(string path)
         {
             // Zorg dat _show up-to-date is
-            _show.Id = currentShowId ?? GenerateRandomId();
+            _show.Id = CurrentShowId ?? GenerateRandomId();
             _show.Name = CurrentShowName ?? "Unnamed Show";
             _show.Scenes = Scenes.ToList();
 
@@ -264,7 +287,7 @@ namespace InterdisciplinairProject.ViewModels
         // DELETE SCENE
         // ============================================================
         [RelayCommand]
-        private void DeleteScene(Scene? scene)
+        private void DeleteScene(ShowScene? scene)
         {
             if (scene == null)
                 return;
@@ -288,6 +311,228 @@ namespace InterdisciplinairProject.ViewModels
                 _show.Scenes.Remove(scene);
 
             Message = $"Scene '{scene.Name}' verwijderd.";
+        }
+
+        public void UpdateSceneDimmer(ShowScene scene, int dimmer)
+        {
+            if (scene == null)
+                return;
+
+            // Cancel any fade in progress for this scene because user is manually changing it
+            CancelFadeForScene(scene);
+
+            dimmer = Math.Max(0, Math.Min(100, dimmer));
+
+            // if we're turning this scene on (dimmer > 0), immediately turn all other scenes off.
+            if (dimmer > 0)
+            {
+                foreach (var other in Scenes.ToList())
+                {
+                    if (!ReferenceEquals(other, scene) && other.Dimmer > 0)
+                    {
+                        other.Dimmer = 0;
+
+                        // update other scene fixtures to 0
+                        if (other.Fixtures != null)
+                        {
+                            foreach (var fixture in other.Fixtures)
+                            {
+                                try
+                                {
+                                    // set observable property if available
+                                    fixture.Dimmer = 0;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine($"[DEBUG] Error zeroing fixture dimmer: {ex.Message}");
+                                }
+                            }
+                        }
+
+                        // refresh the Scenes collection item so UI updates if needed
+                        var idx = Scenes.IndexOf(other);
+                        if (idx >= 0) Scenes[idx] = other;
+                    }
+                }
+            }
+
+            // update model for the requested scene
+            scene.Dimmer = dimmer;
+
+            // update fixture channels for the requested scene
+            if (scene.Fixtures != null)
+            {
+                byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
+                foreach (var fixture in scene.Fixtures)
+                {
+                    try
+                    {
+                        fixture.Dimmer = channelValue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[DEBUG] Error updating fixture channels/dimmer: {ex.Message}");
+                    }
+                }
+            }
+
+            // Ensure UI reflects changes
+            if (SelectedScene == scene)
+            {
+                OnPropertyChanged(nameof(SelectedScene));
+            }
+            else
+            {
+                var idx = Scenes.IndexOf(scene);
+                if (idx >= 0) Scenes[idx] = scene;
+            }
+        }
+
+        // Cancels any running fade for the provided scene
+        private void CancelFadeForScene(ShowScene scene)
+        {
+            if (scene == null) return;
+
+            if (_fadeCts.TryGetValue(scene, out var cts))
+            {
+                try
+                {
+                    cts.Cancel();
+                }
+                catch { }
+                cts.Dispose();
+                _fadeCts.Remove(scene);
+            }
+        }
+
+        // Fade a single scene to target over durationMs, updating fixtures and Scenes on the UI thread.
+        private async Task FadeSceneAsync(ShowScene scene, int target, int durationMs, CancellationToken token)
+        {
+            if (scene == null) return;
+
+            if (durationMs <= 0)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    scene.Dimmer = target;
+                    UpdateFixturesForScene(scene, target);
+                    var idx = Scenes.IndexOf(scene);
+                    if (idx >= 0) Scenes[idx] = scene;
+                    if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+                });
+                return;
+            }
+
+            const int intervalMs = 20;
+            int steps = Math.Max(1, durationMs / intervalMs);
+
+            // read authoritative start on UI thread (await returns the value)
+            int start = await Application.Current.Dispatcher.InvokeAsync(() => scene.Dimmer);
+
+            double delta = (target - start) / (double)steps;
+
+            for (int i = 1; i <= steps; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                double next = start + delta * i;
+                int nextInt = (int)Math.Round(Math.Max(0, Math.Min(100, next)));
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    scene.Dimmer = nextInt;
+                    UpdateFixturesForScene(scene, nextInt);
+                    var idx = Scenes.IndexOf(scene);
+                    if (idx >= 0) Scenes[idx] = scene;
+                    if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+                });
+
+                await Task.Delay(intervalMs, token);
+            }
+
+            // ensure exact target at end
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                scene.Dimmer = target;
+                UpdateFixturesForScene(scene, target);
+                var idx = Scenes.IndexOf(scene);
+                if (idx >= 0) Scenes[idx] = scene;
+                if (SelectedScene == scene) OnPropertyChanged(nameof(SelectedScene));
+            });
+        }
+
+        // Helper to update fixture dimmer channels for a scene on the caller thread (call from UI dispatcher)
+        private void UpdateFixturesForScene(ShowScene scene, int dimmer)
+        {
+            if (scene?.Fixtures == null) return;
+            byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
+            foreach (var fixture in scene.Fixtures)
+            {
+                try
+                {
+                    fixture.Dimmer = channelValue;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[DEBUG] Error updating fixture channels/dimmer: {ex.Message}");
+                }
+            }
+        }
+
+        // Public method used by SceneControlViewModel.PlayAsync to activate scene with fade orchestration.
+        public async Task FadeToAndActivateAsync(ShowScene targetScene, int targetDimmer)
+        {
+            if (targetScene == null) return;
+
+            // Cancel any fade for the target (we'll run a new one)
+            CancelFadeForScene(targetScene);
+
+            // collect currently active other scenes
+            var activeOthers = Scenes.Where(s => !ReferenceEquals(s, targetScene) && s.Dimmer > 0).ToList();
+
+            // fade out others in parallel
+            var fadeOutTasks = new List<Task>();
+            foreach (var other in activeOthers)
+            {
+                // cancel existing token for other and create a new one
+                CancelFadeForScene(other);
+                var cts = new CancellationTokenSource();
+                _fadeCts[other] = cts;
+                fadeOutTasks.Add(Task.Run(() => FadeSceneAsync(other, 0, Math.Max(0, other.FadeOutMs), cts.Token)));
+            }
+
+            try
+            {
+                // wait for all fade-outs to complete
+                await Task.WhenAll(fadeOutTasks);
+            }
+            catch (OperationCanceledException) { /* one of fades cancelled; continue */ }
+
+            // ensure other scenes are set to 0 (defensive)
+            foreach (var other in activeOthers)
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    other.Dimmer = 0;
+                    UpdateFixturesForScene(other, 0);
+                    var idx = Scenes.IndexOf(other);
+                    if (idx >= 0) Scenes[idx] = other;
+                });
+                CancelFadeForScene(other);
+            }
+
+            // now fade target scene to requested dimmer using its FadeInMs
+            CancelFadeForScene(targetScene);
+            var ctsTarget = new CancellationTokenSource();
+            _fadeCts[targetScene] = ctsTarget;
+
+            try
+            {
+                await FadeSceneAsync(targetScene, targetDimmer, Math.Max(0, targetScene.FadeInMs), ctsTarget.Token);
+            }
+            finally
+            {
+                CancelFadeForScene(targetScene);
+            }
         }
     }
 }

@@ -50,7 +50,7 @@
         <ToolBarTray DockPanel.Dock="Top" Style="{StaticResource ToolBarTrayStyle1}" IsLocked="True">
             <ToolBar Style="{StaticResource ToolBarStyleClean}">
                 <TextBlock Text="Show Name:" VerticalAlignment="Center" Margin="5,0"/>
-   
+
                 <TextBox Width="150" Text="{Binding CurrentShowName}" Margin="0,0,15,0" VerticalAlignment="Center" Height="21"/>
 
                 <Button Content="Import Scene" Command="{Binding ImportScenesCommand}" Margin="2,0" 
@@ -101,12 +101,12 @@
                 </ListBox.ItemTemplate>
 
                 <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SelectionChanged">
-                            <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}"
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SceneSelectionChangedCommand}"
                                                    CommandParameter="{Binding SelectedItem, ElementName=sceneListView}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ListBox>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
 
             <GridSplitter Grid.Column="0"
                           Grid.RowSpan="2"
@@ -133,58 +133,65 @@
                     Padding="10"
                     Background="White"
                     SnapsToDevicePixels="True">
-                            <StackPanel>
-                                <!-- Fixture title -->
-                                <TextBlock Text="{Binding Name}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <!-- Fixture title -->
+                                    <TextBlock Text="{Binding Name}"
                                FontSize="15"
                                FontWeight="Bold"
                                Margin="0,0,0,8" />
-                                <!-- Fixture ID -->
-                                <StackPanel Margin="0,0,0,4">
-                                    <TextBlock Text="Fixture ID:" FontWeight="SemiBold" Foreground="#666"/>
-                                    <TextBlock Text="{Binding Id}" />
+                                    <!-- Fixture ID -->
+                                    <StackPanel Margin="0,0,0,4">
+                                        <TextBlock Text="Fixture ID:" FontWeight="SemiBold" Foreground="#666"/>
+                                        <TextBlock Text="{Binding Id}" />
+                                    </StackPanel>
+                                    <!-- Instance ID -->
+                                    <StackPanel Margin="0,0,0,10">
+                                        <TextBlock Text="Instance ID:" FontWeight="SemiBold" Foreground="#666"/>
+                                        <TextBlock Text="{Binding InstanceId}" />
+                                    </StackPanel>
+
+                                    <!-- Channels -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <!-- Dimmer -->
+                                        <StackPanel Margin="0,0,10,0">
+                                            <TextBlock Text="Dimmer"
+                                               Foreground="#666"
+                                               FontSize="12"/>
+                                            <TextBlock Text="{Binding Dimmer}" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                        <!-- Red -->
+                                        <StackPanel Margin="0,0,10,0">
+                                            <TextBlock Text="R"
+                                               Foreground="Red"
+                                               FontSize="12"/>
+                                            <TextBlock Text="{Binding Channels[red], FallbackValue=0}"
+                                               FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                        <!-- Green -->
+                                        <StackPanel Margin="0,0,10,0">
+                                            <TextBlock Text="G"
+                                               Foreground="Green"
+                                               FontSize="12"/>
+                                            <TextBlock Text="{Binding Channels[green], FallbackValue=0}"
+                                               FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                        <!-- Blue -->
+                                        <StackPanel>
+                                            <TextBlock Text="B"
+                                               Foreground="Blue"
+                                               FontSize="12"/>
+                                            <TextBlock Text="{Binding Channels[blue], FallbackValue=0}"
+                                               FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
-                                <!-- Instance ID -->
-                                <StackPanel Margin="0,0,0,10">
-                                    <TextBlock Text="Instance ID:" FontWeight="SemiBold" Foreground="#666"/>
-                                    <TextBlock Text="{Binding InstanceId}" />
-                                </StackPanel>
-                                <!-- Channels -->
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                    <!-- Dimmer -->
-                                    <StackPanel Margin="0,0,10,0">
-                                        <TextBlock Text="Dimmer"
-                                       Foreground="#666"
-                                       FontSize="12"/>
-                                        <TextBlock Text="{Binding Channels.Dimmer}"
-                                       FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                    <!-- Red -->
-                                    <StackPanel Margin="0,0,10,0">
-                                        <TextBlock Text="R"
-                                       Foreground="Red"
-                                       FontSize="12"/>
-                                        <TextBlock Text="{Binding Channels.Red}"
-                                       FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                    <!-- Green -->
-                                    <StackPanel Margin="0,0,10,0">
-                                        <TextBlock Text="G"
-                                       Foreground="Green"
-                                       FontSize="12"/>
-                                        <TextBlock Text="{Binding Channels.Green}"
-                                       FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                    <!-- Blue -->
-                                    <StackPanel>
-                                        <TextBlock Text="B"
-                                       Foreground="Blue"
-                                       FontSize="12"/>
-                                        <TextBlock Text="{Binding Channels.Blue}"
-                                       FontWeight="SemiBold"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

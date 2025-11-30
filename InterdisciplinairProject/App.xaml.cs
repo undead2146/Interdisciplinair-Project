@@ -1,6 +1,6 @@
+using System.Windows;
 using InterdisciplinairProject.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 
 namespace InterdiscplinairProject;
 
@@ -19,8 +19,15 @@ namespace InterdiscplinairProject;
 /// </summary>
 public partial class App : Application
 {
-    public static IServiceProvider Services { get; private set; }
+/// <summary>
+    /// Gets the service provider for dependency injection.
+    /// </summary>
+    public static IServiceProvider? Services { get; private set; }
 
+    /// <summary>
+    /// Raises the <see cref="Application.Startup"/> event.
+    /// </summary>
+    /// <param name="e">A <see cref="StartupEventArgs"/> that contains the event data.</param>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -42,7 +49,6 @@ public partial class App : Application
         // 🧠 ViewModels
         services.AddSingleton<MainViewModel>();     // singleton ViewModel
         services.AddSingleton<ShowbuilderViewModel>();     // singleton ViewModel
-
 
         // 🪟 Views
         services.AddTransient<MainWindow>();

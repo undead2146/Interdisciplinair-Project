@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
