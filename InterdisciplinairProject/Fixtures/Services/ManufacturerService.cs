@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Windows; // Gebruikt voor Environment.GetFolderPath
+using System.Windows;
 
 namespace InterdisciplinairProject.Fixtures.Services
 {

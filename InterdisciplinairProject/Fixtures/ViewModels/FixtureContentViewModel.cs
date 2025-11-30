@@ -73,21 +73,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.Channels)
+                foreach (var channel in parsed.Channels)
                 {
-                    // FIX: capture local variable for correct TestCommand
-                    var channelCopy = c;
-                    if (int.TryParse(c.Value, out var param))
-                    {
-                        channelCopy.Parameter = param;
-                    }
+                    if (int.TryParse(channel.Value, out var param))
+                        channel.Parameter = param;
 
-                    channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
-                    Channels.Add(channelCopy);
+                    channel.TestCommand = new RelayCommand(() => SendChannelValue(channel));
+                    Channels.Add(channel);
                 }
             }
         }
 
+        // ===========================
+        // Testing
+        // ===========================
         private void RefreshAvailablePorts()
         {
             AvailablePorts.Clear();
@@ -112,12 +111,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 error = channel.Name;
                 return false;
             }
+
             return true;
         }
 
-        // ===========================
-        // SEND SINGLE CHANNEL
-        // ===========================
         public void SendChannelValue(Channel channel)
         {
             if (ComPort == null)
@@ -148,9 +145,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ===========================
-        // SEND ALL CHANNELS
-        // ===========================
         private void SendAllChannels()
         {
             if (ComPort == null)

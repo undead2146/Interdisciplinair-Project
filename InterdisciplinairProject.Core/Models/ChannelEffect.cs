@@ -21,8 +21,15 @@ public class ChannelEffect
     }
 
     /// <summary>
+    /// Gets or sets the enabled of effect.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the type of effect.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     [JsonPropertyName("effectType")]
     public EffectType EffectType { get; set; }
 
