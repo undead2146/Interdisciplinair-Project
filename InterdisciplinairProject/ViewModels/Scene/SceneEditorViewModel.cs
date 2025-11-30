@@ -202,7 +202,7 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <summary>
     /// Event handler om de geselecteerde fixture toe te voegen.
     /// </summary>
-    private void FixtureListViewModel_FixtureSelected(object? sender, string json)
+    private async void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
         // Sluit de FixtureListView af
         CurrentView = null;
@@ -316,23 +316,55 @@ public partial class SceneEditorViewModel : ObservableObject
                     }
                 }
 
-                // Voeg de nieuwe fixture toe aan de scene
-                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = newCoreFixture.StartAddress };
+                // Get all registered fixtures for the dialog
+                var allRegisteredFixtures = await _fixtureRegistry.GetAllFixturesAsync();
 
-                // UITGESCHAKELD: Fixture niet automatisch toevoegen, enkel het dialoog tonen
-                // SceneFixtures.Add(sceneFixture);
-                // SelectedFixture = sceneFixture;
 
-                // Toon het dialoog voor de geselecteerde fixture
-                var dialog = new FixtureRegistryDialog(newCoreFixture, _dmxAddressValidator, SceneFixtures.Select(sf => sf.Fixture))
+                // *** CRITICAL FIX: Pass _fixtureRegistry to the dialog ***
+                var dialog = new FixtureRegistryDialog(
+                    newCoreFixture,
+                    _dmxAddressValidator,
+                    _fixtureRegistry,  // ← THIS WAS MISSING!
+                    allRegisteredFixtures)
                 {
                     Owner = Application.Current.MainWindow
                 };
 
-                dialog.ShowDialog();
+                // Show the dialog and check if user clicked Save
+                if (dialog.ShowDialog() == true)
+                {
+                    // User clicked Save - fixture was added to registry ONLY
+                    Debug.WriteLine($"[DEBUG] Fixture saved to registry successfully");
 
-                Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{newCoreFixture.Name}'");
-                Debug.WriteLine($"[DEBUG] Fixture '{newCoreFixture.Name}' NOT added to scene yet");
+                    MessageBox.Show(
+                        "Fixture succesvol toegevoegd aan registry!",
+                        "Succes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    // User clicked Cancel
+                    Debug.WriteLine($"[DEBUG] User cancelled fixture registration");
+                }
+
+                // Show the dialog and check if user clicked Save
+                if (dialog.ShowDialog() == true)
+                {
+                    // User clicked Save - fixture was added to registry ONLY
+                    Debug.WriteLine($"[DEBUG] Fixture saved to registry successfully");
+
+                    MessageBox.Show(
+                        "Fixture succesvol toegevoegd aan registry!",
+                        "Succes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    // User clicked Cancel
+                    Debug.WriteLine($"[DEBUG] User cancelled fixture registration");
+                }
             }
         }
         catch (Exception ex)
@@ -381,8 +413,18 @@ public partial class SceneEditorViewModel : ObservableObject
     {
         if (value?.Fixture != null)
         {
-            // Show the FixtureRegistryDialog for the selected fixture
-            var dialog = new FixtureRegistryDialog(value.Fixture, _dmxAddressValidator, SceneFixtures.Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId).Select(sf => sf.Fixture))
+            // Get all fixtures except the selected one for conflict detection
+            var otherFixtures = SceneFixtures
+                .Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId)
+                .Select(sf => sf.Fixture)
+                .ToList();
+
+            // *** Pass _fixtureRegistry ***
+            var dialog = new FixtureRegistryDialog(
+                value.Fixture,
+                _dmxAddressValidator,
+                _fixtureRegistry,  // ← Pass the registry
+                otherFixtures)
             {
                 Owner = Application.Current.MainWindow
             };
