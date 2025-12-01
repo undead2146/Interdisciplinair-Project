@@ -6,6 +6,7 @@ using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
+using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
@@ -201,7 +202,7 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <summary>
     /// Event handler om de geselecteerde fixture toe te voegen.
     /// </summary>
-    private void FixtureListViewModel_FixtureSelected(object? sender, string json)
+    private async void FixtureListViewModel_FixtureSelected(object? sender, string json)
     {
         // Sluit de FixtureListView af
         CurrentView = null;
@@ -315,14 +316,55 @@ public partial class SceneEditorViewModel : ObservableObject
                     }
                 }
 
-                // Voeg de nieuwe fixture toe aan de scene
-                var sceneFixture = new SceneFixture { Fixture = newCoreFixture, StartChannel = newCoreFixture.StartAddress };
+                // Get all registered fixtures for the dialog
+                var allRegisteredFixtures = await _fixtureRegistry.GetAllFixturesAsync();
 
-                SceneFixtures.Add(sceneFixture);
-                SelectedFixture = sceneFixture;
 
-                Debug.WriteLine($"[DEBUG] Added fixture '{newCoreFixture.Name}' to scene at channel {newCoreFixture.StartAddress}");
-                MessageBox.Show($"Fixture '{newCoreFixture.Name}' succesvol toegevoegd aan de lijst op adres {newCoreFixture.StartAddress}!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+                // *** CRITICAL FIX: Pass _fixtureRegistry to the dialog ***
+                var dialog = new FixtureRegistryDialog(
+                    newCoreFixture,
+                    _dmxAddressValidator,
+                    _fixtureRegistry,  // ← THIS WAS MISSING!
+                    allRegisteredFixtures)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+
+                // Show the dialog and check if user clicked Save
+                if (dialog.ShowDialog() == true)
+                {
+                    // User clicked Save - fixture was added to registry ONLY
+                    Debug.WriteLine($"[DEBUG] Fixture saved to registry successfully");
+
+                    MessageBox.Show(
+                        "Fixture succesvol toegevoegd aan registry!",
+                        "Succes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    // User clicked Cancel
+                    Debug.WriteLine($"[DEBUG] User cancelled fixture registration");
+                }
+
+                // Show the dialog and check if user clicked Save
+                if (dialog.ShowDialog() == true)
+                {
+                    // User clicked Save - fixture was added to registry ONLY
+                    Debug.WriteLine($"[DEBUG] Fixture saved to registry successfully");
+
+                    MessageBox.Show(
+                        "Fixture succesvol toegevoegd aan registry!",
+                        "Succes",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else
+                {
+                    // User clicked Cancel
+                    Debug.WriteLine($"[DEBUG] User cancelled fixture registration");
+                }
             }
         }
         catch (Exception ex)
@@ -365,25 +407,31 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Opens the fixture settings view when a fixture is selected.
+    /// Opens the fixture registry dialog when a fixture is selected.
     /// </summary>
     partial void OnSelectedFixtureChanged(SceneFixture? value)
     {
         if (value?.Fixture != null)
         {
-            // Maak een nieuwe FixtureSettingsViewModel
-            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
-            fixtureSettingsViewModel.LoadFixture(value.Fixture);
+            // Get all fixtures except the selected one for conflict detection
+            var otherFixtures = SceneFixtures
+                .Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId)
+                .Select(sf => sf.Fixture)
+                .ToList();
 
-            // Laad de FixtureSettingsView
-            CurrentView = new FixtureSettingsView
+            // *** Pass _fixtureRegistry ***
+            var dialog = new FixtureRegistryDialog(
+                value.Fixture,
+                _dmxAddressValidator,
+                _fixtureRegistry,  // ← Pass the registry
+                otherFixtures)
             {
-                DataContext = fixtureSettingsViewModel
+                Owner = Application.Current.MainWindow
             };
-        }
-        else
-        {
-            CurrentView = null;
+
+            dialog.ShowDialog();
+
+            Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{value.Fixture.Name}'");
         }
     }
 
