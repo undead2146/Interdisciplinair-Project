@@ -46,14 +46,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand BackCommand { get; }
         public ICommand EditCommand { get; }
-        public ICommand DeleteCommand { get; }
         public ICommand TestAllCommand { get; }
 
         public FixtureContentViewModel(string json)
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
-            DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
             TestAllCommand = new RelayCommand(SendAllChannels);
 
             LoadFromJson(json);

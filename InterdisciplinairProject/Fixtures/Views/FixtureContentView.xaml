@@ -132,12 +132,6 @@
                         Margin="0,0,10,0"
                         Command="{Binding EditCommand}"/>
 
-                <Button Content="Delete" 
-                        Command="{Binding DeleteCommand}" 
-                        Background="#E57373" 
-                        Foreground="White" 
-                        Width="100"
-                        Height="32"/>
             </StackPanel>
         </Grid>
 
