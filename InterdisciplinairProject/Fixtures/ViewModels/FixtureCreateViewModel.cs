@@ -297,9 +297,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             var newModel = new Channel
             {
-                Name = "Lamp",
-                Type = "Lamp",
+                Name = "Dimmer",
+                Type = "Dimmer",
                 Value = "0",
+                Min = 0,
+                Max = 255,
             };
             Channels.Add(new ChannelItem(newModel));
             (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();

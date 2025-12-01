@@ -241,7 +241,9 @@
 											              Width="180"/>
 
                                                     <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <Slider Minimum="0" Maximum="255"
+                                                        <Slider 
+                                                            Minimum="{Binding MinValue}"
+                                                            Maximum="{Binding MaxValue}"
 												            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 												            TickFrequency="{Binding TickFrequency}"
 												            IsSnapToTickEnabled="True"
@@ -276,12 +278,11 @@
                                                     </StackPanel>
 
                                                     <StackPanel x:Name="CustomPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                                                       
                                                         <StackPanel Orientation="Vertical" Margin="0,0,0,6">
                                                             <TextBlock Text="Type name" Margin="0,0,0,2"/>
                                                             <TextBox Text="{Binding CustomTypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
-                                                            <TextBlock Text="Range name" Margin="0,0,0,2"/>
-                                                            <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
+                                                           
                                                         </StackPanel>
 
                                                         <StackPanel Orientation="Vertical" Margin="0,0,0,6">
@@ -320,7 +321,7 @@
                                                         </StackPanel>
 
                                                         <StackPanel Orientation="Vertical">
-                                                            <TextBlock Text="Step Value" Margin="0,0,0,2"/>
+                                                            
 
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
@@ -340,18 +341,17 @@
                                                     </StackPanel>
 
                                                     <StackPanel x:Name="RangePanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
+                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,4">
                                                             <TextBlock Text="Type name" Margin="0,0,0,2"/>
 
                                                             <ComboBox ItemsSource="{Binding AvailableTypes}"
-					                                              SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+					                                              SelectedItem="{Binding SelectedRangeType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
 					                                              Width="180"/>
-                                                            <TextBlock Text="Range name" Margin="0,0,0,2"/>
+                                                            <TextBlock Text="Range name" Margin="0,0,0,0"/>
                                                             <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
                                                         </StackPanel>
 
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
+                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,4">
                                                             <TextBlock Text="Type Range" Margin="0,0,0,2"/>
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
@@ -387,8 +387,7 @@
                                                         </StackPanel>
 
                                                         <StackPanel Orientation="Vertical">
-                                                            <TextBlock Text="Step Value" Margin="0,0,0,2"/>
-
+                                                            
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="*"/>
