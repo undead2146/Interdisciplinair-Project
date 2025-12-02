@@ -87,29 +87,29 @@ namespace InterdisciplinairProject.Fixtures.Services
 
             string manufacturerName = Sanitize(name);
 
-            // Controleer op bestaan (Voldoet aan requirement: mag niet al bestaan)
-            if (GetManufacturers().Any(map => map.Equals(manufacturerName, StringComparison.OrdinalIgnoreCase)))
-            {
+            List<string> manufacturers = LoadManufacturersFromJson();
+
+            if (manufacturers.Any(m => m.Equals(manufacturerName, StringComparison.OrdinalIgnoreCase)))
                 return false;
-            }
 
             try
             {
+                // Create folder for this manufacturer
                 Directory.CreateDirectory(Path.Combine(_rootDirectory, manufacturerName));
-                var manufacturers = LoadManufacturersFromJson();
-                if (!manufacturers.Contains(manufacturerName, StringComparer.OrdinalIgnoreCase))
-                {
-                    manufacturers.Add(manufacturerName);
-                    manufacturers.Sort(StringComparer.OrdinalIgnoreCase);
-                    SaveManufacturers(manufacturers);
-                }
+
+                // Add to the JSON list
+                manufacturers.Add(manufacturerName);
+                manufacturers.Sort(StringComparer.OrdinalIgnoreCase);
+
+                SaveManufacturers(manufacturers);
 
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
         }
+
     }
 }
