@@ -26,6 +26,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                            "InterdisciplinairProject",
                                            "Fixtures");
+
         private readonly bool _isEditing;
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;
@@ -63,6 +64,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         /// Gets the collection of channels.
         /// </summary>
         public ObservableCollection<ChannelItem> Channels { get; } = new();
+
 
         /// <summary>
         /// Gets the command to add a channel.

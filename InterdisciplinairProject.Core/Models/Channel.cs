@@ -50,8 +50,11 @@ public class Channel
     [JsonPropertyName("time")]
     public int Time { get; set; } = 0;
 
+    /// <summary>
+    /// Gets or sets the range.
+    /// </summary>
     [JsonPropertyName("ranges")]
-    public Dictionary<string, ChannelRange> Ranges { get; set; } = new();
+    public List<ChannelRange> Ranges { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the effect type.

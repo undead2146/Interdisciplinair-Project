@@ -4,6 +4,7 @@ using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Models.Enums;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -22,12 +23,13 @@ namespace InterdisciplinairProject.Fixtures.Services
         // Core channel properties
         [ObservableProperty] private string name;
         [ObservableProperty] private string selectedType;
+        [ObservableProperty] private ChannelRange? selectedRange;
         [ObservableProperty] private string? selectedRangeType;
         [ObservableProperty] private int level;
         [ObservableProperty] private int maxValue = 255;
         [ObservableProperty] private int minValue = 0;
 
-        [ObservableProperty] private Dictionary<string, ChannelRange> ranges = new();
+        [ObservableProperty] private ObservableCollection<ChannelRange> ranges = new();
 
         // Effect properties (map to ChannelEffect)
         [ObservableProperty] private bool effectEnabled;
@@ -50,7 +52,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private bool isDegreeHType;
         [ObservableProperty] private bool isDegreeFType;
 
-
         public int TickFrequency => 1;
 
         public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
@@ -58,10 +59,12 @@ namespace InterdisciplinairProject.Fixtures.Services
         public IEnumerable<EffectType> AvailableEffects { get; } = Enum.GetValues(typeof(EffectType)).Cast<EffectType>();
 
         public IRelayCommand AddCustomTypeCommand { get; }
+
         public IRelayCommand AddCustomRangeCommand { get; }
 
-        private bool _isNameManuallyEdited;
+        public IRelayCommand AddRangeCommand { get; }
 
+        private bool _isNameManuallyEdited;
 
         private readonly Channel _model;
 
@@ -71,17 +74,12 @@ namespace InterdisciplinairProject.Fixtures.Services
 
             var available = TypeCatalogService.Names;
 
-            // Name: if empty → give default
-            if (string.IsNullOrWhiteSpace(_model.Name))
-                name = "Channel";
-            else
-                name = _model.Name;
+            name = string.IsNullOrWhiteSpace(_model.Name) ? "Channel" : _model.Name;
 
-            // If model.Type is null/empty OR not in the known list, fall back to Dimmer
-            if (string.IsNullOrWhiteSpace(_model.Type) || !available.Contains(_model.Type))
-                selectedType = "Dimmer";
-            else
-                selectedType = _model.Type!;
+            // Name: if empty → give default
+            selectedType = string.IsNullOrWhiteSpace(_model.Type) || !available.Contains(_model.Type)
+                ? "Dimmer"
+                : _model.Type!;
 
             // Value
             if (int.TryParse(_model.Value, out var lvl))
@@ -99,47 +97,27 @@ namespace InterdisciplinairProject.Fixtures.Services
                 effectMax = _model.ChannelEffect.Max;
             }
 
-            // 🔹 Merge this channel's min/max + ranges into the TYPE definition
-            if (!string.IsNullOrWhiteSpace(_model.Type))
+            // 🔹 Keep a local copy for this channel's UI
+            ranges = _model.Ranges != null
+                ? new ObservableCollection<ChannelRange>(_model.Ranges)
+                : new ObservableCollection<ChannelRange>();
+
+            // 🔹 Apply defaults from type spec (min/max), maar ranges niet terugschrijven
+            var spec = TypeCatalogService.GetByName(selectedType);
+            if (spec != null)
             {
-                var spec = TypeCatalogService.GetByName(_model.Type);
-                if (spec == null)
-                {
-                    spec = new TypeSpecification
-                    {
-                        name = _model.Type,
-                        input = "slider",
-                        min = _model.Min,   // if 0 it’s fine
-                        max = _model.Max == 0 ? 255 : _model.Max
-                    };
-                }
-
-                // Merge ranges from channel into spec
-                if (_model.Ranges != null && _model.Ranges.Count > 0)
-                {
-                    spec.ranges ??= new Dictionary<string, ChannelRange>();
-                    foreach (var kv in _model.Ranges)
-                    {
-                        spec.ranges[kv.Key] = kv.Value;
-                    }
-                }
-
-                TypeCatalogService.AddOrUpdate(spec);
+                MinValue = spec.min ?? 0;
+                MaxValue = spec.max ?? 255;
+                // eventueel: ranges alleen gebruiken als er nog geen lokale ranges zijn
+                if (ranges.Count == 0 && spec.ranges != null)
+                    ranges = new ObservableCollection<ChannelRange>(spec.ranges);
             }
 
-            // 🔹 Also keep a local copy for this channel's UI
-            if (_model.Ranges != null)
-                ranges = new Dictionary<string, ChannelRange>(_model.Ranges);
-            else
-                ranges = new Dictionary<string, ChannelRange>();
-
-            // Apply spec (will set MinValue/MaxValue and copy spec.ranges into Ranges)
-            ApplyTypeSpec(selectedType);
 
             AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
             AddCustomRangeCommand = new RelayCommand(DoAddCustomRange);
+            AddRangeCommand = new RelayCommand(DoAddRange);
         }
-
 
         // Sync back to model when saving
         //public Channel ToModel()
@@ -164,6 +142,19 @@ namespace InterdisciplinairProject.Fixtures.Services
         //    return _model;
         //}
 
+        private void DoAddRange()
+        {
+            var newRange = new ChannelRange
+            {
+                Name = $"Range{Ranges.Count + 1}",
+                MinR = MinValue,
+                MaxR = MaxValue
+            };
+            Ranges.Add(newRange);
+            SelectedRange = newRange;
+            _model.Ranges = Ranges.ToList();
+        }
+
         public Channel ToModel()
         {
             _model.Name = Name;
@@ -179,9 +170,9 @@ namespace InterdisciplinairProject.Fixtures.Services
                 _model.Max = spec.max ?? 255;
 
                 if (spec.ranges != null)
-                    _model.Ranges = new Dictionary<string, ChannelRange>(spec.ranges);
+                    _model.Ranges = new List<ChannelRange>(Ranges);
                 else
-                    _model.Ranges = new Dictionary<string, ChannelRange>();
+                    _model.Ranges = new List<ChannelRange>();
             }
             else
             {
@@ -189,8 +180,8 @@ namespace InterdisciplinairProject.Fixtures.Services
                 _model.Min = MinValue;
                 _model.Max = MaxValue;
                 _model.Ranges = Ranges != null
-                    ? new Dictionary<string, ChannelRange>(Ranges)
-                    : new Dictionary<string, ChannelRange>();
+                    ? new List<ChannelRange>(Ranges)
+                    : new List<ChannelRange>();
             }
 
             // Effect stuff
@@ -272,15 +263,6 @@ namespace InterdisciplinairProject.Fixtures.Services
 
         private void DoAddCustomRange()
         {
-            // Base type we’re adding a range to
-            var baseType = SelectedRangeType ?? SelectedType;
-
-            if (string.IsNullOrWhiteSpace(baseType))
-            {
-                MessageBox.Show("Select a base type first.");
-                return;
-            }
-
             var rangeName = (CustomRangeName ?? "").Trim();
             if (string.IsNullOrWhiteSpace(rangeName))
             {
@@ -288,66 +270,43 @@ namespace InterdisciplinairProject.Fixtures.Services
                 return;
             }
 
-            if (!int.TryParse(CustomRangeMinValue, out var rmin))
+            if (!int.TryParse(CustomRangeMinValue, out var rmin) ||
+                !int.TryParse(CustomRangeMaxValue, out var rmax))
             {
-                MessageBox.Show("Range min is not a valid number.");
-                return;
-            }
-
-            if (!int.TryParse(CustomRangeMaxValue, out var rmax))
-            {
-                MessageBox.Show("Range max is not a valid number.");
+                MessageBox.Show("Range min/max are not valid numbers.");
                 return;
             }
 
             if (rmin < MinValue || rmax > MaxValue || rmin >= rmax)
             {
-                MessageBox.Show(
-                    $"Range must be within [{MinValue}, {MaxValue}] and min < max.",
-                    "Invalid range",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                MessageBox.Show($"Range must be within [{MinValue}, {MaxValue}] and min < max.");
                 return;
             }
 
-            // 🔹 Get the TYPE we’re adding ranges to
-            var spec = TypeCatalogService.GetByName(baseType);
-            if (spec == null)
+            if (ranges.Any(r => r.Name.Equals(rangeName, StringComparison.OrdinalIgnoreCase)))
             {
-                MessageBox.Show($"Base type '{baseType}' not found.");
+                MessageBox.Show("A range with this name already exists.");
                 return;
             }
 
-            spec.ranges ??= new Dictionary<string, ChannelRange>();
-
-            if (spec.ranges.ContainsKey(rangeName))
+            var newRange = new ChannelRange
             {
-                MessageBox.Show("A range with this name already exists for this type.");
-                return;
-            }
-
-            spec.ranges[rangeName] = new ChannelRange
-            {
+                Name = rangeName,
                 MinR = rmin,
                 MaxR = rmax
             };
 
-            // 🔹 Write back into catalog (so all channels using this type see it)
-            TypeCatalogService.AddOrUpdate(spec);
+            ranges.Add(newRange);
 
-            // 🔹 Sync this channel’s local Ranges from the updated spec
-            Ranges = new Dictionary<string, ChannelRange>(spec.ranges);
-
-            // Optionally ensure min/max match the type
-            MinValue = spec.min ?? MinValue;
-            MaxValue = spec.max ?? MaxValue;
+            // Sync naar model
+            _model.Ranges = ranges.ToList();
 
             // Clear UI fields
             CustomRangeName = string.Empty;
             CustomRangeMinValue = string.Empty;
             CustomRangeMaxValue = string.Empty;
 
-            MessageBox.Show($"Range '{rangeName}' added for type '{baseType}'.");
+            MessageBox.Show($"Range '{rangeName}' added.");
         }
 
 
@@ -382,14 +341,12 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
 
             // 🔹 SYNC ranges from type-spec into THIS channel
-            if (spec.ranges != null)
-                Ranges = new Dictionary<string, ChannelRange>(spec.ranges);
-            else
-                Ranges = new Dictionary<string, ChannelRange>();
+            ranges = spec.ranges != null
+                ? new ObservableCollection<ChannelRange>(spec.ranges)
+                : new ObservableCollection<ChannelRange>();
 
             // degreeH/degreeF are legacy; if you still want them, you can also map them to min/max here
         }
-
 
         private static int Snap(int value, int min, int max)
         {
