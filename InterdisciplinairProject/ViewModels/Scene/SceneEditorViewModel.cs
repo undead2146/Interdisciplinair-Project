@@ -6,6 +6,7 @@ using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
 using InterdisciplinairProject.Views;
+using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
@@ -435,7 +436,6 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <summary>
     /// Removes a fixture from the scene.
     /// </summary>
- 
     private async Task RemoveFixture(SceneFixture? fixtureToRemove)
     {
         if (fixtureToRemove == null)
