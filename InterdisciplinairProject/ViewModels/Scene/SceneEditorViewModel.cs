@@ -393,25 +393,31 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Opens the fixture settings view when a fixture is selected.
+    /// Opens the fixture registry dialog when a fixture is selected.
     /// </summary>
     partial void OnSelectedFixtureChanged(SceneFixture? value)
     {
         if (value?.Fixture != null)
         {
-            // Maak een nieuwe FixtureSettingsViewModel
-            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
-            fixtureSettingsViewModel.LoadFixture(value.Fixture);
+            // Get all fixtures except the selected one for conflict detection
+            var otherFixtures = SceneFixtures
+                .Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId)
+                .Select(sf => sf.Fixture)
+                .ToList();
 
-            // Laad de FixtureSettingsView
-            CurrentView = new FixtureSettingsView
+            // *** Pass _fixtureRegistry ***
+            var dialog = new FixtureRegistryDialog(
+                value.Fixture,
+                _dmxAddressValidator,
+                _fixtureRegistry,  // ← Pass the registry
+                otherFixtures)
             {
-                DataContext = fixtureSettingsViewModel
+                Owner = Application.Current.MainWindow
             };
-        }
-        else
-        {
-            CurrentView = null;
+
+            dialog.ShowDialog();
+
+            Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{value.Fixture.Name}'");
         }
     }
 

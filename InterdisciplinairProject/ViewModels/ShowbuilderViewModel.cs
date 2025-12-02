@@ -22,10 +22,16 @@ namespace InterdisciplinairProject.ViewModels
         private InterdisciplinairProject.Core.Models.Show _show = new InterdisciplinairProject.Core.Models.Show();
         private string? _currentShowPath;
 
-        public ObservableCollection<ShowScene> Scenes { get; } = new();
+        public ObservableCollection<Scene> Scenes { get; } = new();
+        public ObservableCollection<TimelineShowScene> TimeLineScenes { get; } = new();
+
+        private int id = 1;
 
         [ObservableProperty]
-        private ShowScene? selectedScene;
+        private Scene? selectedScene;
+
+        [ObservableProperty]
+        private Scene? selectedTimelineScene;
 
         [ObservableProperty]
         private string? currentShowId;
@@ -37,7 +43,7 @@ namespace InterdisciplinairProject.ViewModels
         private string? message;
 
         // new: per-scene fade cancellation tokens
-        private readonly Dictionary<ShowScene, CancellationTokenSource> _fadeCts = new();
+        private readonly Dictionary<Scene, CancellationTokenSource> _fadeCts = new();
 
         // ============================================================
         // CREATE SHOW
@@ -59,7 +65,7 @@ namespace InterdisciplinairProject.ViewModels
                 _show = new InterdisciplinairProject.Core.Models.Show
                 {
                     Name = vm.ShowName,
-                    Scenes = new List<ShowScene>()
+                    Scenes = new List<Scene>()
                 };
 
                 _currentShowPath = null;
@@ -91,7 +97,7 @@ namespace InterdisciplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         // ensure imported scene slider starts at 0
-                        var showScene = new ShowScene
+                        var showScene = new Scene
                         {
                             Id = scene.Id,
                             Name = scene.Name,
@@ -127,9 +133,15 @@ namespace InterdisciplinairProject.ViewModels
         // SCENE SELECTION
         // ============================================================
         [RelayCommand]
-        private void SceneSelectionChanged(ShowScene selectedScene)
+        private void SceneSelectionChanged(Scene selectedScene)
         {
-            SelectedScene = selectedScene;
+            selectedScene = selectedScene;
+        }
+
+        [RelayCommand]
+        private void TimelineSceneSelectionChanged(Scene selectedScene)
+        {
+            selectedTimelineScene = selectedScene;
         }
 
         // ============================================================
@@ -239,6 +251,16 @@ namespace InterdisciplinairProject.ViewModels
                         {
                             // when opening/importing a show, reset dimmer to 0 so sliders start off
                             scene.Dimmer = 0;
+                            
+                            // Calculate channel ratios for all fixtures in the scene
+                            if (scene.Fixtures != null)
+                            {
+                                foreach (var fixture in scene.Fixtures)
+                                {
+                                    //fixture.CalculateChannelRatios();
+                                }
+                            }
+                            
                             Scenes.Add(scene);
                         }
                     }
@@ -287,7 +309,7 @@ namespace InterdisciplinairProject.ViewModels
         // DELETE SCENE
         // ============================================================
         [RelayCommand]
-        private void DeleteScene(ShowScene? scene)
+        private void DeleteScene(Scene? scene)
         {
             if (scene == null)
                 return;
@@ -313,7 +335,7 @@ namespace InterdisciplinairProject.ViewModels
             Message = $"Scene '{scene.Name}' verwijderd.";
         }
 
-        public void UpdateSceneDimmer(ShowScene scene, int dimmer)
+        public void UpdateSceneDimmer(Scene scene, int dimmer)
         {
             if (scene == null)
                 return;
@@ -339,6 +361,12 @@ namespace InterdisciplinairProject.ViewModels
                             {
                                 try
                                 {
+                                    // Calculate ratios if needed
+                                    if (!fixture.Channels.Any())
+                                    {
+                                        //fixture.CalculateChannelRatios();
+                                    }
+                                    
                                     // set observable property if available
                                     fixture.Dimmer = 0;
                                 }
@@ -367,6 +395,12 @@ namespace InterdisciplinairProject.ViewModels
                 {
                     try
                     {
+                        // Calculate ratios if needed
+                        if (!fixture.Channels.Any())
+                        {
+                            //fixture.CalculateChannelRatios();
+                        }
+                        
                         fixture.Dimmer = channelValue;
                     }
                     catch (Exception ex)
@@ -389,7 +423,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Cancels any running fade for the provided scene
-        private void CancelFadeForScene(ShowScene scene)
+        private void CancelFadeForScene(Scene scene)
         {
             if (scene == null) return;
 
@@ -406,7 +440,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Fade a single scene to target over durationMs, updating fixtures and Scenes on the UI thread.
-        private async Task FadeSceneAsync(ShowScene scene, int target, int durationMs, CancellationToken token)
+        private async Task FadeSceneAsync(Scene scene, int target, int durationMs, CancellationToken token)
         {
             if (scene == null) return;
 
@@ -461,7 +495,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Helper to update fixture dimmer channels for a scene on the caller thread (call from UI dispatcher)
-        private void UpdateFixturesForScene(ShowScene scene, int dimmer)
+        private void UpdateFixturesForScene(Scene scene, int dimmer)
         {
             if (scene?.Fixtures == null) return;
             byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
@@ -469,6 +503,12 @@ namespace InterdisciplinairProject.ViewModels
             {
                 try
                 {
+                    // Calculate ratios if not yet done
+                    if (!fixture.Channels.Any())
+                    {
+                        //fixture.CalculateChannelRatios();
+                    }
+                    
                     fixture.Dimmer = channelValue;
                 }
                 catch (Exception ex)
@@ -479,7 +519,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Public method used by SceneControlViewModel.PlayAsync to activate scene with fade orchestration.
-        public async Task FadeToAndActivateAsync(ShowScene targetScene, int targetDimmer)
+        public async Task FadeToAndActivateAsync(Scene targetScene, int targetDimmer)
         {
             if (targetScene == null) return;
 
@@ -534,5 +574,67 @@ namespace InterdisciplinairProject.ViewModels
                 CancelFadeForScene(targetScene);
             }
         }
+        [RelayCommand]
+        private void AddSceneToTimeline()
+        {
+            if(selectedScene == null)
+            {
+                return;
+            }
+            try
+            {
+                TimelineShowScene scene = new TimelineShowScene();
+                scene.ShowScene = selectedScene;
+                scene.Id = id;
+                if (scene.ShowScene != null)
+                {
+                    TimeLineScenes.Add(scene);
+                }
+                id++;
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        public void MoveTimelineScene(TimelineShowScene scene, string direction)
+        {
+            if (scene == null) return;
+            int index = TimeLineScenes.IndexOf(scene);
+            if (index < 0) return; // scene not found in timeline
+
+            if (direction == "left")
+            {
+                if (index == 0) return; // already first
+                TimeLineScenes.Move(index, index - 1);
+            }
+            else if (direction == "right")
+            {
+                if (index >= TimeLineScenes.Count - 1) return; // already last
+                TimeLineScenes.Move(index, index + 1);
+            }
+        }
+
+        [RelayCommand]
+        private void DeleteTimelineScene(TimelineShowScene? scene)
+        {
+            if (scene == null)
+                return;
+
+            // Ask for confirmation before deleting
+            var result = MessageBox.Show(
+                $"Weet je zeker dat je de scene '{scene.ShowScene.Name}' wilt verwijderen?",
+                "Bevestig verwijderen",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            // remove from the UI collection
+            if (TimeLineScenes.Contains(scene))
+                TimeLineScenes.Remove(scene);
+
+            Message = $"Scene '{scene.ShowScene.Name}' verwijderd.";
+        }
+
     }
 }

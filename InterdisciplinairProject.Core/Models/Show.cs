@@ -25,7 +25,7 @@ public class Show
     /// Gets or sets the scenes in this show.
     /// </summary>
     [JsonPropertyName("scenes")]
-    public List<ShowScene>? Scenes { get; set; }
+    public List<Scene>? Scenes { get; set; }
 
     /// <summary>
     /// Gets the display text for this show.
