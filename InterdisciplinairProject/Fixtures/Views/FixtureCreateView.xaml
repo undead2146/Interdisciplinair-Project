@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <converters:Base64ToImageConverter  x:Key="Base64ToImageC"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityC"/>
+        <converters:ChannelIndexPlusOneConverter x:Key="ChannelIndexPlusOneConverter"/>
 
         <Style x:Key="WatermarkTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="1" />
@@ -207,7 +208,7 @@
 										 FocusManager.IsFocusScope="True"/>
 
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="1">
-                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=(ItemsControl.AlternationIndex)}"
+                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=(ItemsControl.AlternationIndex), Converter={StaticResource ChannelIndexPlusOneConverter}}"
                                                    FontWeight="Bold"
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center"/>
