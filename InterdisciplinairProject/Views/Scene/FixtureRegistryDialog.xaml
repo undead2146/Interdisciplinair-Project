@@ -1,0 +1,140 @@
+﻿<Window x:Class="InterdisciplinairProject.Views.Scene.FixtureRegistryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
+        xmlns:core="clr-namespace:InterdisciplinairProject.Core.Models;assembly=InterdisciplinairProject.Core"
+        mc:Ignorable="d"
+        x:Name="DialogRoot" Title="Fixture Registreren" Height="800" Width="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+    </Window.Resources>
+    <Border CornerRadius="10" Background="#F0F0F0" Padding="15" Margin="10">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Margin="0,0,0,15" HorizontalAlignment="Stretch" TextAlignment="Center" FontSize="16" FontWeight="Bold">
+                    <Run Text="Fixture: "/>
+                    <Run Text="{Binding SelectedFixture.Name}"/>
+                </TextBlock>
+
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Start Adres:" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding StartAddress, UpdateSourceTrigger=PropertyChanged}" 
+                                 Margin="0,5,10,0" Padding="5" Height="25" 
+                                 Background="White" BorderBrush="#CCCCCC" BorderThickness="1"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Eind Adres:" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding EndAddress}" 
+                                   Margin="0,5,0,0" Padding="5" Height="25" 
+                                   VerticalAlignment="Center" Background="#E0E0E0"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Text="Fixture Naam (Instance):" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,5,0,0" Padding="5" Height="25" 
+                             Background="White" BorderBrush="#CCCCCC" BorderThickness="1"/>
+                </StackPanel>
+
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="5" Padding="10" Background="White" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Channels in Fixture:" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <ListView Grid.Row="1" ItemsSource="{Binding SelectedFixture.Channels}" MaxHeight="150" BorderThickness="0">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="150"/>
+                                    <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Type}" Width="100"/>
+                                    <GridViewColumn Header="Min" DisplayMemberBinding="{Binding Min}" Width="50"/>
+                                    <GridViewColumn Header="Max" DisplayMemberBinding="{Binding Max}" Width="50"/>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </Grid>
+                </Border>
+
+                <Border BorderBrush="#6A0DAD" BorderThickness="2" CornerRadius="5" Padding="10" Background="White">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Effecten Toewijzen:" FontWeight="Bold" Foreground="#6A0DAD" Margin="0,0,0,10"/>
+
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding EffectRows}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0" BorderBrush="#ADD8E6" BorderThickness="1" CornerRadius="3" Padding="10" Background="#F8F8FF">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Effect Type:" Margin="0,0,5,5" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                                          ItemsSource="{Binding DataContext.EffectTypes, ElementName=DialogRoot}"
+                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                                          Margin="0,0,0,5" Padding="5" Height="25" 
+                                                          Background="#E0F2FF" BorderBrush="#ADD8E6" BorderThickness="1"/>
+
+                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Channel:" Margin="0,0,5,5" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                <ComboBox Grid.Row="1" Grid.Column="1"
+                                                          ItemsSource="{Binding AvailableChannels}"         SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"  DisplayMemberPath="Name"
+                                                          Margin="0,0,0,5" Padding="5" Height="25" 
+                                                          Background="#E0F2FF" BorderBrush="#ADD8E6" BorderThickness="1"/>
+
+                                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Min Value (0-255):" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Min}" Margin="0,0,0,5" Padding="5" Height="25" Background="#E0F2FF" BorderBrush="#ADD8E6" BorderThickness="1"/>
+
+                                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Max Value (0-255):" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Max}" Margin="0,0,0,5" Padding="5" Height="25" Background="#E0F2FF" BorderBrush="#ADD8E6" BorderThickness="1"/>
+
+                                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Time (ms):" Margin="0,0,5,5" VerticalAlignment="Center"/>
+                                                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Time}" Margin="0,0,0,0" Padding="5" Height="25" Background="#E0F2FF" BorderBrush="#ADD8E6" BorderThickness="1"/>
+                                            </Grid>
+                                        </Border>
+
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </Grid>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <Button Content="+ Add effect" Width="110" Height="35" Margin="0,0,10,0" Foreground="#6A0DAD" FontWeight="SemiBold" Cursor="Hand" Padding="5,10" Click="AddEffectRow"/>
+                    <Button Content="Save" Width="80" Height="35" Margin="0,0,10,0" Click="SaveButton_Click"/>
+                    <Button Content="Cancel" Width="80" Height="35" Click="CancelButton_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>
