@@ -407,44 +407,6 @@
                                 <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="DeleteButton" Property="Visibility" Value="Visible" />
                             </DataTrigger>
-
-                            <!--<DataTrigger Binding="{Binding IsSliderType}" Value="True">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsSliderType}" Value="False">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsCustomType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsAddRangeType}" Value="True">
-                                <Setter TargetName="RangePanel" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addRange" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsDegreeHType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="degreePanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsDegreeFType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="degreeFullPanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding ShowSliderPanel}" Value="True">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>-->
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

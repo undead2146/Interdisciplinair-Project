@@ -26,7 +26,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                            "InterdisciplinairProject",
                                            "Fixtures");
-
         private readonly bool _isEditing;
         private readonly string? _originalManufacturer;
         private readonly string? _originalFixtureName;

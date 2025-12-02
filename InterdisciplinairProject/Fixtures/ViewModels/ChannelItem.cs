@@ -119,29 +119,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             AddRangeCommand = new RelayCommand(DoAddRange);
         }
 
-        // Sync back to model when saving
-        //public Channel ToModel()
-        //{
-        //    _model.Name = Name;
-        //    _model.Type = SelectedType;
-        //    _model.Value = Level.ToString();
-        //    _model.Min = MinValue;
-        //    _model.Max = MaxValue;
-
-        //    _model.ChannelEffect.EffectType = EffectType;
-        //    _model.ChannelEffect.Time = EffectTime;
-        //    _model.ChannelEffect.Min = EffectMin;
-        //    _model.ChannelEffect.Max = EffectMax;
-
-        //    // 🔹 Write ranges to model → ends up in JSON
-        //    _model.Ranges = Ranges != null
-        //        ? new Dictionary<string, ChannelRange>(Ranges)
-        //        : new Dictionary<string, ChannelRange>();
-
-        //    ApplyTypeSpec(_model.Type);
-        //    return _model;
-        //}
-
         private void DoAddRange()
         {
             var newRange = new ChannelRange

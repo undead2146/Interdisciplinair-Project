@@ -191,7 +191,6 @@ namespace InterdisciplinairProject.Fixtures.Views
             return element as ListBoxItem;
         }
 
-
         private ScrollViewer FindScrollViewer(DependencyObject parent)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
