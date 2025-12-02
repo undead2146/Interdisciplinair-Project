@@ -11,7 +11,7 @@ using InterdisciplinairProject.Views;
 
 public partial class SceneControlViewModel : ObservableObject
 {
-    private readonly ShowScene? _sceneModel;
+    private readonly Scene? _sceneModel;
     private readonly ShowbuilderViewModel? _parentShowVm;
 
     // cancellation for play animation
@@ -20,7 +20,7 @@ public partial class SceneControlViewModel : ObservableObject
     // suppress pushing changes back to parent when they originate from the model (e.g. fades)
     private bool _suppressParentUpdate;
 
-    public SceneControlViewModel(ShowScene? scene = null, ShowbuilderViewModel? parentShowVm = null)
+    public SceneControlViewModel(Scene? scene = null, ShowbuilderViewModel? parentShowVm = null)
     {
         _sceneModel = scene;
         _parentShowVm = parentShowVm;
@@ -54,19 +54,19 @@ public partial class SceneControlViewModel : ObservableObject
                 _suppressParentUpdate = false;
             }
         }
-        else if (e.PropertyName == nameof(ShowScene.FadeInMs))
+        else if (e.PropertyName == nameof(Scene.FadeInMs))
         {
             if (FadeInMs != _sceneModel.FadeInMs)
                 FadeInMs = _sceneModel.FadeInMs;
         }
-        else if (e.PropertyName == nameof(ShowScene.FadeOutMs))
+        else if (e.PropertyName == nameof(Scene.FadeOutMs))
         {
             if (FadeOutMs != _sceneModel.FadeOutMs)
                 FadeOutMs = _sceneModel.FadeOutMs;
         }
     }
 
-    public ShowScene? SceneModel => _sceneModel;
+    public Scene? SceneModel => _sceneModel;
     public string? Id => _sceneModel?.Id;
 
     [ObservableProperty]

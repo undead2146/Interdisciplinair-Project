@@ -1,4 +1,6 @@
-﻿using InterdisciplinairProject.Core.Models;
+﻿﻿using InterdisciplinairProject.Core.Models;
+using System;
+using System.IO;
 using System.Text.Json;
 
 namespace Show
