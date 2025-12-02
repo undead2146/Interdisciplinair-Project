@@ -9,6 +9,9 @@ namespace InterdisciplinairProject.Core.Models
 {
     public class ChannelRange
     {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
         [JsonPropertyName("minR")]
         public int MinR { get; set; }
 
