@@ -295,16 +295,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
-            var newModel = new Channel
+            if (Channels.Count < 512)
             {
-                Name = "Dimmer",
-                Type = "Dimmer",
-                Value = "0",
-                Min = 0,
-                Max = 255,
-            };
-            Channels.Add(new ChannelItem(newModel));
-            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
+                var newModel = new Channel
+                {
+                    Name = "Dimmer",
+                    Type = "Dimmer",
+                    Value = "0",
+                    Min = 0,
+                    Max = 255,
+                };
+                Channels.Add(new ChannelItem(newModel));
+                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
+            }
+            else{
+                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private bool CanDeleteChannel(ChannelItem? channel)

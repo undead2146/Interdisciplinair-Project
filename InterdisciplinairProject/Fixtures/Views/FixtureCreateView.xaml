@@ -147,7 +147,7 @@
 				 Grid.Row="0"
 				 ItemsSource="{Binding Channels}"
 				 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
-                 AlternationCount="255"
+                 AlternationCount="512"
 				 SelectionChanged="ChannelsListBox_SelectionChanged"
 				 MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
 				 Margin="0"
