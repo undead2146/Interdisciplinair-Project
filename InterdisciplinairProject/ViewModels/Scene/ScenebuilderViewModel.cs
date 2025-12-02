@@ -7,6 +7,8 @@ using InterdisciplinairProject.Views;
 using Show;
 using System.Collections.ObjectModel;
 using System.Windows;
+using InterdisciplinairProject.ViewModels;
+using InterdisciplinairProject.Views.Scene;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -26,6 +28,9 @@ public partial class ScenebuilderViewModel : ObservableObject
     [ObservableProperty]
     private object? _currentView;
 
+    [ObservableProperty]
+    private object? _leftPanelView;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ScenebuilderViewModel"/> class.
     /// </summary>
@@ -33,16 +38,23 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// <param name="fixtureRepository">The fixture repository.</param>
     /// <param name="fixtureRegistry">The fixture registry.</param>
     /// <param name="hardwareConnection">The hardware connection.</param>
+    /// 
     public ScenebuilderViewModel(
-        ISceneRepository sceneRepository,
-        IFixtureRepository fixtureRepository,
-        IFixtureRegistry fixtureRegistry,
-        IHardwareConnection hardwareConnection)
+    ISceneRepository sceneRepository,
+    IFixtureRepository fixtureRepository,
+    IFixtureRegistry fixtureRegistry,
+    IHardwareConnection hardwareConnection)
     {
         _sceneRepository = sceneRepository;
         _fixtureRepository = fixtureRepository;
         _fixtureRegistry = fixtureRegistry;
         _hardwareConnection = hardwareConnection;
+
+        // Seed test fixtures
+       
+        // Toon standaard de Scene List View
+        ShowSceneList();
+
         _ = LoadScenesAsync(); // fire-and-forget; constructor can't be async
     }
 
@@ -82,6 +94,8 @@ public partial class ScenebuilderViewModel : ObservableObject
                 {
                     RefreshSceneInList(updatedScene);
                 };
+
+                sceneEditorViewModel.OnRequestFixtureRegistry = ShowFixtureRegistry;
 
                 // Toon SceneEditorView IN de SceneBuilder
                 CurrentView = new SceneEditorView
@@ -308,6 +322,54 @@ public partial class ScenebuilderViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[ERROR] Error refreshing scene in list: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Shows the Scene List in the left panel.
+    /// </summary>
+    private void ShowSceneList()
+    {
+        var sceneListView = new SceneListView
+        {
+            DataContext = this
+        };
+        LeftPanelView = sceneListView;
+    }
+
+    /// <summary>
+    /// Shows the Fixture Registry List in the left panel.
+    /// Called when the user clicks "Add Fixture" in the SceneEditorView.
+    /// </summary>
+    public void ShowFixtureRegistry(Action<Fixture> onFixtureSelected)
+    {
+        try
+        {
+            var fixtureRegistryViewModel = new FixtureRegistryListViewModel(_fixtureRegistry);
+
+            // Subscribe to the FixtureSelected event
+            fixtureRegistryViewModel.FixtureSelected += (sender, selectedFixture) =>
+            {
+                // Call the callback with the selected fixture
+                onFixtureSelected?.Invoke(selectedFixture);
+
+                // Switch back to Scene List
+                ShowSceneList();
+            };
+
+            var fixtureRegistryView = new FixtureRegistryListView
+            {
+                DataContext = fixtureRegistryViewModel
+            };
+
+            LeftPanelView = fixtureRegistryView;
+
+            System.Diagnostics.Debug.WriteLine("[DEBUG] Switched to Fixture Registry view");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ERROR] Error showing fixture registry: {ex.Message}");
+            MessageBox.Show($"Fout bij openen van fixture registry: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
