@@ -404,7 +404,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 if (ch.Max == 0) ch.Max = 255;
                 if (ch.Time < 0) ch.Time = 0;
 
-                ch.Ranges ??= new Dictionary<string, ChannelRange>();
+                ch.Ranges ??= new List<ChannelRange>();
 
                 if (ch.ChannelEffect == null)
                     ch.ChannelEffect = new ChannelEffect();
