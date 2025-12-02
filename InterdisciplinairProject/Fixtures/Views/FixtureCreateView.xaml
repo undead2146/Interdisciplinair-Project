@@ -107,6 +107,7 @@
 				 PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
 				 Drop="ChannelsListBox_Drop"
 				 DragOver="ChannelsListBox_DragOver"
+                 ScrollViewer.CanContentScroll="True"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  ScrollViewer.VerticalScrollBarVisibility="Auto">
 
@@ -129,7 +130,7 @@
                     <DataTemplate>
                         <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="8" Background="White" CornerRadius="3">
                             <StackPanel>
-                                <Grid>
+                                <Grid x:Name="ChannelHeader" Cursor="SizeAll">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
