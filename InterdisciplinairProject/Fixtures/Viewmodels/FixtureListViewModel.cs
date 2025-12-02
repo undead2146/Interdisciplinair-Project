@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Converters;
-using InterdisciplinairProject.Fixtures.Models;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,82 +9,74 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
-    public enum SearchMode
-    {
-        Fixture,
-        Manufacturer
-    }
-
     public class FixtureListViewModel : INotifyPropertyChanged
     {
+
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
 
-        public Array SearchModes => Enum.GetValues(typeof(SearchMode));
-
         public event EventHandler<string>? FixtureSelected;
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        public Array SearchModes => Enum.GetValues(typeof(SearchMode));
+
         public ObservableCollection<ManufacturerGroup> ManufacturerGroups { get; set; } = new();
+        public ObservableCollection<Fixture> SelectedFixtures { get; set; } = new();
 
         private string _searchText = string.Empty;
-
         public string SearchText
         {
             get => _searchText;
             set
             {
-                if (_searchText != value)
-                {
-                    _searchText = value;
-                    OnPropertyChanged(nameof(SearchText));
-                    ApplySearch();
-                }
+                _searchText = value;
+                OnPropertyChanged(nameof(SearchText));
+                ApplySearch();
             }
         }
 
-        private SearchMode _selectedSearchMode = SearchMode.Fixture;
+        public enum SearchMode
+        {
+            Fixture,
+            Manufacturer
+        }
 
+        private SearchMode _selectedSearchMode = SearchMode.Fixture;
         public SearchMode SelectedSearchMode
         {
             get => _selectedSearchMode;
             set
             {
-                if (_selectedSearchMode != value)
-                {
-                    _selectedSearchMode = value;
-                    OnPropertyChanged(nameof(SelectedSearchMode));
-                    ApplySearch();
-                }
+                _selectedSearchMode = value;
+                OnPropertyChanged(nameof(SelectedSearchMode));
+                ApplySearch();
             }
         }
 
-        private FixtureJSON? _selectedFixture;
-        public FixtureJSON? SelectedFixture
+        private Fixture? _selectedFixture;
+        public Fixture? SelectedFixture
         {
             get => _selectedFixture;
             set
             {
-                if (_selectedFixture != value)
-                {
-                    _selectedFixture = value;
-                    OnPropertyChanged(nameof(SelectedFixture));
-                }
+                _selectedFixture = value;
+                OnPropertyChanged(nameof(SelectedFixture));
             }
         }
 
         public ICommand OpenFixtureCommand { get; }
+        public ICommand DeleteFixtureCommand { get; }
 
         public FixtureListViewModel()
         {
             OpenFixtureCommand = new RelayCommand(OpenFixture);
+            DeleteFixtureCommand = new RelayCommand(DeleteSelected);
 
             _fixturesFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -101,45 +92,37 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public void ReloadFixturesFromFiles()
         {
             ManufacturerGroups.Clear();
-
-            if (!Directory.Exists(_fixturesFolder)) return;
-
-            var allFixtures = new List<FixtureJSON>();
+            var all = new List<Fixture>();
 
             foreach (var file in Directory.GetFiles(_fixturesFolder, "*.json", SearchOption.AllDirectories))
             {
                 try
                 {
                     string json = File.ReadAllText(file);
-                    var fixture = JsonSerializer.Deserialize<FixtureJSON>(json);
+                    var fixture = JsonSerializer.Deserialize<Fixture>(json);
+                    if (fixture == null) continue;
 
-                    if (fixture != null)
-                    {
-                        if (string.IsNullOrEmpty(fixture.Name))
-                            fixture.Name = Path.GetFileNameWithoutExtension(file);
-                        if (string.IsNullOrEmpty(fixture.Manufacturer))
-                            fixture.Manufacturer = "Unknown";
+                    if (string.IsNullOrWhiteSpace(fixture.Name))
+                        fixture.Name = Path.GetFileNameWithoutExtension(file);
+                    if (string.IsNullOrWhiteSpace(fixture.Manufacturer))
+                        fixture.Manufacturer = "Unknown";
+                    if (!string.IsNullOrEmpty(fixture.ImageBase64))
+                        fixture.ImageBase64 = ImageCompressionHelpers.DecompressBase64(fixture.ImageBase64);
 
-                        if (!string.IsNullOrEmpty(fixture.ImageBase64))
-                        {
-                            fixture.ImageBase64 = ImageCompressionHelpers.DecompressBase64(fixture.ImageBase64);
-                        }
-
-                        allFixtures.Add(fixture);
-                    }
+                    all.Add(fixture);
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"Failed to load fixture from {file}: {ex.Message}");
+                    Debug.WriteLine(ex);
                 }
             }
 
-            foreach (var group in allFixtures.GroupBy(f => f.Manufacturer))
+            foreach (var g in all.GroupBy(f => f.Manufacturer))
             {
                 var mg = new ManufacturerGroup
                 {
-                    Manufacturer = group.Key,
-                    Fixtures = new ObservableCollection<FixtureJSON>(group.OrderBy(f => f.Name))
+                    Manufacturer = g.Key,
+                    Fixtures = new ObservableCollection<Fixture>(g.OrderBy(f => f.Name))
                 };
                 mg.RefreshFilteredFixtures(SearchText);
                 ManufacturerGroups.Add(mg);
@@ -152,78 +135,78 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (SelectedSearchMode == SearchMode.Fixture)
             {
-                foreach (var group in ManufacturerGroups)
+                foreach (var g in ManufacturerGroups)
                 {
-                    group.RefreshFilteredFixtures(SearchText);
-                    group.IsVisible = group.FilteredFixtures.Count > 0;
+                    g.RefreshFilteredFixtures(SearchText);
+                    g.IsVisible = g.FilteredFixtures.Count > 0;
                 }
             }
-            else // Manufacturer search
+            else
             {
-                foreach (var group in ManufacturerGroups)
+                foreach (var g in ManufacturerGroups)
                 {
-                    group.IsVisible = string.IsNullOrWhiteSpace(SearchText)
-                        || group.Manufacturer.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
-
-                    group.RefreshFilteredFixtures(""); // show all fixtures in visible groups
+                    g.IsVisible = string.IsNullOrWhiteSpace(SearchText) ||
+                                  g.Manufacturer.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+                    g.RefreshFilteredFixtures("");
                 }
             }
         }
 
-        // ------------------------------------------------------------
-        // OPEN
-        // ------------------------------------------------------------
         private void OpenFixture()
         {
-            if (SelectedFixture == null) return;
+            if (SelectedFixtures.Count != 1) return;
+            var fixture = SelectedFixtures.First();
+            string path = Path.Combine(_fixturesFolder, fixture.Manufacturer, fixture.Name + ".json");
 
-            string filePath = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
-            if (!File.Exists(filePath))
+            if (!File.Exists(path))
             {
-                MessageBox.Show("Fixture JSON-bestand niet gevonden.");
+                MessageBox.Show("Fixture file not found.");
                 return;
             }
 
-            try
+            FixtureSelected?.Invoke(this, File.ReadAllText(path));
+        }
+
+        private void DeleteSelected()
+        {
+            if (SelectedFixtures.Count == 0)
             {
-                string json = File.ReadAllText(filePath);
-                FixtureSelected?.Invoke(this, json);
+                MessageBox.Show("No fixtures selected.");
+                return;
             }
-            catch (Exception ex)
+
+            string message = SelectedFixtures.Count == 1
+                ? $"Want to delete fixture \"{SelectedFixtures.First().Name}\"?"
+                : $"Want to delete {SelectedFixtures.Count} fixtures?";
+
+            var confirm = MessageBox.Show(
+                message,
+                "Delete fixture(s)",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            foreach (var fixture in SelectedFixtures.ToList())
             {
-                MessageBox.Show("Fout bij het laden van fixture: " + ex.Message);
+                string path = Path.Combine(_fixturesFolder, fixture.Manufacturer, fixture.Name + ".json");
+                if (File.Exists(path))
+                    File.Delete(path);
             }
+
+            SelectedFixtures.Clear();
+            ReloadFixturesFromFiles();
         }
 
         private void StartWatchingDataFolder()
         {
-            if (!Directory.Exists(_fixturesFolder)) return;
-
-            _watcher = new FileSystemWatcher(_fixturesFolder, "*.json")
-            {
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
-            };
-
-            _watcher.Created += async (s, e) =>
-            {
-                await Task.Delay(200);
-                string fileName = Path.GetFileNameWithoutExtension(e.Name);
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if (!ManufacturerGroups.SelectMany(g => g.Fixtures).Any(f => f.Name == fileName))
-                        ReloadFixturesFromFiles();
-                });
-            };
-
+            _watcher = new FileSystemWatcher(_fixturesFolder, "*.json");
+            _watcher.Created += (s, e) => Application.Current.Dispatcher.Invoke(ReloadFixturesFromFiles);
+            _watcher.Deleted += (s, e) => Application.Current.Dispatcher.Invoke(ReloadFixturesFromFiles);
             _watcher.EnableRaisingEvents = true;
         }
 
-        // ------------------------------------------------------------
-        // INotifyPropertyChanged
-        // ------------------------------------------------------------
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
+        private void OnPropertyChanged(string name)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using InterdisciplinairProject.Core.Models.Enums;
 
 namespace InterdisciplinairProject.Core.Models;
 
@@ -20,8 +21,15 @@ public class ChannelEffect
     }
 
     /// <summary>
+    /// Gets or sets the enabled of effect.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the type of effect.
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     [JsonPropertyName("effectType")]
     public EffectType EffectType { get; set; }
 
@@ -48,35 +56,4 @@ public class ChannelEffect
     /// </summary>
     [JsonPropertyName("parameters")]
     public Dictionary<string, object> Parameters { get; set; }
-}
-
-/// <summary>
-/// Enumeration of effect types.
-/// </summary>
-public enum EffectType
-{
-    /// <summary>
-    /// Fade in effect.
-    /// </summary>
-    FadeIn,
-
-    /// <summary>
-    /// Fade out effect.
-    /// </summary>
-    FadeOut,
-
-    /// <summary>
-    /// Strobe effect.
-    /// </summary>
-    Strobe,
-
-    /// <summary>
-    /// Pulse effect.
-    /// </summary>
-    Pulse,
-
-    /// <summary>
-    /// Custom effect.
-    /// </summary>
-    Custom
 }

@@ -1,9 +1,9 @@
-using InterdisciplinairProject.Core.Models;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using InterdisciplinairProject.Core.Interfaces;
+using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Models.Enums;
 
 namespace InterdisciplinairProject.Core.Repositories;
 
@@ -13,7 +13,7 @@ namespace InterdisciplinairProject.Core.Repositories;
 public class FixtureRepository : IFixtureRepository
 {
     private readonly string _fixturesDirectoryPath;
-    private List<FixtureDefinition> _cachedFixtures;
+    private List<Fixture> _cachedFixtures;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FixtureRepository"/> class.
@@ -22,16 +22,16 @@ public class FixtureRepository : IFixtureRepository
     public FixtureRepository(string fixturesDirectoryPath)
     {
         _fixturesDirectoryPath = fixturesDirectoryPath;
-        _cachedFixtures = new List<FixtureDefinition>();
+        _cachedFixtures = new List<Fixture>();
     }
 
     /// <summary>
     /// Gets all fixtures from the JSON files in the fixtures directory.
     /// </summary>
     /// <returns>A list of fixtures.</returns>
-    public async Task<List<FixtureDefinition>> GetAllFixturesAsync()
+    public async Task<List<Fixture>> GetAllFixturesAsync()
     {
-        var fixtures = new List<FixtureDefinition>();
+        var fixtures = new List<Fixture>();
 
         if (!Directory.Exists(_fixturesDirectoryPath))
         {
@@ -77,7 +77,7 @@ public class FixtureRepository : IFixtureRepository
     /// </summary>
     /// <param name="fixtureId">The fixture ID.</param>
     /// <returns>The fixture, or null if not found.</returns>
-    public FixtureDefinition? GetFixtureById(string fixtureId)
+    public Fixture? GetFixtureById(string fixtureId)
     {
         // First check cached fixtures
         var fixture = _cachedFixtures.FirstOrDefault(f => f.FixtureId == fixtureId);
@@ -118,7 +118,7 @@ public class FixtureRepository : IFixtureRepository
         return null;
     }
 
-    private async Task<FixtureDefinition?> LoadFixtureFromFileAsync(string filePath)
+    private async Task<Fixture?> LoadFixtureFromFileAsync(string filePath)
     {
         var json = await File.ReadAllTextAsync(filePath);
         Debug.WriteLine($"[DEBUG] FixtureRepository: Loading fixture from {filePath}");
@@ -129,9 +129,8 @@ public class FixtureRepository : IFixtureRepository
         var manufacturer = root.GetProperty("manufacturer").GetString() ?? string.Empty;
         var imagePath = root.TryGetProperty("imagePath", out var ip) ? ip.GetString() : string.Empty;
 
-        var channels = new Dictionary<string, byte?>();
+        var channels = new ObservableCollection<Channel>();
         var channelDescriptions = new Dictionary<string, string>();
-        var channelTypes = new Dictionary<string, ChannelType>();
 
         if (root.TryGetProperty("channels", out var channelsElement))
         {
@@ -147,19 +146,36 @@ public class FixtureRepository : IFixtureRepository
                     var valueStr = channelElement.GetProperty("value").GetString() ?? "0";
                     if (byte.TryParse(valueStr, out var value))
                     {
-                        channels[channelName] = value;
+                        channels.Add(new Channel
+                        {
+                            Name = channelName,
+                            Type = channelTypeStr,
+                            Value = valueStr,
+                            Parameter = value,
+                            Min = channelElement.TryGetProperty("min", out var minProp) && minProp.TryGetInt32(out var min) ? min : 0,
+                            Max = channelElement.TryGetProperty("max", out var maxProp) && maxProp.TryGetInt32(out var max) ? max : 255,
+                            Time = channelElement.TryGetProperty("time", out var timeProp) && timeProp.TryGetInt32(out var time) ? time : 0,
+                            ChannelEffect = new ChannelEffect(),
+                        });
                     }
                     else
                     {
-                        channels[channelName] = 0;
+                        channels.Add(new Channel
+                        {
+                            Name = channelName,
+                            Type = channelTypeStr,
+                            Value = valueStr,
+                            Parameter = 0,
+                            Min = 0,
+                            Max = 255,
+                            Time = 0,
+                            ChannelEffect = new ChannelEffect(),
+                        });
                     }
-
-                    var channelType = Enum.TryParse<ChannelType>(channelTypeStr, true, out var parsedType) ? parsedType : ChannelType.Unknown;
-                    channelTypes[channelName] = channelType;
 
                     // Create description from type
                     channelDescriptions[channelName] = $"{channelName}: {channelTypeStr}";
-                    Debug.WriteLine($"[DEBUG] FixtureRepository: Added channel '{channelName}' = {channels[channelName]}, Type: {channelType}");
+                    Debug.WriteLine($"[DEBUG] FixtureRepository: Added channel '{channelName}' = {valueStr}, Type: {channelTypeStr}");
                 }
             }
             else if (channelsElement.ValueKind == JsonValueKind.Object)
@@ -169,28 +185,46 @@ public class FixtureRepository : IFixtureRepository
                 {
                     if (prop.Value.ValueKind == JsonValueKind.Number)
                     {
-                        channels[prop.Name] = (byte)prop.Value.GetInt32();
+                        var val = (byte)prop.Value.GetInt32();
+                        channels.Add(new Channel
+                        {
+                            Name = prop.Name,
+                            Type = "Unknown",
+                            Value = prop.Value.ToString(),
+                            Parameter = val,
+                            Min = 0,
+                            Max = 255,
+                            Time = 0,
+                            ChannelEffect = new ChannelEffect(),
+                        });
                     }
                     else
                     {
-                        channels[prop.Name] = null;
+                        channels.Add(new Channel
+                        {
+                            Name = prop.Name,
+                            Type = "Unknown",
+                            Value = "0",
+                            Parameter = 0,
+                            Min = 0,
+                            Max = 255,
+                            Time = 0,
+                            ChannelEffect = new ChannelEffect(),
+                        });
                     }
-
-                    channelTypes[prop.Name] = Enum.TryParse<ChannelType>(prop.Name, true, out var parsedType) ? parsedType : ChannelType.Unknown;
                 }
             }
         }
 
-        var fixture = new FixtureDefinition
+        var fixture = new Fixture
         {
             FixtureId = name, // Use name as FixtureId for now
             Name = name,
             Manufacturer = manufacturer,
             Channels = channels,
             ChannelDescriptions = channelDescriptions,
-            ChannelTypes = channelTypes,
         };
-        Debug.WriteLine($"[DEBUG] FixtureRepository: Created fixture '{fixture.Name}' with Id '{fixture.Id}' and channels: {string.Join(", ", fixture.Channels.Keys)}");
+        Debug.WriteLine($"[DEBUG] FixtureRepository: Created fixture '{fixture.Name}' with Id '{fixture.Id}' and channels: {string.Join(", ", fixture.Channels.Select(c => c.Name))}");
         return fixture;
     }
 

@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using InterdisciplinairProject.Core.Models;
-using InterdisciplinairProject.Features.Scene;
 
 namespace InterdisciplinairProject.Services;
 
@@ -43,33 +40,41 @@ public class SceneManager
     /// <summary>
     /// Gets the current scene loaded in memory.
     /// </summary>
-    public Features.Scene.Scene CurrentScene { get; private set; }
+    public Scene CurrentScene { get; private set; }
 
     /// <summary>
     /// Adds a fixture to the current scene as a new instance.
     /// </summary>
-    /// <param name="fixture">The fixture to add.</param>
-    public void AddFixtureToScene(Core.Models.Fixture fixture)
+    /// <param name="fixture">The fixture definition to add to the scene.</param>
+    public void AddFixtureToScene(Fixture fixture)
     {
-        var instance = new Features.Scene.SceneFixture
+        var instance = new Fixture
         {
-            FixtureId = fixture.Id,
+            FixtureId = fixture.FixtureId,
             InstanceId = Guid.NewGuid().ToString("N"),
             Name = fixture.Name,
-            Channels = new Dictionary<string, byte?>(),
+            Manufacturer = fixture.Manufacturer,
+            Description = fixture.Description,
+            Channels = new ObservableCollection<Channel>(fixture.Channels.Select(c => new Channel
+            {
+                Name = c.Name,
+                Type = c.Type,
+                Value = c.Value,
+                Min = c.Min,
+                Max = c.Max,
+                Time = c.Time,
+                ChannelEffect = c.ChannelEffect,
+            })),
+            ChannelDescriptions = new Dictionary<string, string>(fixture.ChannelDescriptions),
+            StartAddress = fixture.StartAddress,
         };
 
-        foreach (var ch in fixture.Channels)
-        {
-            instance.Channels[ch.Key] = ch.Value ?? 0;
-        }
-
-        CurrentScene.Fixtures.Add(instance);
+        CurrentScene.Fixtures?.Add(instance);
         Debug.WriteLine($"[DEBUG] SceneManager: Added fixture '{instance.Name}' ({instance.InstanceId}) to scene '{CurrentScene.Name}' ({CurrentScene.Id})");
         SaveSceneToFile();
     }
 
-    private Features.Scene.Scene? LoadSceneFromFile()
+    private Scene? LoadSceneFromFile()
     {
         try
         {
@@ -88,7 +93,7 @@ public class SceneManager
                 var name = sceneEl.TryGetProperty("name", out var nameEl) ? nameEl.GetString() ?? string.Empty : string.Empty;
                 var universe = sceneEl.TryGetProperty("universe", out var uEl) ? uEl.GetInt32() : 1;
 
-                var scene = new Features.Scene.Scene { Id = id, Name = name, Universe = universe };
+                var scene = new Scene { Id = id, Name = name, Universe = universe, Fixtures = new List<Fixture>() };
 
                 if (sceneEl.TryGetProperty("fixtures", out var fixturesEl) && fixturesEl.ValueKind == JsonValueKind.Array)
                 {
@@ -100,12 +105,12 @@ public class SceneManager
                             var instanceId = fixEl.TryGetProperty("instanceId", out var iId) ? iId.GetString() ?? Guid.NewGuid().ToString("N") : Guid.NewGuid().ToString("N");
                             var nameProp = fixEl.TryGetProperty("name", out var nEl) ? nEl.GetString() ?? string.Empty : string.Empty;
 
-                            var sceneFix = new Features.Scene.SceneFixture
+                            var sceneFix = new Fixture
                             {
                                 FixtureId = fixtureId,
                                 InstanceId = instanceId,
                                 Name = nameProp,
-                                Channels = new Dictionary<string, byte?>(),
+                                Channels = new ObservableCollection<Channel>(),
                             };
 
                             if (fixEl.TryGetProperty("channels", out var channelsEl) && channelsEl.ValueKind == JsonValueKind.Object)
@@ -115,11 +120,32 @@ public class SceneManager
                                     if (chan.Value.ValueKind == JsonValueKind.Number)
                                     {
                                         var intVal = chan.Value.GetInt32();
-                                        sceneFix.Channels[chan.Name] = (byte)Math.Max(0, Math.Min(255, intVal));
+                                        var param = (byte)Math.Max(0, Math.Min(255, intVal));
+                                        sceneFix.Channels.Add(new Channel
+                                        {
+                                            Name = chan.Name,
+                                            Value = chan.Value.ToString(),
+                                            Parameter = param,
+                                            Type = "Unknown",
+                                            Min = 0,
+                                            Max = 255,
+                                            Time = 0,
+                                            ChannelEffect = new ChannelEffect(),
+                                        });
                                     }
                                     else
                                     {
-                                        sceneFix.Channels[chan.Name] = 0;
+                                        sceneFix.Channels.Add(new Channel
+                                        {
+                                            Name = chan.Name,
+                                            Value = "0",
+                                            Parameter = 0,
+                                            Type = "Unknown",
+                                            Min = 0,
+                                            Max = 255,
+                                            Time = 0,
+                                            ChannelEffect = new ChannelEffect(),
+                                        });
                                     }
                                 }
                             }
@@ -144,9 +170,9 @@ public class SceneManager
         return null;
     }
 
-    private Features.Scene.Scene CreateDefaultScene()
+    private Scene CreateDefaultScene()
     {
-        var defaultScene = new Features.Scene.Scene { Id = "default", Name = "Default Scene", Universe = 1 };
+        var defaultScene = new Scene { Id = "default", Name = "Default Scene", Universe = 1, Fixtures = new List<Fixture>() };
         return defaultScene;
     }
 
@@ -227,13 +253,13 @@ public class SceneManager
                     id = CurrentScene.Id,
                     name = CurrentScene.Name,
                     universe = CurrentScene.Universe,
-                    fixtures = CurrentScene.Fixtures.Select(f => new
+                    fixtures = CurrentScene.Fixtures?.Select(f => new
                     {
                         fixtureId = f.FixtureId,
                         instanceId = f.InstanceId,
                         name = f.Name,
-                        channels = f.Channels.ToDictionary(kvp => kvp.Key, kvp => (int)(kvp.Value ?? 0)),
-                    }).ToArray(),
+                        channels = f.Channels.ToDictionary(c => c.Name, c => c.Parameter),
+                    }).ToArray() ?? Array.Empty<object>(),
                 },
             };
 

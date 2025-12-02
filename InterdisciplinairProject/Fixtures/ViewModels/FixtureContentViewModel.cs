@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Fixtures.Models;
+using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Communication;
 using System.Collections.ObjectModel;
 using System.Text.Json;
@@ -46,14 +46,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public ICommand BackCommand { get; }
         public ICommand EditCommand { get; }
-        public ICommand DeleteCommand { get; }
         public ICommand TestAllCommand { get; }
 
         public FixtureContentViewModel(string json)
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
-            DeleteCommand = new RelayCommand(() => DeleteRequested?.Invoke(this, EventArgs.Empty));
             TestAllCommand = new RelayCommand(SendAllChannels);
 
             LoadFromJson(json);
@@ -64,7 +62,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             if (string.IsNullOrWhiteSpace(json)) return;
 
-            var parsed = JsonSerializer.Deserialize<FixtureJSON>(json);
+            var parsed = JsonSerializer.Deserialize<Fixture>(json);
 
             if (parsed != null)
             {
@@ -73,16 +71,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 ImageBase64 = parsed.ImageBase64;
 
                 Channels.Clear();
-                foreach (var c in parsed.Channels)
+                foreach (var channel in parsed.Channels)
                 {
-                    // FIX: capture local variable for correct TestCommand
-                    var channelCopy = c;
-                    channelCopy.TestCommand = new RelayCommand(() => SendChannelValue(channelCopy));
-                    Channels.Add(channelCopy);
+                    if (int.TryParse(channel.Value, out var param))
+                        channel.Parameter = param;
+
+                    channel.TestCommand = new RelayCommand(() => SendChannelValue(channel));
+                    Channels.Add(channel);
                 }
             }
         }
 
+        // ===========================
+        // Testing
+        // ===========================
         private void RefreshAvailablePorts()
         {
             AvailablePorts.Clear();
@@ -107,12 +109,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 error = channel.Name;
                 return false;
             }
+
             return true;
         }
 
-        // ===========================
-        // SEND SINGLE CHANNEL
-        // ===========================
         public void SendChannelValue(Channel channel)
         {
             if (ComPort == null)
@@ -143,9 +143,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        // ===========================
-        // SEND ALL CHANNELS
-        // ===========================
         private void SendAllChannels()
         {
             if (ComPort == null)
