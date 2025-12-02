@@ -77,5 +77,6 @@ namespace InterdisciplinairProject.Fixtures.Communication
                 throw new Exception("ELO ERROR: " + ex.Message);
             }
         }
+
     }
 }

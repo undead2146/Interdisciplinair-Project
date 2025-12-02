@@ -15,6 +15,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         public int? max { get; set; }   // slider maximum
 
         // 🔹 NEW: ranges defined for this type (by name)
-        public Dictionary<string, ChannelRange>? ranges { get; set; }
+        public List<ChannelRange> ranges { get; set; } = new();
     }
 }
