@@ -22,16 +22,16 @@ namespace InterdisciplinairProject.ViewModels
         private InterdisciplinairProject.Core.Models.Show _show = new InterdisciplinairProject.Core.Models.Show();
         private string? _currentShowPath;
 
-        public ObservableCollection<ShowScene> Scenes { get; } = new();
+        public ObservableCollection<Scene> Scenes { get; } = new();
         public ObservableCollection<TimelineShowScene> TimeLineScenes { get; } = new();
 
         private int id = 1;
 
         [ObservableProperty]
-        private ShowScene? selectedScene;
+        private Scene? selectedScene;
 
         [ObservableProperty]
-        private ShowScene? selectedTimelineScene;
+        private Scene? selectedTimelineScene;
 
         [ObservableProperty]
         private string? currentShowId;
@@ -43,7 +43,7 @@ namespace InterdisciplinairProject.ViewModels
         private string? message;
 
         // new: per-scene fade cancellation tokens
-        private readonly Dictionary<ShowScene, CancellationTokenSource> _fadeCts = new();
+        private readonly Dictionary<Scene, CancellationTokenSource> _fadeCts = new();
 
         // ============================================================
         // CREATE SHOW
@@ -65,7 +65,7 @@ namespace InterdisciplinairProject.ViewModels
                 _show = new InterdisciplinairProject.Core.Models.Show
                 {
                     Name = vm.ShowName,
-                    Scenes = new List<ShowScene>()
+                    Scenes = new List<Scene>()
                 };
 
                 _currentShowPath = null;
@@ -97,7 +97,7 @@ namespace InterdisciplinairProject.ViewModels
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         // ensure imported scene slider starts at 0
-                        var showScene = new ShowScene
+                        var showScene = new Scene
                         {
                             Id = scene.Id,
                             Name = scene.Name,
@@ -133,13 +133,13 @@ namespace InterdisciplinairProject.ViewModels
         // SCENE SELECTION
         // ============================================================
         [RelayCommand]
-        private void SceneSelectionChanged(ShowScene selectedScene)
+        private void SceneSelectionChanged(Scene selectedScene)
         {
             selectedScene = selectedScene;
         }
 
         [RelayCommand]
-        private void TimelineSceneSelectionChanged(ShowScene selectedScene)
+        private void TimelineSceneSelectionChanged(Scene selectedScene)
         {
             selectedTimelineScene = selectedScene;
         }
@@ -257,7 +257,7 @@ namespace InterdisciplinairProject.ViewModels
                             {
                                 foreach (var fixture in scene.Fixtures)
                                 {
-                                    fixture.CalculateChannelRatios();
+                                    //fixture.CalculateChannelRatios();
                                 }
                             }
                             
@@ -309,7 +309,7 @@ namespace InterdisciplinairProject.ViewModels
         // DELETE SCENE
         // ============================================================
         [RelayCommand]
-        private void DeleteScene(ShowScene? scene)
+        private void DeleteScene(Scene? scene)
         {
             if (scene == null)
                 return;
@@ -335,7 +335,7 @@ namespace InterdisciplinairProject.ViewModels
             Message = $"Scene '{scene.Name}' verwijderd.";
         }
 
-        public void UpdateSceneDimmer(ShowScene scene, int dimmer)
+        public void UpdateSceneDimmer(Scene scene, int dimmer)
         {
             if (scene == null)
                 return;
@@ -364,7 +364,7 @@ namespace InterdisciplinairProject.ViewModels
                                     // Calculate ratios if needed
                                     if (!fixture.Channels.Any())
                                     {
-                                        fixture.CalculateChannelRatios();
+                                        //fixture.CalculateChannelRatios();
                                     }
                                     
                                     // set observable property if available
@@ -398,7 +398,7 @@ namespace InterdisciplinairProject.ViewModels
                         // Calculate ratios if needed
                         if (!fixture.Channels.Any())
                         {
-                            fixture.CalculateChannelRatios();
+                            //fixture.CalculateChannelRatios();
                         }
                         
                         fixture.Dimmer = channelValue;
@@ -423,7 +423,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Cancels any running fade for the provided scene
-        private void CancelFadeForScene(ShowScene scene)
+        private void CancelFadeForScene(Scene scene)
         {
             if (scene == null) return;
 
@@ -440,7 +440,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Fade a single scene to target over durationMs, updating fixtures and Scenes on the UI thread.
-        private async Task FadeSceneAsync(ShowScene scene, int target, int durationMs, CancellationToken token)
+        private async Task FadeSceneAsync(Scene scene, int target, int durationMs, CancellationToken token)
         {
             if (scene == null) return;
 
@@ -495,7 +495,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Helper to update fixture dimmer channels for a scene on the caller thread (call from UI dispatcher)
-        private void UpdateFixturesForScene(ShowScene scene, int dimmer)
+        private void UpdateFixturesForScene(Scene scene, int dimmer)
         {
             if (scene?.Fixtures == null) return;
             byte channelValue = (byte)Math.Round(dimmer * 255.0 / 100.0);
@@ -506,7 +506,7 @@ namespace InterdisciplinairProject.ViewModels
                     // Calculate ratios if not yet done
                     if (!fixture.Channels.Any())
                     {
-                        fixture.CalculateChannelRatios();
+                        //fixture.CalculateChannelRatios();
                     }
                     
                     fixture.Dimmer = channelValue;
@@ -519,7 +519,7 @@ namespace InterdisciplinairProject.ViewModels
         }
 
         // Public method used by SceneControlViewModel.PlayAsync to activate scene with fade orchestration.
-        public async Task FadeToAndActivateAsync(ShowScene targetScene, int targetDimmer)
+        public async Task FadeToAndActivateAsync(Scene targetScene, int targetDimmer)
         {
             if (targetScene == null) return;
 

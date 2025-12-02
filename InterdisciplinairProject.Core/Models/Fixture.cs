@@ -97,11 +97,8 @@ public class Fixture : INotifyPropertyChanged
     [JsonIgnore]
     public bool IsComplex => ChannelCount > 16;
 
-    private byte _dimmer;
-
     /// <summary>
     /// Gets or sets the dimmer channel value (0..255).
-    /// When set, it proportionally adjusts all channel values based on their initial ratios.
     /// </summary>
     [JsonIgnore]
     public byte Dimmer

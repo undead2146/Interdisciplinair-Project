@@ -25,7 +25,7 @@ namespace InterdisciplinairProject.Views
 
         private void SceneControl_Loaded(object? sender, RoutedEventArgs e)
         {
-            if (DataContext is ShowScene sceneModel)
+            if (DataContext is InterdisciplinairProject.Core.Models.Scene sceneModel)
             {
                 var parentShowVm = FindParentShowbuilderViewModel();
                 this.DataContext = new SceneControlViewModel(sceneModel, parentShowVm);
@@ -48,7 +48,7 @@ namespace InterdisciplinairProject.Views
             }
         }
 
-        private static void ExecuteSceneSelectionCommand(ShowbuilderViewModel parentShowVm, ShowScene scene)
+        private static void ExecuteSceneSelectionCommand(ShowbuilderViewModel parentShowVm, InterdisciplinairProject.Core.Models.Scene scene)
         {
             if (parentShowVm == null || scene == null) return;
 

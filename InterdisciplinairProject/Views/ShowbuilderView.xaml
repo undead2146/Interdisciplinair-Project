@@ -419,7 +419,7 @@
                                             <TextBlock Text="R"
                                                Foreground="Red"
                                                FontSize="12"/>
-                                            <TextBlock Text="{Binding Channels[red], FallbackValue=0}"
+                                            <TextBlock Text="{Binding Red, FallbackValue=0}"
                                                FontWeight="SemiBold"/>
                                         </StackPanel>
                                         <!-- Green -->
@@ -427,7 +427,7 @@
                                             <TextBlock Text="G"
                                                Foreground="Green"
                                                FontSize="12"/>
-                                            <TextBlock Text="{Binding Channels[green], FallbackValue=0}"
+                                            <TextBlock Text="{Binding Green, FallbackValue=0}"
                                                FontWeight="SemiBold"/>
                                         </StackPanel>
                                         <!-- Blue -->
@@ -435,7 +435,7 @@
                                             <TextBlock Text="B"
                                                Foreground="Blue"
                                                FontSize="12"/>
-                                            <TextBlock Text="{Binding Channels[blue], FallbackValue=0}"
+                                            <TextBlock Text="{Binding Blue, FallbackValue=0}"
                                                FontWeight="SemiBold"/>
                                         </StackPanel>
                                     </StackPanel>

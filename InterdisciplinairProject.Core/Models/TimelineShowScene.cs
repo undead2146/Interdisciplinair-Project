@@ -10,7 +10,7 @@ namespace InterdisciplinairProject.Core.Models
     public class TimelineShowScene:INotifyPropertyChanged
     {
         public int Id { get; set; }
-        public ShowScene ShowScene { get; set; }
+        public Scene ShowScene { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
     }
