@@ -62,6 +62,9 @@ public class Channel
     [JsonPropertyName("channelEffect")]
     public ChannelEffect ChannelEffect { get; set; } = new ChannelEffect();
 
+    [JsonPropertyName("channelEffects")]
+    public List<ChannelEffect> ChannelEffects { get; set; } = new();
+
     /// <summary>
     /// Gets or sets the test command.
     /// </summary>

@@ -237,13 +237,13 @@
                                                 TabStripPlacement="Top"
                                                 Height="250"
                                                 Width="200">
+                                        <!-- TabItem range -->
                                         <TabItem Header="Channel">
                                             <Grid Margin="4">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
                                                     <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
-                                                <!-- 1) Select channel type -->
                                                 <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
                                                     <TextBlock Text="Select Channel Type:" 
                                                                FontWeight="SemiBold" Margin="0,0,0,4"/>
@@ -263,7 +263,6 @@
 
 
                                                 </StackPanel>
-                                                <!-- 2) Add Custom Type -->
                                                 <Border Grid.Row="1"
                                                         Background="LightGreen"
                                                         HorizontalAlignment="Center"
@@ -285,7 +284,6 @@
                                                                 <ColumnDefinition Width="1*"/>
                                                                 <ColumnDefinition Width="1*"/>
                                                             </Grid.ColumnDefinitions>
-                                                            <!-- MIN -->
                                                             <TextBox Grid.Column="0"
                                                                      Text="{Binding CustomRangeMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                      Padding="4"
@@ -298,7 +296,6 @@
                                                                      MaxWidth="90"
                                                                      HorizontalAlignment="Stretch"
                                                              TextWrapping="NoWrap"/>
-                                                            <!-- MAX -->
                                                             <TextBox Grid.Column="1"
                                                                      Text="{Binding CustomRangeMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                      Padding="4"
@@ -322,19 +319,18 @@
                                                 </Border>
                                             </Grid>
                                         </TabItem>
+                                        <!-- TabItem range -->
                                         <TabItem Header="Range">
                                             <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
                                                     <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
-                                                <!-- Add Range knop -->
                                                 <Button Grid.Row="0"
                                                         Content="+ Add Range"
                                                         Padding="6,4"
                                                         Margin="0,0,0,10"
                                                         Command="{Binding AddRangeCommand}" />
-                                                <!-- Scrollbare lijst met ranges -->
                                                 <ListBox Grid.Row="1"
                                                          ItemsSource="{Binding Ranges}"
                                                          SelectedItem="{Binding SelectedRange, Mode=TwoWay}"
@@ -373,62 +369,48 @@
                                                         </DataTemplate>
                                                     </ListBox.ItemTemplate>
                                                 </ListBox>
-
                                             </Grid>
                                         </TabItem>
+                                        <!-- TabItem effect type -->
                                         <TabItem Header="Effects">
-                                            <Grid>
+                                            <Grid Margin="10">
                                                 <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" SharedSizeGroup="TabContentHeight"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
+                                                <Button Grid.Row="0"
+                                                        Content="+ Add Effect"
+                                                        Padding="6,4"
+                                                        Margin="0,0,0,10"
+                                                        Command="{Binding AddEffectCommand}" />
+                                                <ListBox Grid.Row="1"
+                                                         ItemsSource="{Binding Effects}"
+                                                         SelectedItem="{Binding SelectedEffect, Mode=TwoWay}"
+                                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding DataContext.AvailableEffects, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center"
+                                                                          Margin="0,0,8,0"/>
 
-                                                <StackPanel Orientation="Vertical" Margin="6">
-                                                <CheckBox Content="Enable Effect"
-                                                          IsChecked="{Binding EffectEnabled, Mode=TwoWay}" 
-                                                          Margin="0,0,0,8"/>
-
-                                                <TextBlock Text="Select Effect Type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
-                                                    <ComboBox ItemsSource="{Binding AvailableEffects}"
-                                                              SelectedItem="{Binding EffectType, Mode=TwoWay}"
-                                                              Width="180"/>
-                                                    
-                                                    <Grid Margin="0,10,0,0">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <!-- Time -->
-                                                        <TextBlock Grid.Row="0" Grid.Column="0"
-                                                                   Text="Time (ms):"
-                                                                   Margin="0,0,8,0"
-                                                                   VerticalAlignment="Center"/>
-                                                        <TextBox Grid.Row="0" Grid.Column="1"
-                                                                 Text="{Binding EffectTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Width="100"/>
-                                                        <!-- Minimum -->
-                                                        <TextBlock Grid.Row="1" Grid.Column="0"
-                                                                   Text="Minimum:"
-                                                                   Margin="0,0,8,0"
-                                                                   VerticalAlignment="Center"/>
-                                                        <TextBox Grid.Row="1" Grid.Column="1"
-                                                                 Text="{Binding EffectMin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Width="100"/>
-                                                        <!-- Maximum -->
-                                                        <TextBlock Grid.Row="2" Grid.Column="0"
-                                                                   Text="Maximum:"
-                                                                   Margin="0,0,8,0"
-                                                                   VerticalAlignment="Center"/>
-                                                        <TextBox Grid.Row="2" Grid.Column="1"
-                                                                 Text="{Binding EffectMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                 Width="100"/>
-                                                    </Grid>
-
-                                                </StackPanel>
+                                                                <Button Grid.Column="1"
+                                                                        Content="🗑"
+                                                                        Command="{Binding DataContext.DeleteEffectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        VerticalAlignment="Center"
+                                                                        HorizontalAlignment="Right"
+                                                                        Width="30"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
                                             </Grid>
                                         </TabItem>
                                     </TabControl>

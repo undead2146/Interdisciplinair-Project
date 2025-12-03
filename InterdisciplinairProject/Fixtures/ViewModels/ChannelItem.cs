@@ -37,6 +37,7 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private int effectTime;
         [ObservableProperty] private byte effectMin;
         [ObservableProperty] private byte effectMax;
+        [ObservableProperty] private ChannelEffect? selectedEffect;
 
         // Custom type panel
         [ObservableProperty] private string? customTypeName;
@@ -55,6 +56,8 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private bool isDegreeHType;
         [ObservableProperty] private bool isDegreeFType;
 
+        public ObservableCollection<ChannelEffect> Effects { get; } = new();
+
         public int TickFrequency => 1;
 
         public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
@@ -66,6 +69,10 @@ namespace InterdisciplinairProject.Fixtures.Services
         public IRelayCommand AddCustomRangeCommand { get; }
 
         public IRelayCommand AddRangeCommand { get; }
+
+        public IRelayCommand AddEffectCommand { get;  }
+
+        public IRelayCommand<ChannelEffect> DeleteEffectCommand { get; }
 
         private bool _isNameManuallyEdited;
 
@@ -91,13 +98,10 @@ namespace InterdisciplinairProject.Fixtures.Services
                 level = 0;
 
             // Effect init
-            if (_model.ChannelEffect != null)
+            if (_model.ChannelEffect != null && _model.ChannelEffects.Any())
             {
-                effectEnabled = _model.ChannelEffect.Enabled;
-                effectType = _model.ChannelEffect.EffectType;
-                effectTime = _model.ChannelEffect.Time;
-                effectMin = _model.ChannelEffect.Min;
-                effectMax = _model.ChannelEffect.Max;
+                Effects = new ObservableCollection<ChannelEffect>(_model.ChannelEffects);
+                SelectedEffect = Effects.FirstOrDefault();
             }
 
             // 🔹 Keep a local copy for this channel's UI
@@ -115,14 +119,31 @@ namespace InterdisciplinairProject.Fixtures.Services
                 if (ranges.Count == 0 && spec.ranges != null)
                     ranges = new ObservableCollection<ChannelRange>(spec.ranges);
             }
-
-
             AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
             AddCustomRangeCommand = new RelayCommand(DoAddCustomRange);
-            AddRangeCommand = new RelayCommand(DoAddRange);
+            AddRangeCommand = new RelayCommand(AddRange);
+            AddEffectCommand = new RelayCommand(AddEffect);
+            DeleteEffectCommand = new RelayCommand<ChannelEffect>(DeleteEffect);
         }
 
-        private void DoAddRange()
+        private void AddEffect()
+        {
+            var newEffect = new ChannelEffect
+            {
+                EffectType = EffectType.FadeIn,
+            };
+
+            Effects.Add(newEffect);
+            selectedEffect = newEffect;
+        }
+
+        private void DeleteEffect(ChannelEffect? effect)
+        {
+            if (effect != null && Effects.Contains(effect))
+                Effects.Remove(effect);
+        }
+
+        private void AddRange()
         {
             var newRange = new ChannelRange
             {
@@ -143,7 +164,6 @@ namespace InterdisciplinairProject.Fixtures.Services
 
             // 🔹 Get spec for this type
             var spec = TypeCatalogService.GetByName(_model.Type);
-
 
             if (spec != null)
             {
@@ -166,18 +186,22 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
 
             // Effect stuff
-            if (_model.ChannelEffect == null)
-                _model.ChannelEffect = new ChannelEffect();
+            if (Effects.Any())
+            {
+                // legacy: eerste effect
+                _model.ChannelEffect = Effects.First();
 
-            _model.ChannelEffect.Enabled = EffectEnabled;
-            _model.ChannelEffect.EffectType = EffectType;
-            _model.ChannelEffect.Time = EffectTime;
-            _model.ChannelEffect.Min = EffectMin;
-            _model.ChannelEffect.Max = EffectMax;
+                // nieuwe lijst
+                _model.ChannelEffects = Effects.ToList();
+            }
+            else
+            {
+                _model.ChannelEffect = new ChannelEffect();
+                _model.ChannelEffects = new List<ChannelEffect>();
+            }
 
             return _model;
         }
-
 
         private void DoAddCustomType()
         {
@@ -290,9 +314,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             MessageBox.Show($"Range '{rangeName}' added.");
         }
 
-
-
-
         private void ApplyTypeSpec(string? typeName)
         {
             IsSliderType = false;
@@ -372,8 +393,5 @@ namespace InterdisciplinairProject.Fixtures.Services
             CustomRangeMinValue = MinValue.ToString();
             CustomRangeMaxValue = MaxValue.ToString();
         }
-
-        
     }
-
 }
