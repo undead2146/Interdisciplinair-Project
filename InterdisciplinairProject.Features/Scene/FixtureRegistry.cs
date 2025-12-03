@@ -105,10 +105,15 @@ public class FixtureRegistry : IFixtureRegistry
     /// <inheritdoc/>
     public async Task<bool> AddFixtureAsync(Core.Models.Fixture fixture)
     {
-        if (fixture == null || string.IsNullOrWhiteSpace(fixture.InstanceId))
+        if (fixture == null)
         {
             Debug.WriteLine("[DEBUG] FixtureRegistry: Invalid fixture");
             return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(fixture.InstanceId))
+        {
+            fixture.InstanceId = Guid.NewGuid().ToString();
         }
 
         await EnsureRegistryLoadedAsync();
@@ -118,7 +123,7 @@ public class FixtureRegistry : IFixtureRegistry
             // Check if fixture already exists
             if (_cachedFixtures.Any(f => f.InstanceId == fixture.InstanceId))
             {
-                Debug.WriteLine($"[DEBUG] FixtureRegistry: CoreFixture '{fixture.InstanceId}' already exists in registry");
+                Debug.WriteLine($"[DEBUG] FixtureRegistry: Fixture '{fixture.InstanceId}' already exists in registry");
                 return false;
             }
 
