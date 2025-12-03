@@ -11,10 +11,8 @@ namespace InterdisciplinairProject.Fixtures.Views
 {
     public partial class FixtureCreateView : UserControl
     {
-
         private ChannelItem? _selectedChannel; // Veld om de geselecteerde staat bij te houden
         private Point _dragStartPoint;  // needed for drag drop functionality for reordering channels
-
 
         public FixtureCreateView()
         {
@@ -71,6 +69,7 @@ namespace InterdisciplinairProject.Fixtures.Views
                         }
                     }
                 }
+
                 e.Handled = true; // Voorkom dat Enter andere knoppen activeert
             }
         }
@@ -92,17 +91,37 @@ namespace InterdisciplinairProject.Fixtures.Views
             }
         }
 
-        // start of drag drop functionality for reordering channels 
+        // start of drag drop functionality for reordering channels
         private bool IsHeaderClicked(DependencyObject source)
         {
-            var grid = FindParent<Grid>(source);
-            return grid != null && grid.Name == "ChannelHeader";
+            while (source != null)
+            {
+                // voorkom drag als je op de naam klikt (dubbelklik rename mag NIET slepen)
+                if (source is FrameworkElement fe && fe.Name == "ChannelName")
+                    return false;
+
+                // drag alleen toestaan binnen DragBorder
+                if (source is Border b && b.Name == "DragBorder")
+                    return true;
+
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            return false;
         }
+
 
 
         private void ChannelsListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DependencyObject source = e.OriginalSource as DependencyObject;
+            var listBox = (ListBox)sender;
+
+            var item = GetNearestContainer(listBox, e.GetPosition(listBox));
+            if (item != null)
+            {
+                listBox.SelectedItem = item.DataContext;
+            }
 
             if (IsHeaderClicked(source))
             {
@@ -113,6 +132,10 @@ namespace InterdisciplinairProject.Fixtures.Views
                 _dragStartPoint = default;
             }
         }
+
+
+
+
 
         private void ChannelsListBox_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -131,7 +154,6 @@ namespace InterdisciplinairProject.Fixtures.Views
                 DragDrop.DoDragDrop(listBox, listBox.SelectedItem, DragDropEffects.Move);
             }
         }
-
 
         private void ChannelsListBox_DragOver(object sender, DragEventArgs e)
         {
@@ -191,7 +213,6 @@ namespace InterdisciplinairProject.Fixtures.Views
             return element as ListBoxItem;
         }
 
-
         private ScrollViewer FindScrollViewer(DependencyObject parent)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -205,10 +226,11 @@ namespace InterdisciplinairProject.Fixtures.Views
                 if (result != null)
                     return result;
             }
+
             return null;
         }
-    // end of drag drop functionality for reordering channels 
 
+    // end of drag drop functionality for reordering channels
         private void NumericOnly(object sender, TextCompositionEventArgs e)
         {
             // allow only digits
@@ -221,6 +243,5 @@ namespace InterdisciplinairProject.Fixtures.Views
             if (e.Key == Key.Space)
                 e.Handled = true;
         }
-
     }
 }

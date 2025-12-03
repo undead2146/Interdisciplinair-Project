@@ -179,7 +179,15 @@
                     <DataTemplate>
                         <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="8" Background="White" CornerRadius="3">
                             <StackPanel>
-                                <Grid x:Name="ChannelHeader" Cursor="SizeAll">
+
+                                <Border x:Name="DragBorder"
+                                        Cursor="SizeAll"
+                                        Background="Transparent"
+                                        BorderBrush="Gray"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4">
+                                    <Grid x:Name="ChannelHeader" Cursor="SizeAll">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -214,6 +222,7 @@
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
+                                </Border>
 
                                 <Border x:Name="OptionsPanel"
 									    Visibility="Visible"

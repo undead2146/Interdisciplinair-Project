@@ -383,8 +383,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             CustomRangeMaxValue = MaxValue.ToString();
         }
 
-
     }
 
 }
-
