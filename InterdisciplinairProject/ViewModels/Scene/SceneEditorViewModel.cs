@@ -587,6 +587,7 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <summary>
     /// Removes a fixture from the scene.
     /// </summary>
+    [RelayCommand]
     private async Task RemoveFixture(SceneFixture? fixtureToRemove)
     {
         if (fixtureToRemove == null)

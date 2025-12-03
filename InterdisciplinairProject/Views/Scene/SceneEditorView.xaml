@@ -10,183 +10,186 @@
              d:DesignWidth="800">
     <UserControl.Resources>
         <converters:FixtureEndAddressConverter x:Key="EndAddressConverter"/>
+        
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFEBEE"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
-    <Grid Margin="10">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
       
-        <!-- Scene naam -->
-        <StackPanel Orientation="Horizontal"
-                    Grid.Row="0"
-                    Margin="0,0,0,10">
-            <TextBlock Text="Scène Naam:"
-                       VerticalAlignment="Center"
-                       Margin="0,0,5,0"/>
-            <TextBox Text="{Binding Scene.Name}"
-                     Width="200"
-                     Margin="0,0,10,0"
-                     IsReadOnly="True"/>
-            <Button Command="{Binding EditSceneNameCommand}"
-                    Padding="8,5"
-                    Margin="0,0,10,0"
-                    ToolTip="Scène naam bewerken"
-                    Background="#007ACC"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="3"
-                                Padding="{TemplateBinding Padding}">
-                            <TextBlock Text="✏"
-                                       FontSize="16"
-                                       Foreground="{TemplateBinding Foreground}"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver"
-                                     Value="True">
-                                <Setter Property="Background"
-                                        Value="#005A9E"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed"
-                                     Value="True">
-                                <Setter Property="Background"
-                                        Value="#004578"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
-       
-        <!-- Fixture toevoegen knop -->
-        <StackPanel Orientation="Horizontal"
-                    Grid.Row="1"
-                    Margin="0,0,0,10">
-            <Button Content="Fixture Toevoegen"
-                    Command="{Binding AddFixtureCommand}"
-                    Padding="10,5"/>
-        </StackPanel>
+        <!-- Header: Scene Name and Edit -->
+        <Border Grid.Row="0" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,20" Margin="0,0,0,20">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding Scene.Name}" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" Foreground="#333"/>
+                    <Button Command="{Binding EditSceneNameCommand}" 
+                            Margin="10,0,0,0"
+                            ToolTip="Scène naam bewerken"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            VerticalAlignment="Center">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="4">
+                                    <TextBlock Text="✏" FontSize="18" Foreground="#666"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#F0F0F0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
-        <!-- Hoofd content: Fixture lijst links, settings rechts -->
-        <Grid Grid.Row="2">
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
           
-            <!-- Fixture lijst -->
-            <Border Grid.Column="0"
-                    BorderBrush="#FFE0E0E0"
-                    BorderThickness="1"
-                    CornerRadius="4"
-                    Margin="0,0,10,0">
-                <ListBox ItemsSource="{Binding SceneFixtures}"
-                         SelectedItem="{Binding SelectedFixture}"
-                         BorderThickness="0"
-                         Margin="5"
-                         HorizontalContentAlignment="Stretch">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="Padding" Value="0"/>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+            <!-- Left Column: Fixture List -->
+            <Grid Grid.Column="0" Margin="0,0,20,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                                <!-- Fixture Name -->
-                                <StackPanel Grid.Column="0"
-                                            Orientation="Vertical"
-                                            VerticalAlignment="Center"
-                                            Margin="5">
-                                    <TextBlock Text="{Binding Fixture.Name}"
-                                               FontWeight="SemiBold"
-                                               FontSize="14"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="DMX: "
-                                                   FontSize="11"
-                                                   Foreground="Gray"/>
-                                        <TextBlock Text="{Binding Fixture.StartAddress}"
-                                                   FontSize="11"
-                                                   Foreground="Gray"/>
-                                        <TextBlock Text=" - "
-                                                   FontSize="11"
-                                                   Foreground="Gray"/>
-                                        <TextBlock FontSize="11"
-                                                   Foreground="Gray">
-                                            <TextBlock.Text>
-                                                <Binding Path="Fixture"
-                                                         Converter="{StaticResource EndAddressConverter}"/>
-                                            </TextBlock.Text>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </StackPanel>
+                <!-- Header & Add Button -->
+                <DockPanel Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Fixtures" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="#555"/>
+                    <Button Content="+ Toevoegen"
+                            Command="{Binding AddFixtureCommand}"
+                            HorizontalAlignment="Right"
+                            Background="#FF2D6CDF"
+                            Foreground="White"
+                            FontWeight="SemiBold"
+                            Padding="12,6"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF1E5BB0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DockPanel>
 
-                                <!-- Remove Button -->
-                                <Button Grid.Column="2"
-                                        Content="X"
-                                        Foreground="Red"
-                                        FontWeight="Bold"
-                                        Width="20"
-                                        Height="20"
-                                        Padding="0"
-                                        Margin="5,0,0,0"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        ToolTip="Verwijder deze fixture"
-                                        Command="{Binding DataContext.RemoveFixtureCommand, 
-                                                  RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
-                                        CommandParameter="{Binding}">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="Background" Value="Transparent"/>
-                                            <Setter Property="BorderBrush" Value="Transparent"/>
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="{TemplateBinding Background}"
-                                                                BorderThickness="0"
-                                                                Padding="{TemplateBinding Padding}">
-                                                            <ContentPresenter HorizontalAlignment="Center"
-                                                                            VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#15000000"/>
-                                                    <Setter Property="Foreground" Value="DarkRed"/>
+                <!-- List -->
+                <Border Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Background="White">
+                    <ListBox x:Name="FixturesListBox"
+                             ItemsSource="{Binding SceneFixtures}"
+                             SelectedItem="{Binding SelectedFixture}"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Padding="5"
+                             HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="Border" 
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="#E0E0E0"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Margin="0,0,0,8"
+                                                    Padding="10">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="#E7F1FF"/>
+                                                    <Setter TargetName="Border" Property="BorderBrush" Value="#0056B3"/>
                                                 </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Border>
-            <!-- Fixture settings view -->
-            <Border Grid.Column="1"
-                    BorderBrush="#FFE0E0E0"
-                    BorderThickness="1"
-                    CornerRadius="4">
-                <ContentControl Content="{Binding CurrentView}"
-                                Margin="5"/>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="#F8F9FA"/>
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Info -->
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Fixture.Name}" FontWeight="Bold" FontSize="14" Margin="0,0,0,4"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="DMX: " FontSize="12" Foreground="#666"/>
+                                            <TextBlock Text="{Binding Fixture.StartAddress}" FontSize="12" FontWeight="SemiBold" Foreground="#444"/>
+                                            <TextBlock Text=" - " FontSize="12" Foreground="#666"/>
+                                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#444">
+                                                <TextBlock.Text>
+                                                    <Binding Path="Fixture" Converter="{StaticResource EndAddressConverter}"/>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- Remove Button -->
+                                    <Button Grid.Column="1"
+                                            Command="{Binding DataContext.RemoveFixtureCommand, ElementName=FixturesListBox}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource IconButtonStyle}"
+                                            Width="30"
+                                            Height="30"
+                                            VerticalAlignment="Center"
+                                            ToolTip="Verwijder fixture">
+                                        <TextBlock Text="×" FontSize="20" FontWeight="Bold" Foreground="#DC3545" Margin="0,-2,0,0"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Grid>
+
+            <!-- Right Column: Settings -->
+            <Border Grid.Column="1" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Background="White">
+                <ContentControl Content="{Binding CurrentView}"/>
             </Border>
         </Grid>
     </Grid>
