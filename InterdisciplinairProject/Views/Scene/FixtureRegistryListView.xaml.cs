@@ -7,10 +7,13 @@ using System.Windows.Input;
 namespace InterdisciplinairProject.Views.Scene;
 
 /// <summary>
-/// Interaction logic for FixtureRegistryListView.xaml
+/// Interaction logic for FixtureRegistryListView.xaml.
 /// </summary>
 public partial class FixtureRegistryListView : UserControl
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FixtureRegistryListView"/> class.
+    /// </summary>
     public FixtureRegistryListView()
     {
         InitializeComponent();
@@ -28,7 +31,7 @@ public partial class FixtureRegistryListView : UserControl
         {
             Title = "Selecteer fixture bestand om te importeren",
             Filter = "JSON bestanden (*.json)|*.json|Alle bestanden (*.*)|*.*",
-            Multiselect = false
+            Multiselect = false,
         };
 
         if (openFileDialog.ShowDialog() == true)
