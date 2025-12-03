@@ -2,31 +2,30 @@ using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace InterdisciplinairProject.Converters;
-
-/// <summary>
-/// Converts a slider value (0-255 for channels, 0-100 for dimmers) and a container height to a pixel height,
-/// subtracting a fixed vertical margin of 12px (6px top + 6px bottom).
-/// Expects values[0] = slider value (double), values[1] = container height (double).
-/// </summary>
-public class PercentageHeightConverter : IMultiValueConverter
+namespace InterdisciplinairProject.Converters
 {
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    public class PercentageHeightConverter : IMultiValueConverter
     {
-        if (values.Length == 2
-            && values[0] is double sliderValue
-            && values[1] is double containerHeight)
+        // Converts slider value, min, max, and container height to a proportional height
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            double availableHeight = Math.Max(0.0, containerHeight - 12.0);
-            double pct = Math.Clamp(sliderValue / 255.0, 0.0, 1.0);
-            return pct * availableHeight;
+            if (values.Length != 4 ||
+                !(values[0] is double value) ||
+                !(values[1] is double min) ||
+                !(values[2] is double max) ||
+                !(values[3] is double containerHeight))
+                return 0.0;
+
+            if (max <= min) return 0.0;
+
+            double percent = (value - min) / (max - min);
+            percent = Math.Max(0, Math.Min(1, percent));
+            return percent * containerHeight;
         }
 
-        return 0.0;
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

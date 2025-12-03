@@ -32,11 +32,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public string? ImageBase64 { get; set; }
         public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
 
+        // WiFi properties for ELO (WiFi)
+        private string? _wifiIP;
+        private int _wifiPort = 6038; // default port
+
+        public string? WifiIP { get => _wifiIP; set => SetProperty(ref _wifiIP, value); }
+        public int WifiPort { get => _wifiPort; set => SetProperty(ref _wifiPort, value); }
+
         // UPDATED LABELS
         public ObservableCollection<string> LampMethods { get; set; } = new()
         {
             "Standard DMX",
-            "ELO (Cable)"
+            "ELO (Cable)",
+            "ELO (WiFi)"
         };
 
         public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
@@ -52,7 +60,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
-            TestAllCommand = new RelayCommand(SendAllChannels);
+            TestAllCommand = new RelayCommand(TestAllChannels);
 
             LoadFromJson(json);
             RefreshAvailablePorts();
@@ -76,7 +84,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     if (int.TryParse(channel.Value, out var param))
                         channel.Parameter = param;
 
-                    channel.TestCommand = new RelayCommand(() => SendChannelValue(channel));
+                    channel.TestCommand = new RelayCommand(() => TestSingleChannel(channel));
                     Channels.Add(channel);
                 }
             }
@@ -113,9 +121,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             return true;
         }
 
-        public void SendChannelValue(Channel channel)
+        public void TestSingleChannel(Channel channel)
         {
-            if (ComPort == null)
+            if (SelectedMethod == "ELO (WiFi)" && string.IsNullOrWhiteSpace(WifiIP))
+            {
+                MessageBox.Show("No WiFi IP entered.");
+                return;
+            }
+
+            if (SelectedMethod != "ELO (WiFi)" && string.IsNullOrWhiteSpace(ComPort))
             {
                 MessageBox.Show("No COM port selected.");
                 return;
@@ -127,25 +141,36 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
-            int index = Channels.IndexOf(channel);
-            if (index < 0) return;
+            // Build a small frame with just this channel
+            byte[] eloData = new byte[Channels.Count];
+            for (int i = 0; i < Channels.Count; i++)
+                eloData[i] = (i == Channels.IndexOf(channel)) ? (byte)channel.Parameter : (byte)0;
 
             if (SelectedMethod == "Standard DMX")
             {
                 byte[] dmx = new byte[512];
-                dmx[index] = (byte)channel.Parameter;
+                dmx[Channels.IndexOf(channel)] = (byte)channel.Parameter;
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO (Cable)
+            else if (SelectedMethod == "ELO (Cable)")
             {
-                byte[] eloData = { (byte)channel.Parameter };
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
+            }
+            else if (SelectedMethod == "ELO (WiFi)")
+            {
+                DMXCommunication.SendELOWifiFrame(WifiIP!, WifiPort, eloData);
             }
         }
 
-        private void SendAllChannels()
+        private void TestAllChannels()
         {
-            if (ComPort == null)
+            if (SelectedMethod == "ELO (WiFi)" && string.IsNullOrWhiteSpace(WifiIP))
+            {
+                MessageBox.Show("No WiFi IP entered.");
+                return;
+            }
+
+            if (SelectedMethod != "ELO (WiFi)" && string.IsNullOrWhiteSpace(ComPort))
             {
                 MessageBox.Show("No COM port selected.");
                 return;
@@ -168,13 +193,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 DMXCommunication.SendDMXFrame(ComPort!, dmx);
             }
-            else // ELO (Cable)
+            else if (SelectedMethod == "ELO (Cable)")
             {
                 byte[] eloData = new byte[Channels.Count];
                 for (int i = 0; i < Channels.Count; i++)
                     eloData[i] = (byte)Channels[i].Parameter;
 
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
+            }
+            else if (SelectedMethod == "ELO (WiFi)")
+            {
+                byte[] eloData = new byte[Channels.Count];
+                for (int i = 0; i < Channels.Count; i++)
+                    eloData[i] = (byte)Channels[i].Parameter;
+
+                DMXCommunication.SendELOWifiFrame(WifiIP!, WifiPort, eloData);
             }
         }
     }

@@ -16,10 +16,6 @@ namespace InterdisciplinairProject.Fixtures.Services
 
         private static readonly List<TypeSpecification> _defaults = new()
         {
-             // Special “UI modes”
-            new TypeSpecification { name = "Custom",            input = "custom"      },
-            new TypeSpecification { name = "Add Range To Type", input = "rangeToType" },
-
             // Base types (aligned with ChannelType, no Unknown)
             // For now: all 0–255
             new TypeSpecification { name = "Dimmer",           input = "slider", min = 0, max = 255 },

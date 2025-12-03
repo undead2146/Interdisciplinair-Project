@@ -45,6 +45,9 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private string customRangeMinValue = string.Empty;
         [ObservableProperty] private string customRangeMaxValue = string.Empty;
 
+        [ObservableProperty] private string typeMinValue = string.Empty;
+        [ObservableProperty] private string typeMaxValue = string.Empty;
+
         // Type flags
         [ObservableProperty] private bool isSliderType;
         [ObservableProperty] private bool isCustomType;
@@ -98,7 +101,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
 
             // 🔹 Keep a local copy for this channel's UI
-            ranges = _model.Ranges != null
+            Ranges = _model.Ranges != null
                 ? new ObservableCollection<ChannelRange>(_model.Ranges)
                 : new ObservableCollection<ChannelRange>();
 
@@ -118,29 +121,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             AddCustomRangeCommand = new RelayCommand(DoAddCustomRange);
             AddRangeCommand = new RelayCommand(DoAddRange);
         }
-
-        // Sync back to model when saving
-        //public Channel ToModel()
-        //{
-        //    _model.Name = Name;
-        //    _model.Type = SelectedType;
-        //    _model.Value = Level.ToString();
-        //    _model.Min = MinValue;
-        //    _model.Max = MaxValue;
-
-        //    _model.ChannelEffect.EffectType = EffectType;
-        //    _model.ChannelEffect.Time = EffectTime;
-        //    _model.ChannelEffect.Min = EffectMin;
-        //    _model.ChannelEffect.Max = EffectMax;
-
-        //    // 🔹 Write ranges to model → ends up in JSON
-        //    _model.Ranges = Ranges != null
-        //        ? new Dictionary<string, ChannelRange>(Ranges)
-        //        : new Dictionary<string, ChannelRange>();
-
-        //    ApplyTypeSpec(_model.Type);
-        //    return _model;
-        //}
 
         private void DoAddRange()
         {
@@ -163,6 +143,7 @@ namespace InterdisciplinairProject.Fixtures.Services
 
             // 🔹 Get spec for this type
             var spec = TypeCatalogService.GetByName(_model.Type);
+
 
             if (spec != null)
             {
@@ -330,6 +311,9 @@ namespace InterdisciplinairProject.Fixtures.Services
                 // Use type-defined min/max; default to 0..255 if not set
                 MinValue = spec.min ?? 0;
                 MaxValue = spec.max ?? 255;
+
+                TypeMinValue = MinValue.ToString();
+                TypeMaxValue = MaxValue.ToString();
             }
             else if (spec.input.Equals("rangeToType", StringComparison.OrdinalIgnoreCase))
             {
@@ -341,9 +325,12 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
 
             // 🔹 SYNC ranges from type-spec into THIS channel
-            ranges = spec.ranges != null
+            Ranges = spec.ranges != null
                 ? new ObservableCollection<ChannelRange>(spec.ranges)
                 : new ObservableCollection<ChannelRange>();
+
+            TypeMinValue = MinValue.ToString();
+            TypeMaxValue = MaxValue.ToString();
 
             // degreeH/degreeF are legacy; if you still want them, you can also map them to min/max here
         }
@@ -361,6 +348,9 @@ namespace InterdisciplinairProject.Fixtures.Services
             ApplyTypeSpec(value);
             // Clamp current level into new range
             Level = Snap(Level, MinValue, MaxValue);
+
+            TypeMinValue = MinValue.ToString();
+            TypeMaxValue = MaxValue.ToString();
         }
 
         partial void OnSelectedRangeTypeChanged(string value)
@@ -383,6 +373,7 @@ namespace InterdisciplinairProject.Fixtures.Services
             CustomRangeMaxValue = MaxValue.ToString();
         }
 
+        
     }
 
 }
