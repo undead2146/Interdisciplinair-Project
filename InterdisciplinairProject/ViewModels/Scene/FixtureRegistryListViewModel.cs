@@ -45,6 +45,11 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     public event EventHandler<Fixture>? FixtureSelected;
 
     /// <summary>
+    /// Event raised when the user cancels the fixture selection.
+    /// </summary>
+    public event Action? Cancel;
+
+    /// <summary>
     /// Loads all fixtures from the registry.
     /// </summary>
     private async Task LoadFixturesAsync()
@@ -114,6 +119,15 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     {
         await _fixtureRegistry.RefreshRegistryAsync();
         await LoadFixturesAsync();
+    }
+
+    /// <summary>
+    /// Cancels the fixture selection and returns to the scene list.
+    /// </summary>
+    [RelayCommand]
+    private void CancelSelection()
+    {
+        Cancel?.Invoke();
     }
 
     /// <summary>

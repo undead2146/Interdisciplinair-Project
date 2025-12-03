@@ -18,11 +18,53 @@
             Margin="0">
         <DockPanel Margin="12">
             <!-- Header -->
-            <TextBlock DockPanel.Dock="Top" 
-                       Text="Fixture Inventaris" 
-                       FontWeight="Bold"
-                       FontSize="14"
-                       Margin="0,0,0,12"/>
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" 
+                           Text="Fixture Inventaris" 
+                           FontWeight="Bold"
+                           FontSize="14"/>
+                <Button Grid.Column="1"
+                        Content="X"
+                        Foreground="Red"
+                        FontWeight="Bold"
+                        Width="20"
+                        Height="20"
+                        Padding="0"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        ToolTip="Annuleren"
+                        Command="{Binding CancelSelectionCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderThickness="0"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FFFFE0E0"/>
+                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
 
             <!-- Import Button aan de onderkant -->
             <Button DockPanel.Dock="Bottom"
