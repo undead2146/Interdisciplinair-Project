@@ -60,7 +60,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             BackCommand = new RelayCommand(() => BackRequested?.Invoke(this, EventArgs.Empty));
             EditCommand = new RelayCommand(() => EditRequested?.Invoke(this, this));
-            TestAllCommand = new RelayCommand(SendAllChannels);
+            TestAllCommand = new RelayCommand(TestAllChannels);
 
             LoadFromJson(json);
             RefreshAvailablePorts();
@@ -84,7 +84,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     if (int.TryParse(channel.Value, out var param))
                         channel.Parameter = param;
 
-                    channel.TestCommand = new RelayCommand(() => SendChannelValue(channel));
+                    channel.TestCommand = new RelayCommand(() => TestSingleChannel(channel));
                     Channels.Add(channel);
                 }
             }
@@ -121,7 +121,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             return true;
         }
 
-        public void SendChannelValue(Channel channel)
+        public void TestSingleChannel(Channel channel)
         {
             if (SelectedMethod == "ELO (WiFi)" && string.IsNullOrWhiteSpace(WifiIP))
             {
@@ -162,7 +162,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
-        private void SendAllChannels()
+        private void TestAllChannels()
         {
             if (SelectedMethod == "ELO (WiFi)" && string.IsNullOrWhiteSpace(WifiIP))
             {

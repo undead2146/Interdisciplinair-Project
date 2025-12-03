@@ -10,26 +10,25 @@ namespace InterdisciplinairProject.Fixtures.Communication
         // ======================
         // STANDARD DMX FRAME (SERIAL)
         // ======================
-        public static void SendDMXFrame(string comPort, byte[] data)
+        public static void SendDMXFrame(string serialPort, byte[] universe)
         {
             try
             {
-                for (int i = 0; i < data.Length; i++)
-                    data[i] = (byte)(data[i] % 255);
-
-                using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two);
+                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Open();
-                Thread.Sleep(1);
 
+                // Break + start code
+                Thread.Sleep(1);
                 sp.BreakState = true;
                 Thread.Sleep(1);
                 sp.BreakState = false;
 
                 SpinWait.SpinUntil(() => false, TimeSpan.FromTicks(10));
 
-                byte[] frame = new byte[data.Length + 1];
+                // DMX frame: start code + universe
+                byte[] frame = new byte[universe.Length + 1];
                 frame[0] = 0x00;
-                Array.Copy(data, 0, frame, 1, data.Length);
+                Array.Copy(universe, 0, frame, 1, universe.Length);
 
                 sp.Write(frame, 0, frame.Length);
             }
@@ -42,34 +41,31 @@ namespace InterdisciplinairProject.Fixtures.Communication
         // ======================
         // ELO FRAME (SERIAL CABLE)
         // ======================
-        public static void SendELOFrame(string comPort, byte[] channelBytes)
+        public static void SendELOFrame(string serialPort, byte[] universe)
         {
             try
             {
-                for (int i = 0; i < channelBytes.Length; i++)
-                    channelBytes[i] = (byte)(channelBytes[i] % 255);
-
-                using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two)
+                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
                 {
                     Handshake = Handshake.None,
                     ReadTimeout = 100,
                     WriteTimeout = 100
                 };
                 sp.Open();
+
                 Thread.Sleep(5);
 
                 byte[] start = { 0x00, 0xFF, 0x00 };
                 byte[] stop = { 0xFF, 0xF0, 0xF0 };
 
-                // Pad single-channel sends to at least 10 bytes
                 int minLength = 10;
-                byte[] padded = new byte[Math.Max(channelBytes.Length, minLength)];
-                Array.Copy(channelBytes, padded, channelBytes.Length);
+                byte[] padded = new byte[Math.Max(universe.Length, minLength)];
+                Array.Copy(universe, padded, universe.Length);
 
                 byte[] frame = new byte[start.Length + padded.Length + stop.Length];
                 Array.Copy(start, 0, frame, 0, start.Length);
                 Array.Copy(padded, 0, frame, start.Length, padded.Length);
-                //Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
+                Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
 
                 sp.Write(frame, 0, frame.Length);
             }
