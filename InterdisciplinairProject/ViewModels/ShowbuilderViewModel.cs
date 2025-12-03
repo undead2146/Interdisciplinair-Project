@@ -1,19 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Views; // 👈 Needed for CreateShowWindow
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Views;
 using Show;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
-using System.Threading;
-using System.Threading.Tasks;
+
+using SceneModel = InterdisciplinairProject.Core.Models.Scene;
 
 namespace InterdisciplinairProject.ViewModels
 {
@@ -93,7 +90,7 @@ namespace InterdisciplinairProject.ViewModels
                 {
                     string selectedScenePath = openFileDialog.FileName;
 
-                    Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
+                    InterdisciplinairProject.Core.Models.Scene scene = SceneExtractor.ExtractScene(selectedScenePath);
                     if (!Scenes.Any(s => s.Id == scene.Id))
                     {
                         // ensure imported scene slider starts at 0
