@@ -5,8 +5,8 @@ using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
+using InterdisciplinairProject.ViewModels.Scene;
 using InterdisciplinairProject.Views;
-using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
@@ -138,39 +138,6 @@ public partial class SceneEditorViewModel : ObservableObject
         {
             Debug.WriteLine($"[ERROR] Error auto-saving scene: {ex.Message}");
             MessageBox.Show($"Fout bij automatisch opslaan van scene: {ex.Message}", "Waarschuwing", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-    }
-
-    /// <summary>
-    /// Saves the scene.
-    /// </summary>
-    [RelayCommand]
-    private async Task SaveScene()
-    {
-        try
-        {
-            // Synchroniseer de Scene.Fixtures met de SceneFixtures ListBox
-            Scene.Fixtures ??= new List<InterdisciplinairProject.Core.Models.Fixture>();
-            Scene.Fixtures.Clear();
-
-            // Kopieer de huidige listbox inhoud naar het Core Scene object
-            foreach (var sf in SceneFixtures)
-            {
-                Scene.Fixtures.Add(sf.Fixture);
-            }
-
-            Debug.WriteLine($"[DEBUG] Saving scene '{Scene.Name}' with {Scene.Fixtures?.Count ?? 0} fixtures");
-
-            // Sla de complete scene op via repository
-            await _sceneRepository.SaveSceneAsync(Scene);
-
-            MessageBox.Show("Scene succesvol opgeslagen!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
-            Debug.WriteLine($"[DEBUG] Scene '{Scene.Name}' saved successfully");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[ERROR] Error saving scene: {ex.Message}");
-            MessageBox.Show($"Error saving scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -497,31 +464,25 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Opens the fixture registry dialog when a fixture is selected.
+    /// Opens the fixture settings view when a fixture is selected.
     /// </summary>
     partial void OnSelectedFixtureChanged(SceneFixture? value)
     {
         if (value?.Fixture != null)
         {
-            // Get all fixtures except the selected one for conflict detection
-            var otherFixtures = SceneFixtures
-                .Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId)
-                .Select(sf => sf.Fixture)
-                .ToList();
+            // Maak een nieuwe FixtureSettingsViewModel
+            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
+            fixtureSettingsViewModel.LoadFixture(value.Fixture);
 
-            // *** Pass _fixtureRegistry ***
-            var dialog = new FixtureRegistryDialog(
-                value.Fixture,
-                _dmxAddressValidator,
-                _fixtureRegistry,  // ← Pass the registry
-                otherFixtures)
+            // Laad de FixtureSettingsView
+            CurrentView = new FixtureSettingsView
             {
-                Owner = Application.Current.MainWindow
+                DataContext = fixtureSettingsViewModel
             };
-
-            dialog.ShowDialog();
-
-            Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{value.Fixture.Name}'");
+        }
+        else
+        {
+            CurrentView = null;
         }
     }
 
@@ -541,6 +502,88 @@ public partial class SceneEditorViewModel : ObservableObject
         }
 
         return maxChannel + 1;
+    }
+
+    /// <summary>
+    /// Event handler for when a fixture is selected from the registry list.
+    /// </summary>
+    private async void OnFixtureSelectedFromRegistry(object? sender, InterdisciplinairProject.Core.Models.Fixture fixture)
+    {
+        // Close the list view
+        CurrentView = null;
+
+        /*
+        if (sender is FixtureRegistryImportViewModel vm)
+        {
+            vm.FixtureSelected -= OnFixtureSelectedFromRegistry;
+        }
+        */
+
+        try
+        {
+            // Valideer het DMX adres voordat de fixture wordt toegevoegd
+            var existingFixtures = SceneFixtures.Select(sf => sf.Fixture).ToList();
+            var validationResult = _dmxAddressValidator.ValidateFixtureAddress(fixture, existingFixtures);
+
+            if (!validationResult.IsValid)
+            {
+                // Er zijn conflicten gevonden
+                var message = $"DMX adres conflict gedetecteerd!\n\n{validationResult.Summary}";
+
+                if (validationResult.SuggestedStartAddress.HasValue)
+                {
+                    message += $"\n\nSuggestie: Gebruik startadres {validationResult.SuggestedStartAddress.Value}.";
+
+                    var result = MessageBox.Show(
+                        message + "\n\nWilt u het gesuggereerde adres gebruiken?",
+                        "Adres Conflict",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Gebruik het gesuggereerde adres
+                        fixture.StartAddress = validationResult.SuggestedStartAddress.Value;
+                    }
+                    else if (result == MessageBoxResult.Cancel)
+                    {
+                        // Annuleer het toevoegen
+                        Debug.WriteLine($"[DEBUG] User cancelled adding fixture due to address conflict");
+                        return;
+                    }
+
+                    // Bij No: voeg toe met het conflicterende adres (gebruiker weet wat hij doet)
+                }
+                else
+                {
+                    MessageBox.Show(
+                        message + "\n\nEr is geen ruimte meer beschikbaar in het DMX universum.",
+                        "Adres Conflict",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            // Voeg de nieuwe fixture toe aan de scene
+            var sceneFixture = new SceneFixture { Fixture = fixture, StartChannel = fixture.StartAddress };
+
+            SceneFixtures.Add(sceneFixture);
+
+            // ✅ AUTOMATISCH OPSLAAN NA TOEVOEGEN
+            await AutoSaveScene();
+
+            // Selecteer de nieuwe fixture zodat de settings view wordt getoond
+            SelectedFixture = sceneFixture;
+
+            Debug.WriteLine($"[DEBUG] Added fixture '{fixture.Name}' from registry to scene at channel {fixture.StartAddress}");
+            MessageBox.Show($"Fixture '{fixture.Name}' succesvol toegevoegd!", "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error adding fixture from registry: {ex.Message}");
+            MessageBox.Show($"Fout bij het toevoegen van fixture: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     /// <summary>

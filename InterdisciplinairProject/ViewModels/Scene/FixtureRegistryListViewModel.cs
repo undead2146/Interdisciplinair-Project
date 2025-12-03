@@ -2,11 +2,15 @@
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Fixtures.ViewModels;
+using InterdisciplinairProject.Fixtures.Views;
+using InterdisciplinairProject.ViewModels.Scene;
 using Microsoft.Win32;
+using Scene = InterdisciplinairProject.Core.Models.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text.Json;
 using System.Windows;
-using Scene = InterdisciplinairProject.Core.Models.Scene;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -110,5 +114,65 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     {
         await _fixtureRegistry.RefreshRegistryAsync();
         await LoadFixturesAsync();
+    }
+
+    /// <summary>
+    /// Imports a fixture to the registry by selecting from available fixtures.
+    /// </summary>
+    [RelayCommand]
+    private void ImportFixtureToRegistry()
+    {
+        try
+        {
+            var fixtureListViewModel = new FixtureListViewModel();
+            fixtureListViewModel.FixtureSelected += OnFixtureSelectedForRegistryImport;
+
+            var window = new Window
+            {
+                Title = "Select Fixture to Import",
+                Content = new FixtureListView { DataContext = fixtureListViewModel },
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            };
+
+            window.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error opening fixture list view: {ex.Message}");
+            MessageBox.Show($"Error opening fixture list: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Event handler for when a fixture is selected for registry import.
+    /// </summary>
+    /// <param name="sender">The sender.</param>
+    /// <param name="json">The JSON string of the selected fixture.</param>
+    private void OnFixtureSelectedForRegistryImport(object? sender, string json)
+    {
+        try
+        {
+            var fixture = JsonSerializer.Deserialize<Fixture>(json);
+            if (fixture == null)
+            {
+                MessageBox.Show("Failed to deserialize fixture.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var viewModel = new FixtureRegistryImportViewModel(_fixtureRegistry, fixture);
+            var dialog = new Views.Scene.FixtureRegistryDialog(viewModel);
+
+            if (dialog.ShowDialog() == true)
+            {
+                // Refresh the list
+                _ = LoadFixturesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error processing selected fixture: {ex.Message}");
+            MessageBox.Show($"Error processing fixture: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

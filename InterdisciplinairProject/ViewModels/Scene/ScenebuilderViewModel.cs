@@ -23,7 +23,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     private readonly IHardwareConnection _hardwareConnection;
 
     [ObservableProperty]
-    private Scene? _selectedScene;
+    private InterdisciplinairProject.Core.Models.Scene? _selectedScene;
 
     [ObservableProperty]
     private object? _currentView;
@@ -61,7 +61,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// <summary>
     /// Gets the collection of scenes.
     /// </summary>
-    public ObservableCollection<Scene> Scenes { get; } = new();
+    public ObservableCollection<InterdisciplinairProject.Core.Models.Scene> Scenes { get; } = new();
 
     /// <summary>
     /// Opens the scene editor for the selected scene.
@@ -128,7 +128,7 @@ public partial class ScenebuilderViewModel : ObservableObject
                     return;
                 }
 
-                var scene = new Scene
+                var scene = new InterdisciplinairProject.Core.Models.Scene
                 {
                     Id = Guid.NewGuid().ToString(),
                     Name = name,
@@ -153,7 +153,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// </summary>
     /// <param name="scene">The scene to delete.</param>
     [RelayCommand]
-    private async Task DeleteScene(Scene scene)
+    private async Task DeleteScene(InterdisciplinairProject.Core.Models.Scene scene)
     {
         try
         {
@@ -294,7 +294,7 @@ public partial class ScenebuilderViewModel : ObservableObject
     /// Refreshes a specific scene in the list after it has been updated.
     /// </summary>
     /// <param name="updatedScene">The updated scene.</param>
-    private void RefreshSceneInList(Scene updatedScene)
+    private void RefreshSceneInList(InterdisciplinairProject.Core.Models.Scene updatedScene)
     {
         try
         {
