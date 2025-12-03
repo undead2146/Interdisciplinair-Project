@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Models.Enums;
+using InterdisciplinairProject.Fixtures.Services;
 using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.IO;
@@ -259,97 +261,158 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return;
                 }
 
-                // Validate essential fields
-                var allowedTypes = new HashSet<string>
-                {
-                    "Lamp", "Ster", "Klok", "Ventilator", "Rood", "Groen", "Blauw", "Wit",
-                };
+                Fixture fixture;
 
-                var missingFields = new List<string>();
-
-                string? name = root["name"]?.ToString();
-                string? manufacturer = root["manufacturer"]?.ToString();
-
-                if (string.IsNullOrWhiteSpace(name))
+                if (root["availableChannels"] != null) // OFL JSON
                 {
-                    missingFields.Add("'name'");
-                }
-
-                if (string.IsNullOrWhiteSpace(manufacturer))
-                {
-                    manufacturer = "Unknown";
-                    root["manufacturer"] = manufacturer;
-                }
-
-                JsonArray? channels = root["channels"] as JsonArray;
-                if (channels == null || channels.Count == 0)
-                {
-                    missingFields.Add("'channels' array is missing or empty");
-                }
-                else
-                {
-                    for (int i = 0; i < channels.Count; i++)
+                    fixture = new Fixture
                     {
-                        if (channels[i] is JsonObject channel)
+                        FixtureId = "",
+                        InstanceId = "",
+                        Name = root["name"]?.ToString() ?? "Unnamed",
+                        Manufacturer = root["manufacturerKey"]?.ToString() ?? "Unknown",
+                        Description = "",
+                        StartAddress = 1,
+                        ImageBase64 = ""
+                    };
+
+                    fixture.Channels.Clear();
+
+                    var channelsNode = root["availableChannels"] as JsonObject;
+                    if (channelsNode != null)
+                    {
+                        foreach (var kvp in channelsNode)
                         {
-                            var missingInChannel = new List<string>();
+                            var ch = new Channel
+                            {
+                                Name = kvp.Key,
+                                Type = kvp.Key,
+                                Value = "0",
+                                Min = 0,
+                                Max = 255,
+                                Time = 0,
+                                ChannelEffect = new ChannelEffect
+                                {
+                                    Enabled = false,
+                                    EffectType = EffectType.Custom,
+                                    Time = 0,
+                                    Min = 0,
+                                    Max = 255,
+                                    Parameters = new Dictionary<string, object>()
+                                }
+                            };
+                            fixture.Channels.Add(ch);
 
-                            string? chName = channel["Name"]?.ToString();
-                            string? chType = channel["Type"]?.ToString();
-
-                            if (string.IsNullOrWhiteSpace(chName))
-                                missingInChannel.Add("Name");
-                            if (string.IsNullOrWhiteSpace(chType))
-                                missingInChannel.Add("Type");
-                            else if (!allowedTypes.Contains(chType))
-                                missingInChannel.Add($"Type ('{chType}' is invalid)");
-
-                            if (missingInChannel.Count > 0)
-                                missingFields.Add($"Channel {i + 1}: missing {string.Join(", ", missingInChannel)}");
+                            // register channel type
+                            TypeCatalogService.AddOrUpdate(new TypeSpecification
+                            {
+                                name = ch.Type,
+                                input = "slider",
+                                min = 0,
+                                max = 255
+                            });
                         }
                     }
                 }
-
-                if (missingFields.Count > 0)
+                else // native JSON
                 {
-                    string msg = "The following required fields are missing or invalid:\n- " +
-                                 string.Join("\n- ", missingFields);
-                    System.Windows.MessageBox.Show(msg);
-                    return;
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true,
+                        ReadCommentHandling = JsonCommentHandling.Skip
+                    };
+                    fixture = JsonSerializer.Deserialize<Fixture>(jsonContent, options)
+                              ?? throw new JsonException("Invalid fixture JSON.");
+
+                    ApplyDefaults(fixture);
+
+                    // register channel types
+                    foreach (var ch in fixture.Channels)
+                    {
+                        TypeCatalogService.AddOrUpdate(new TypeSpecification
+                        {
+                            name = ch.Type,
+                            input = "slider",
+                            min = 0,
+                            max = 255
+                        });
+                    }
                 }
 
-                // Use filename (without extension) as fixture name
                 string fixtureName = Path.GetFileNameWithoutExtension(jsonPath);
+                fixture.Name = fixtureName;
 
-                if (fixtureListVm.ManufacturerGroups
+                if (string.IsNullOrWhiteSpace(fixture.Manufacturer))
+                    fixture.Manufacturer = "Unknown";
+
+                // register manufacturer
+                var manufacturerService = new ManufacturerService();
+                manufacturerService.RegisterManufacturer(fixture.Manufacturer);
+
+                bool exists = fixtureListVm.ManufacturerGroups
                     .SelectMany(g => g.Fixtures)
-                    .Any(f => f.Name.Equals(fixtureName, StringComparison.OrdinalIgnoreCase)))
+                    .Any(f => f.Name.Equals(fixtureName, StringComparison.OrdinalIgnoreCase));
+
+                if (exists)
                 {
                     System.Windows.MessageBox.Show($"Fixture '{fixtureName}' already exists.");
                     return;
                 }
 
+                string manufacturerFolder = Path.Combine(_fixturesFolder, fixture.Manufacturer);
+                Directory.CreateDirectory(manufacturerFolder);
+                string targetPath = Path.Combine(manufacturerFolder, fixtureName + ".json");
 
-                // Save fixture into local fixtures folder
-                string manufactorFolder = Path.Combine(_fixturesFolder, manufacturer);
-                Directory.CreateDirectory(manufactorFolder);
-                string targetPath = Path.Combine(manufactorFolder, fixtureName + ".json");
-                root["name"] = fixtureName;
+                string outputJson = JsonSerializer.Serialize(fixture, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(targetPath, outputJson);
 
-                File.WriteAllText(targetPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
                 fixtureListVm.ReloadFixturesFromFiles();
 
                 System.Windows.MessageBox.Show($"Successfully imported fixture '{fixtureName}'.");
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
-                System.Windows.MessageBox.Show("Error parsing JSON. Ensure the file is valid.");
+                System.Windows.MessageBox.Show(
+                    $"Invalid JSON format:\n\n{ex.Message}\n\n" +
+                    $"Path: {ex.Path}\n" +
+                    $"Line: {ex.LineNumber}, Byte: {ex.BytePositionInLine}");
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Error importing fixture: " + ex.Message);
             }
         }
+
+        private void ApplyDefaults(Fixture f)
+        {
+            f.FixtureId ??= "";
+            f.InstanceId ??= "";
+            f.Name ??= "Unnamed";
+            f.Manufacturer ??= "Unknown";
+            f.Description ??= "";
+            f.ImageBase64 ??= "";
+            if (f.StartAddress <= 0) f.StartAddress = 1;
+
+            foreach (var ch in f.Channels)
+            {
+                ch.Name ??= "";
+                ch.Type ??= "";
+                ch.Value ??= "0";
+
+                if (ch.Min < 0) ch.Min = 0;
+                if (ch.Max == 0) ch.Max = 255;
+                if (ch.Time < 0) ch.Time = 0;
+
+                ch.Ranges ??= new List<ChannelRange>();
+
+                if (ch.ChannelEffect == null)
+                    ch.ChannelEffect = new ChannelEffect();
+                else if (ch.ChannelEffect.Parameters == null)
+                    ch.ChannelEffect.Parameters = new Dictionary<string, object>();
+            }
+        }
+
 
         // ------------------------------------------------------------
         // EXPORT FIXTURE

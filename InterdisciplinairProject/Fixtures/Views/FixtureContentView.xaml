@@ -44,7 +44,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- GREEN BOX → NOW IN THE MIDDLE -->
+            <!-- GREEN BOX → MIDDLE -->
             <Border Grid.Column="1" Padding="12" Margin="0,0,12,0" Background="LightGreen" CornerRadius="6">
                 <StackPanel>
                     <TextBlock Text="Switch Lamp Method:" FontWeight="Bold"/>
@@ -54,13 +54,50 @@
                 </StackPanel>
             </Border>
 
-            <!-- BLUE BOX → NOW ON THE RIGHT -->
+            <!-- BLUE BOX → RIGHT -->
             <Border Grid.Column="2" Padding="12" Background="LightBlue" CornerRadius="6">
                 <StackPanel>
-                    <TextBlock Text="COM-port:" FontWeight="Bold"/>
-                    <ComboBox Width="150" Margin="0,4,0,12"
-                              ItemsSource="{Binding AvailablePorts}"
-                              SelectedItem="{Binding ComPort, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <!-- COM Port (for Standard DMX or ELO Cable) -->
+                    <StackPanel x:Name="ComPortPanel">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMethod}" Value="ELO (WiFi)">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <TextBlock Text="COM-port:" FontWeight="Bold"/>
+                        <ComboBox Width="150" Margin="0,4,0,12"
+                                  ItemsSource="{Binding AvailablePorts}"
+                                  SelectedItem="{Binding ComPort, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <!-- WiFi (IP + Port) -->
+                    <StackPanel x:Name="WifiPanel">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMethod}" Value="ELO (WiFi)">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <TextBlock Text="WiFi IP:" FontWeight="Bold"/>
+                        <TextBox Width="150" Margin="0,4,0,6"
+                                 Text="{Binding WifiIP, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="WiFi Port:" FontWeight="Bold"/>
+                        <TextBox Width="150" Margin="0,4,0,12"
+                                 Text="{Binding WifiPort, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
                     <Button Width="120" Content="Test All" Command="{Binding TestAllCommand}" />
                 </StackPanel>
             </Border>
@@ -71,53 +108,49 @@
         <Grid Grid.Row="2" Margin="0,12,0,0">
             <Border Padding="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Channels:" FontWeight="Bold" Margin="0,6,0,6"/>
+                    <ItemsControl ItemsSource="{Binding Channels}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="8" Margin="0,0,0,8"
+                                        Background="#FAFAFA"
+                                        BorderBrush="#EEE"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
 
-                        <ItemsControl ItemsSource="{Binding Channels}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="8" Margin="0,0,0,8"
-                                            Background="#FAFAFA"
-                                            BorderBrush="#EEE"
-                                            BorderThickness="1"
-                                            CornerRadius="4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                                        <!-- CHANNEL INFO -->
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Type}"
+                                                       FontStyle="Italic"
+                                                       FontSize="12"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
 
-                                            <!-- CHANNEL INFO -->
-                                            <StackPanel Orientation="Vertical">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding Type}"
-                                                           FontStyle="Italic"
-                                                           FontSize="12"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
+                                        <!-- PARAMETER INPUT -->
+                                        <TextBox Grid.Column="1"
+                                                 Width="90"
+                                                 Height="32"
+                                                 Margin="6,0,6,0"
+                                                 Text="{Binding Parameter, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                            <!-- PARAMETER INPUT -->
-                                            <TextBox Grid.Column="1"
-                                                     Width="90"
-                                                     Height="32"
-                                                     Margin="6,0,6,0"
-                                                     Text="{Binding Parameter, UpdateSourceTrigger=PropertyChanged}"/>
-
-                                            <!-- TEST BUTTON -->
-                                            <Button Grid.Column="2"
-                                                    Content="Test"
-                                                    Width="90"
-                                                    Height="32"
-                                                    Command="{Binding TestCommand}"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                                        <!-- TEST BUTTON -->
+                                        <Button Grid.Column="2"
+                                                Content="Test"
+                                                Width="90"
+                                                Height="32"
+                                                Command="{Binding TestCommand}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </ScrollViewer>
             </Border>
         </Grid>
@@ -131,13 +164,6 @@
                         Height="32"
                         Margin="0,0,10,0"
                         Command="{Binding EditCommand}"/>
-
-                <Button Content="Delete" 
-                        Command="{Binding DeleteCommand}" 
-                        Background="#E57373" 
-                        Foreground="White" 
-                        Width="100"
-                        Height="32"/>
             </StackPanel>
         </Grid>
 
