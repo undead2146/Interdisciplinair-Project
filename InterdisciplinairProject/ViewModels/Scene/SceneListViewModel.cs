@@ -1,11 +1,8 @@
-using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
-
-using Scene = InterdisciplinairProject.Core.Models.Scene;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -17,10 +14,10 @@ public partial class SceneListViewModel : ObservableObject
     private readonly ISceneRepository _sceneRepository;
 
     [ObservableProperty]
-    private ObservableCollection<Scene> _scenes = new();
+    private ObservableCollection<InterdisciplinairProject.Core.Models.Scene> _scenes = new();
 
     [ObservableProperty]
-    private Scene? _selectedScene;
+    private InterdisciplinairProject.Core.Models.Scene? _selectedScene;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SceneListViewModel"/> class.
@@ -51,7 +48,7 @@ public partial class SceneListViewModel : ObservableObject
     [RelayCommand]
     private async Task CreateNewScene()
     {
-        var newScene = new Scene
+        var newScene = new InterdisciplinairProject.Core.Models.Scene
         {
             Name = $"Nieuwe Scène {DateTime.Now:yyyy-MM-dd HH:mm}",
         };
