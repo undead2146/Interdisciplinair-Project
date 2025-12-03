@@ -22,27 +22,27 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        Background="{TemplateBinding Background}"
-                        SnapsToDevicePixels="True">
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
                             <Grid>
                                 <!-- real textbox content -->
                                 <ScrollViewer x:Name="PART_ContentHost" />
 
                                 <!-- watermark -->
                                 <TextBlock x:Name="Watermark"
-                                   Text="{TemplateBinding Tag}"
-                                   Margin="4,2,0,0"
-                                   Foreground="Gray"
-                                   IsHitTestVisible="False"
-                                   Visibility="Collapsed" />
+                                           Text="{TemplateBinding Tag}"
+                                           Margin="4,2,0,0"
+                                           Foreground="Gray"
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed" />
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="Text" Value="">
                                 <Setter TargetName="Watermark"
-                                Property="Visibility"
-                                Value="Visible" />
+                                        Property="Visibility"
+                                        Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -71,13 +71,13 @@
                 <StackPanel>
                     <TextBlock Text="Fixture name:" FontWeight="Bold"/>
                     <TextBox Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200" Margin="0,4,0,12" Padding="3" HorizontalAlignment="Left"/>
+                             Width="200" Margin="0,4,0,12" Padding="3" HorizontalAlignment="Left"/>
 
                     <TextBlock Text="Manufacturer:" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <ComboBox ItemsSource="{Binding AvailableManufacturers}"
-                          SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
-                          Width="180" Padding="3"/>
+                                  SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
+                                  Width="180" Padding="3"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -132,35 +132,33 @@
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,12,0,0">
-            <Button
-			Content="+ Add channel"
-			Padding="10"
-			Margin="0,0,0,10"
-			Command="{Binding AddChannelCommand}"
-			Background="#1E90FF"
-			Foreground="White"
-			FontWeight="Bold"/>
+            <Button Content="+ Add channel"
+			        Padding="10"
+			        Margin="0,0,0,10"
+			        Command="{Binding AddChannelCommand}"
+			        Background="#1E90FF"
+			        Foreground="White"
+			        FontWeight="Bold"/>
         </Grid>
 
         <Grid Grid.Row="2" Margin="0,12,0,0">
             <ListBox x:Name="ChannelsListBox"
-                 HorizontalAlignment="Stretch"
-				 Grid.Row="0"
-				 ItemsSource="{Binding Channels}"
-				 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
-                 AlternationCount="512"
-				 SelectionChanged="ChannelsListBox_SelectionChanged"
-				 MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
-				 Margin="0"
-				 AllowDrop="True"
-				 PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
-				 PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
-				 Drop="ChannelsListBox_Drop"
-				 DragOver="ChannelsListBox_DragOver"
-                 ScrollViewer.CanContentScroll="True"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto">
-
+                     HorizontalAlignment="Stretch"
+				     Grid.Row="0"
+				     ItemsSource="{Binding Channels}"
+				     SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                     AlternationCount="512"
+				     SelectionChanged="ChannelsListBox_SelectionChanged"
+				     MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
+				     Margin="0"
+				     AllowDrop="True"
+				     PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
+				     PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
+				     Drop="ChannelsListBox_Drop"
+				     DragOver="ChannelsListBox_DragOver"
+                     ScrollViewer.CanContentScroll="True"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" />
@@ -200,12 +198,12 @@
                                           Margin="0,0,8,0"
                                           Cursor="SizeAll"/>
                                     <TextBox x:Name="EditTextBox"
-										 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-										 Visibility="Collapsed"
-										 Grid.Column="1"
-										 Style="{StaticResource EditingTextBoxStyle}"
-										 KeyDown="EditTextBox_KeyDown"
-										 FocusManager.IsFocusScope="True"/>
+										     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+										     Visibility="Collapsed"
+										     Grid.Column="1"
+										     Style="{StaticResource EditingTextBoxStyle}"
+										     KeyDown="EditTextBox_KeyDown"
+										     FocusManager.IsFocusScope="True"/>
 
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="1">
                                         <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=(ItemsControl.AlternationIndex), Converter={StaticResource ChannelIndexPlusOneConverter}}"
@@ -341,8 +339,8 @@
 
                                                 <TextBlock Text="Select Effect Type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                                     <ComboBox ItemsSource="{Binding AvailableEffects}"
-                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
-                                                          Width="180"/>
+                                                              SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                                              Width="180"/>
                                                     
                                                     <Grid Margin="0,10,0,0">
                                                         <Grid.RowDefinitions>
