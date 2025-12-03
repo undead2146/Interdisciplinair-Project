@@ -117,6 +117,31 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Deletes a fixture from the registry.
+    /// </summary>
+    /// <param name="fixture">The fixture to delete.</param>
+    [RelayCommand]
+    private async Task DeleteFixture(Fixture fixture)
+    {
+        if (fixture == null)
+        {
+            return;
+        }
+
+        var result = MessageBox.Show(
+            $"Weet je zeker dat je de fixture '{fixture.Name}' wilt verwijderen uit de registry?",
+            "Bevestig Verwijdering",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            await _fixtureRegistry.RemoveFixtureAsync(fixture.InstanceId);
+            await LoadFixturesAsync();
+        }
+    }
+
+    /// <summary>
     /// Imports a fixture to the registry by selecting from available fixtures.
     /// </summary>
     [RelayCommand]

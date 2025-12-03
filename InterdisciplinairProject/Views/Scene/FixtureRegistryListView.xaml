@@ -27,7 +27,7 @@
             <!-- Import Button aan de onderkant -->
             <Button DockPanel.Dock="Bottom"
                     x:Name="ImportFixtureButton"
-                    Content="Import Fixture to Registry"
+                    Content="Importeer Fixture"
                     Background="#FFCC99FF"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -85,7 +85,8 @@
                                 <StackPanel Grid.Column="0" Orientation="Vertical">
                                     <TextBlock Text="{Binding Name}"
                                                VerticalAlignment="Center"
-                                               FontWeight="Medium"/>
+                                               FontWeight="Medium"
+                                               TextWrapping="Wrap"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="DMX: "
                                                    FontSize="11"
@@ -105,25 +106,34 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <!-- Optionele delete/edit knoppen -->
-                                <StackPanel Grid.Column="1" 
-                                           Orientation="Horizontal"
-                                           Visibility="Collapsed"
-                                           x:Name="ActionButtons">
-                                    <Button Content="✎" 
-                                           Padding="4"
-                                           Margin="4,0"
-                                           Background="Transparent"
-                                           BorderThickness="0"
-                                           Cursor="Hand"
-                                           ToolTip="Bewerken"/>
-                                    <Button Content="✕" 
-                                           Padding="4"
-                                           Background="Transparent"
-                                           BorderThickness="0"
-                                           Cursor="Hand"
-                                           ToolTip="Verwijderen"/>
-                                </StackPanel>
+                                <!-- Delete Button -->
+                                <Button Grid.Column="1"
+                                        Command="{Binding DataContext.DeleteFixtureCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="8"
+                                        Margin="4,0,0,0"
+                                        Cursor="Hand"
+                                        ToolTip="Fixture verwijderen"
+                                        HorizontalAlignment="Right">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FFFFE0E0"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <TextBlock Text="X" 
+                                             FontSize="12" 
+                                             FontWeight="Bold"
+                                             Foreground="#FFD32F2F"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Center"/>
+                                </Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
