@@ -4,8 +4,6 @@ using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
-using InterdisciplinairProject.Fixtures.Views;
-using InterdisciplinairProject.ViewModels.Scene;
 using InterdisciplinairProject.Views;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

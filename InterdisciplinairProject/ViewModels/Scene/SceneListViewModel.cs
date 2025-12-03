@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 
+using Scene = InterdisciplinairProject.Core.Models.Scene;
+
 namespace InterdisciplinairProject.ViewModels;
 
 /// <summary>
