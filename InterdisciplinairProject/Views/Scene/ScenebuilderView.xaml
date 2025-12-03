@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:HalfConverter x:Key="HalfConverter"/>
+    </UserControl.Resources>
     <Grid Margin="12">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="180" MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource HalfConverter}}"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="12"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -57,9 +61,17 @@
             <!-- AANGEPAST: ContentControl voor dynamische view (Scene lijst OF Fixture Registry) -->
             <ContentControl Grid.Row="4"
                            Content="{Binding LeftPanelView}"
-                           HorizontalAlignment="Left"
-                           Width="180"/>
+                           HorizontalAlignment="Stretch"/>
         </Grid>
+
+        <!-- GridSplitter for horizontal resizing -->
+        <GridSplitter Grid.Column="1"
+                      Width="12"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="Transparent"
+                      ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"/>
 
         <!-- Rechter kolom: hier wordt de SceneEditorView geladen -->
         <ContentControl Grid.Column="2" 
