@@ -4,10 +4,7 @@ using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
-using InterdisciplinairProject.Fixtures.Views;
-using InterdisciplinairProject.ViewModels.Scene;
 using InterdisciplinairProject.Views;
-using InterdisciplinairProject.Views.Scene;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.Json;
@@ -465,31 +462,25 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Opens the fixture registry dialog when a fixture is selected.
+    /// Opens the fixture settings view when a fixture is selected.
     /// </summary>
     partial void OnSelectedFixtureChanged(SceneFixture? value)
     {
         if (value?.Fixture != null)
         {
-            // Get all fixtures except the selected one for conflict detection
-            var otherFixtures = SceneFixtures
-                .Where(sf => sf.Fixture.InstanceId != value.Fixture.InstanceId)
-                .Select(sf => sf.Fixture)
-                .ToList();
+            // Maak een nieuwe FixtureSettingsViewModel
+            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
+            fixtureSettingsViewModel.LoadFixture(value.Fixture);
 
-            // *** Pass _fixtureRegistry ***
-            var dialog = new FixtureRegistryDialog(
-                value.Fixture,
-                _dmxAddressValidator,
-                _fixtureRegistry,  // ← Pass the registry
-                otherFixtures)
+            // Laad de FixtureSettingsView
+            CurrentView = new FixtureSettingsView
             {
-                Owner = Application.Current.MainWindow
+                DataContext = fixtureSettingsViewModel
             };
-
-            dialog.ShowDialog();
-
-            Debug.WriteLine($"[DEBUG] Opened FixtureRegistryDialog for fixture '{value.Fixture.Name}'");
+        }
+        else
+        {
+            CurrentView = null;
         }
     }
 
