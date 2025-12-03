@@ -23,7 +23,7 @@
             <!-- Import Button aan de onderkant -->
             <Button DockPanel.Dock="Bottom"
                     x:Name="ImportFixtureButton"
-                    Content="+ Import Fixtures"
+                    Content="Import Fixture to Registry"
                     Background="#FFCC99FF"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -31,7 +31,7 @@
                     Margin="0,12,0,0"
                     BorderThickness="0"
                     Cursor="Hand"
-                    Click="ImportFixtureButton_Click">
+                    Command="{Binding ImportFixtureToRegistryCommand}">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Template">
