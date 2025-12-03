@@ -120,7 +120,7 @@
                                 BorderBrush="#DDDDDD" 
                                 BorderThickness="1" 
                                 CornerRadius="4"
-                                MinHeight="150">
+                                MinHeight="130">
                             <Grid>
                                 <!-- Placeholder content -->
                                 <StackPanel VerticalAlignment="Center" 
@@ -179,6 +179,20 @@
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
                                 </ListBox>
+                                <Canvas IsHitTestVisible="False">
+                                    <Line X1="0"
+                                      Y1="0"
+                                      X2="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Canvas}}"
+                                      Y2="0"
+                                      Stroke="Red"
+                                      StrokeThickness="3">  
+                                        <Line.RenderTransform>
+                                            <TranslateTransform 
+                                            X="0"
+                                            Y="{Binding ProgressPosition}" />       
+                                        </Line.RenderTransform>
+                                    </Line>
+                                </Canvas>
                                 <!-- ItemsControl for timeline scenes can be added here later -->
                             </Grid>
                         </Border>
