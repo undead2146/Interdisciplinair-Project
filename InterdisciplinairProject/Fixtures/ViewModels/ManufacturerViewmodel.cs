@@ -451,5 +451,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             item.Name = item.OriginalName;
             item.IsEditing = false;
         }
+
     }
+
 }

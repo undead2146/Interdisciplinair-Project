@@ -51,6 +51,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ** NIEUW: Command voor de Fabrikanten knop **
         public ICommand ShowManufacturerCommand { get; }
 
+        public ICommand GoBackCommand { get; }
+
         public MainWindowFixturesViewModel()
         {
             CreateFixtureCommand = new RelayCommand(CreateFixture);
@@ -59,6 +61,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             ExportFixtureCommand = new RelayCommand(ExportFixture, CanExportFixture);
             // ** NIEUW: Initialiseer het Fabrikanten Command **
             ShowManufacturerCommand = new RelayCommand(ShowManufacturer);
+            GoBackCommand = new RelayCommand(ExecuteGoBack);
 
             fixtureListVm = new FixtureListViewModel();
             fixtureListVm.FixtureSelected += OnFixtureSelected;
@@ -86,8 +89,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // ------------------------------------------------------------
 
         // ------------------------------------------------------------
-        // VIEW NAVIGATION
+        // ✨ NAVIGATIE METHODE VOOR DE 'BACK' KNOP
         // ------------------------------------------------------------
+        private void ExecuteGoBack()
+        {
+         
+
+            
+            CurrentViewModel = fixtureListVm;
+        }
+
+
 
         // ** NIEUW: Methode om de Manufacturer View te tonen **
         private void ShowManufacturer()
