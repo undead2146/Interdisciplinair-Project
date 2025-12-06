@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Models;  
 using InterdisciplinairProject.Core.Models.Enums;
 using InterdisciplinairProject.Fixtures.Services;
 using InterdisciplinairProject.Fixtures.Views;
