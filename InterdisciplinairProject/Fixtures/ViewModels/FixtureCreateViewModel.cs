@@ -141,7 +141,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             SaveCommand = new RelayCommand(SaveFixture);
             CancelCommand = new RelayCommand(Cancel);
             RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
-            AddImageCommand = new RelayCommand<Fixture>(AddImage);
+
+            AddImageCommand = new RelayCommand(AddImage);
 
             if (existing != null)
             {
@@ -155,15 +156,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 foreach (var ch in existing.Channels)
                     Channels.Add(new ChannelItem(ch));
 
-                _currentFixture.Name = FixtureName;
-                _currentFixture.Manufacturer = SelectedManufacturer!;
-
-                ImageBase64 = ImageCompressionHelpers.DecompressBase64(existing.ImageBase64 ?? string.Empty);
+                _currentFixture = new Fixture
+                {
+                    Name = FixtureName,
+                    Manufacturer = SelectedManufacturer!,
+                    Channels = new ObservableCollection<Channel>(existing.Channels),
+                    ImageBase64 = ImageCompressionHelpers.DecompressBase64(existing.ImageBase64 ?? string.Empty)
+                };
+                ImageBase64 = _currentFixture.ImageBase64;
             }
             else
             {
                 _isEditing = false;
                 SelectedManufacturer = AvailableManufacturers.FirstOrDefault();
+                _currentFixture = new Fixture(); // 🔹 altijd een geldige Fixture
                 AddChannel();
             }
         }
@@ -218,6 +224,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void SaveFixture()
         {
+            // 🔎 Validatie
             if (Channels.Any(ch =>
                     string.Equals(ch.SelectedType, "Select a type", StringComparison.OrdinalIgnoreCase)))
             {
@@ -234,9 +241,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
-            string manufacturer = SelectedManufacturer ?? "Unknown";
+            // 🔧 Vul het Fixture model
+            _currentFixture.Name = FixtureName;
+            _currentFixture.Manufacturer = SelectedManufacturer ?? "Unknown";
+            _currentFixture.ImageBase64 = !string.IsNullOrEmpty(ImageBase64)
+                ? ImageCompressionHelpers.CompressBase64(ImageBase64)
+                : string.Empty;
+            _currentFixture.Channels = new ObservableCollection<Channel>(
+                Channels.Select(ci => ci.ToModel())
+            );
+
+            // 🔧 Bestandsnaam en map
+            string manufacturer = _currentFixture.Manufacturer;
             string safeManufacturerName = SanitizeFileName(manufacturer);
-            string safeFixtureName = SanitizeFileName(FixtureName);
+            string safeFixtureName = SanitizeFileName(_currentFixture.Name);
 
             string manufacturerDir = Path.Combine(_dataDir, safeManufacturerName);
             if (!Directory.Exists(manufacturerDir))
@@ -246,24 +264,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             if (!_isEditing && File.Exists(newFilePath))
             {
-                MessageBox.Show($"There already exist a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.",
-                    "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"There already exists a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            // Vul het Fixture model
-            _currentFixture.Name = FixtureName;
-            _currentFixture.Manufacturer = manufacturer;
-            _currentFixture.ImageBase64 = !string.IsNullOrEmpty(ImageBase64)
-                ? ImageCompressionHelpers.CompressBase64(ImageBase64)
-                : string.Empty;
-
-            // Zet ChannelItems terug naar Channels
-            _currentFixture.Channels = new ObservableCollection<Channel>(
-                Channels.Select(ci => ci.ToModel())
-            );
-
-            // Serialiseer met camelCase + enum converter
+            // 🔧 Serialiseer met camelCase + enum converter
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
@@ -275,6 +281,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             try
             {
+                // 🔧 Verwijder oude file bij rename
                 if (_isEditing && (_originalFixtureName != FixtureName || _originalManufacturer != manufacturer))
                 {
                     string safeOriginalManufacturerName = SanitizeFileName(_originalManufacturer!);
@@ -285,7 +292,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 }
 
                 File.WriteAllText(newFilePath, json);
-                MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' map.",
+                MessageBox.Show($"Fixture '{FixtureName}' is succesfully saved in '{manufacturer}' folder.",
                     "Succes", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 LoadManufacturers();
@@ -296,11 +303,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
             catch (IOException ioEx)
             {
-                MessageBox.Show($"Error with saving fixture: {ioEx.Message}", "Save error",
+                MessageBox.Show($"Error saving fixture: {ioEx.Message}", "Save error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private void AddChannel()
         {
@@ -344,9 +350,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 BackRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        private void AddImage(Fixture? fixture)
+        private void AddImage()
         {
-            if (fixture == null) return;
             var dlg = new OpenFileDialog
             {
                 Title = "Select an image",
@@ -357,15 +362,16 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (dlg.ShowDialog() == true)
             {
                 string selectedFile = dlg.FileName;
-
                 try
                 {
                     byte[] imageBytes = File.ReadAllBytes(selectedFile);
                     ImageBase64 = Convert.ToBase64String(imageBytes);
+                    _currentFixture.ImageBase64 = ImageBase64;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"unable to Load image:\n{ex.Message}", "Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Unable to load image:\n{ex.Message}", "Failed",
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
