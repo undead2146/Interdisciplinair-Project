@@ -49,6 +49,8 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private string typeMinValue = string.Empty;
         [ObservableProperty] private string typeMaxValue = string.Empty;
 
+        [ObservableProperty] private bool isRangeTabEnabled = true;
+
         // Type flags
         [ObservableProperty] private bool isSliderType;
         [ObservableProperty] private bool isCustomType;
@@ -88,7 +90,7 @@ namespace InterdisciplinairProject.Fixtures.Services
 
             // Name: if empty → give default
             selectedType = string.IsNullOrWhiteSpace(_model.Type) || !available.Contains(_model.Type)
-                ? "Dimmer"
+                ? "Select a type"
                 : _model.Type!;
 
             // Value
@@ -323,7 +325,16 @@ namespace InterdisciplinairProject.Fixtures.Services
             IsAddRangeType = false;
 
             var spec = TypeCatalogService.GetByName(typeName);
-            if (spec == null) return;
+            if (spec == null)
+            {
+                IsRangeTabEnabled = false;
+                return;
+            }
+
+
+            // 🔹 Disable "Range" tab when this is the placeholder "noInput" type
+            IsRangeTabEnabled = !spec.input.Equals("noInput", StringComparison.OrdinalIgnoreCase);
+            IsRangeTabEnabled = !spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase);
 
             if (spec.input.Equals("slider", StringComparison.OrdinalIgnoreCase))
             {
@@ -343,6 +354,11 @@ namespace InterdisciplinairProject.Fixtures.Services
             else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
             {
                 IsCustomType = true;
+                IsRangeTabEnabled = false;
+            }
+            else if (spec.input.Equals("noInput", StringComparison.OrdinalIgnoreCase))
+            {
+                IsCustomType = false;
             }
 
             // 🔹 SYNC ranges from type-spec into THIS channel

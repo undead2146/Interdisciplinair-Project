@@ -16,6 +16,8 @@ namespace InterdisciplinairProject.Fixtures.Services
 
         private static readonly List<TypeSpecification> _defaults = new()
         {
+            new TypeSpecification { name = "Select a type",           input = "noInput"},
+            new TypeSpecification { name = "Custom",           input = "custom"},
             // Base types (aligned with ChannelType, no Unknown)
             // For now: all 0–255
             new TypeSpecification { name = "Dimmer",           input = "slider", min = 0, max = 255 },

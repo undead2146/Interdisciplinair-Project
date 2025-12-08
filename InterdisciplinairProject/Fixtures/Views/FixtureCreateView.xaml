@@ -263,6 +263,10 @@
 
 
                                                 </StackPanel>
+
+                                                <StackPanel 
+                                                    Name="CustomTypePanel"
+                                                    Grid.Row="1">
                                                 <Border Grid.Row="1"
                                                         Background="LightGreen"
                                                         HorizontalAlignment="Center"
@@ -317,10 +321,25 @@
                                                     </StackPanel>
 
                                                 </Border>
+                                                </StackPanel>
                                             </Grid>
                                         </TabItem>
                                         <!-- TabItem range -->
                                         <TabItem Header="Range">
+                                            <TabItem.Style>
+                                                <Style TargetType="TabItem">
+                                                    <Setter Property="IsEnabled" Value="True" />
+                                                    <Style.Triggers>
+                                                        <!-- Disable when placeholder type is selected -->
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Select a type">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Custom">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TabItem.Style>
                                             <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
@@ -430,6 +449,7 @@
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
+                                
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
                             </DataTrigger>
@@ -437,7 +457,16 @@
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                 <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="DeleteButton" Property="Visibility" Value="Visible" />
+                                
                             </DataTrigger>
+
+                            <DataTrigger Binding="{Binding IsCustomType}" Value="True">
+                                <Setter TargetName="CustomTypePanel" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsCustomType}" Value="False">
+                                <Setter TargetName="CustomTypePanel" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

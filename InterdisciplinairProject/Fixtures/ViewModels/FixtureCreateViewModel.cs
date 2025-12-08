@@ -218,6 +218,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void SaveFixture()
         {
+            if (Channels.Any(ch =>
+                    string.Equals(ch.SelectedType, "Select a type", StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBox.Show("A channel hasn't been assigned a type.",
+                                "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             if (string.IsNullOrEmpty(FixtureName) ||
                 Channels.Any(ch => string.IsNullOrWhiteSpace(ch.Name) || string.IsNullOrEmpty(ch.SelectedType)))
             {
@@ -300,8 +308,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 var newModel = new Channel
                 {
-                    Name = "Dimmer",
-                    Type = "Dimmer",
+                    Name = "Select a type",
+                    Type = "Select a type",
                     Value = "0",
                     Min = 0,
                     Max = 255,
