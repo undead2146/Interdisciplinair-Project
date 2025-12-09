@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 
@@ -17,7 +16,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 {
     public class FixtureListViewModel : INotifyPropertyChanged
     {
-
         private readonly string _fixturesFolder;
         private FileSystemWatcher? _watcher;
 
@@ -25,9 +23,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public Array SearchModes => Enum.GetValues(typeof(SearchMode));
-
         public ObservableCollection<ManufacturerGroup> ManufacturerGroups { get; set; } = new();
-        public ObservableCollection<Fixture> SelectedFixtures { get; set; } = new();
 
         private string _searchText = string.Empty;
         public string SearchText
@@ -154,9 +150,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void OpenFixture()
         {
-            if (SelectedFixtures.Count != 1) return;
-            var fixture = SelectedFixtures.First();
-            string path = Path.Combine(_fixturesFolder, fixture.Manufacturer, fixture.Name + ".json");
+            if (SelectedFixture == null) return;
+
+            string path = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
 
             if (!File.Exists(path))
             {
@@ -169,32 +165,27 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void DeleteSelected()
         {
-            if (SelectedFixtures.Count == 0)
+            if (SelectedFixture == null)
             {
-                MessageBox.Show("No fixtures selected.");
+                MessageBox.Show("No fixture selected.");
                 return;
             }
 
-            string message = SelectedFixtures.Count == 1
-                ? $"Want to delete fixture \"{SelectedFixtures.First().Name}\"?"
-                : $"Want to delete {SelectedFixtures.Count} fixtures?";
+            string msg = $"Delete fixture \"{SelectedFixture.Name}\"?";
 
             var confirm = MessageBox.Show(
-                message,
-                "Delete fixture(s)",
+                msg, "Delete fixture",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
-            if (confirm != MessageBoxResult.Yes) return;
+            if (confirm != MessageBoxResult.Yes)
+                return;
 
-            foreach (var fixture in SelectedFixtures.ToList())
-            {
-                string path = Path.Combine(_fixturesFolder, fixture.Manufacturer, fixture.Name + ".json");
-                if (File.Exists(path))
-                    File.Delete(path);
-            }
+            string path = Path.Combine(_fixturesFolder, SelectedFixture.Manufacturer, SelectedFixture.Name + ".json");
+            if (File.Exists(path))
+                File.Delete(path);
 
-            SelectedFixtures.Clear();
+            SelectedFixture = null;
             ReloadFixturesFromFiles();
         }
 

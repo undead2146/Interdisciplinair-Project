@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:InterdisciplinairProject.Fixtures.ViewModels"
              xmlns:converters="clr-namespace:InterdisciplinairProject.Fixtures.Converters"
-             xmlns:behaviors="clr-namespace:InterdisciplinairProject.Fixtures.Behaviors"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
@@ -70,10 +69,10 @@
                                     </DataTemplate>
                                 </Expander.HeaderTemplate>
 
+                                <!-- SINGLE SELECTION LISTBOX -->
                                 <ListBox ItemsSource="{Binding FilteredFixtures}"
-                                         SelectionMode="Extended"
-                                         behaviors:SelectedItemsBehavior.BindableSelectedItems="{Binding DataContext.SelectedFixtures, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                          SelectedItem="{Binding DataContext.SelectedFixture, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                         SelectionMode="Single"
                                          BorderThickness="0"
                                          Background="Transparent"
                                          ScrollViewer.VerticalScrollBarVisibility="Disabled"

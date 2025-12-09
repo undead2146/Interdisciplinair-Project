@@ -50,6 +50,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 {
                     _selectedFixture = value;
                     OnPropertyChanged(nameof(SelectedFixture));
+
+                    // Update CanExport when selection changes
                     CanExport = _selectedFixture != null;
                     ExportFixtureCommand.NotifyCanExecuteChanged();
                 }
@@ -115,6 +117,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             var detailVm = new FixtureContentViewModel(json);
             detailVm.BackRequested += (_, __) => CurrentViewModel = fixtureListVm;
             detailVm.DeleteRequested += (_, __) => OnFixtureDelete(detailVm.Name, detailVm.Manufacturer);
+
             detailVm.EditRequested += (_, contentVm) =>
             {
                 var editVm = new FixtureCreateViewModel(contentVm);
@@ -199,10 +202,12 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 File.Delete(filePath);
                 System.Windows.MessageBox.Show($"Fixture '{fixtureName}' was deleted.");
 
+                // --- FIX TO DISABLE EXPORT BUTTON ---
                 SelectedFixture = null;
                 fixtureListVm.SelectedFixture = null;
                 CanExport = false;
                 ExportFixtureCommand.NotifyCanExecuteChanged();
+                // --------------------------------------
 
                 fixtureListVm.ReloadFixturesFromFiles();
                 CurrentViewModel = fixtureListVm;
