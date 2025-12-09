@@ -132,13 +132,7 @@ namespace InterdisciplinairProject.ViewModels
         [RelayCommand]
         private void SceneSelectionChanged(SceneModel selectedScene)
         {
-            SelectedScene = selectedScene;
-        }
-
-        [RelayCommand]
-        private void TimelineSceneSelectionChanged(SceneModel selectedScene)
-        {
-            SelectedTimelineScene = selectedScene;
+            selectedScene = selectedScene;
         }
 
         // ============================================================

@@ -4,8 +4,6 @@ using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Services;
 using InterdisciplinairProject.Fixtures.ViewModels;
-using InterdisciplinairProject.Fixtures.Views;
-using InterdisciplinairProject.ViewModels.Scene;
 using InterdisciplinairProject.Views;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -589,6 +587,7 @@ public partial class SceneEditorViewModel : ObservableObject
     /// <summary>
     /// Removes a fixture from the scene.
     /// </summary>
+    [RelayCommand]
     private async Task RemoveFixture(SceneFixture? fixtureToRemove)
     {
         if (fixtureToRemove == null)

@@ -357,6 +357,13 @@ public partial class ScenebuilderViewModel : ObservableObject
                 ShowSceneList();
             };
 
+            // Subscribe to the Cancel event
+            fixtureRegistryViewModel.Cancel += () =>
+            {
+                // Switch back to Scene List
+                ShowSceneList();
+            };
+
             var fixtureRegistryView = new FixtureRegistryListView
             {
                 DataContext = fixtureRegistryViewModel

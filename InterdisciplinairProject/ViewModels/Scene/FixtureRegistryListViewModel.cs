@@ -45,6 +45,11 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     public event EventHandler<Fixture>? FixtureSelected;
 
     /// <summary>
+    /// Event raised when the user cancels the fixture selection.
+    /// </summary>
+    public event Action? Cancel;
+
+    /// <summary>
     /// Loads all fixtures from the registry.
     /// </summary>
     private async Task LoadFixturesAsync()
@@ -114,6 +119,40 @@ public partial class FixtureRegistryListViewModel : ObservableObject
     {
         await _fixtureRegistry.RefreshRegistryAsync();
         await LoadFixturesAsync();
+    }
+
+    /// <summary>
+    /// Cancels the fixture selection and returns to the scene list.
+    /// </summary>
+    [RelayCommand]
+    private void CancelSelection()
+    {
+        Cancel?.Invoke();
+    }
+
+    /// <summary>
+    /// Deletes a fixture from the registry.
+    /// </summary>
+    /// <param name="fixture">The fixture to delete.</param>
+    [RelayCommand]
+    private async Task DeleteFixture(Fixture fixture)
+    {
+        if (fixture == null)
+        {
+            return;
+        }
+
+        var result = MessageBox.Show(
+            $"Weet je zeker dat je de fixture '{fixture.Name}' wilt verwijderen uit de registry?",
+            "Bevestig Verwijdering",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            await _fixtureRegistry.RemoveFixtureAsync(fixture.InstanceId);
+            await LoadFixturesAsync();
+        }
     }
 
     /// <summary>

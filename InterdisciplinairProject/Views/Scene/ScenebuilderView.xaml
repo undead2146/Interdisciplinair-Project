@@ -3,66 +3,88 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="12">
+    <UserControl.Resources>
+        <converters:HalfConverter x:Key="HalfConverter"/>
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF2D6CDF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF1E5BB0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="White">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280" MinWidth="200" MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource HalfConverter}}"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="12"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Linker kolom met scene lijst -->
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="8"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="12"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Linker kolom met scene lijst (Sidebar) -->
+        <Border Grid.Column="0" Background="#F8F9FA" BorderBrush="#E9ECEF" BorderThickness="0,0,1,0">
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- Nieuwe Scene button -->
-            <Button x:Name="NewSceneButton"
-                    Grid.Row="0"
-                    Content="Nieuwe Scene"
-                    FontSize="16"
-                    Padding="12,8"
-                    HorizontalAlignment="Left"
-                    Width="180"
-                    Command="{Binding NewSceneCommand}"
-                    Background="#FF2D6CDF"
-                    Foreground="White"
-                    BorderThickness="0"/>
+                <!-- Nieuwe Scene button -->
+                <Button x:Name="NewSceneButton"
+                        Grid.Row="0"
+                        Content="+ Nieuwe Scene"
+                        Command="{Binding NewSceneCommand}"
+                        Style="{StaticResource SidebarButtonStyle}"/>
 
-            <!-- Kleine spacer -->
-            <Border Grid.Row="1"/>
+                <!-- Import Scenes button -->
+                <Button x:Name="ImportScenesButton"
+                        Grid.Row="1"
+                        Content="Import Scenes"
+                        Command="{Binding ImportScenesCommand}"
+                        Style="{StaticResource SidebarButtonStyle}"
+                        Background="#FF4CAF50"/>
 
-            <!-- Import Scenes button -->
-            <Button x:Name="ImportScenesButton"
-                    Grid.Row="2"
-                    Content="Import Scenes"
-                    FontSize="16"
-                    Padding="12,8"
-                    HorizontalAlignment="Left"
-                    Width="180"
-                    Command="{Binding ImportScenesCommand}"
-                    Background="#FF4CAF50"
-                    Foreground="White"
-                    BorderThickness="0"/>
+                <!-- ContentControl voor dynamische view (Scene lijst OF Fixture Registry) -->
+                <ContentControl Grid.Row="3"
+                               Content="{Binding LeftPanelView}"
+                               HorizontalAlignment="Stretch"
+                               VerticalContentAlignment="Stretch"/>
+            </Grid>
+        </Border>
 
-            <!-- Spacer -->
-            <Border Grid.Row="3"/>
-
-            <!-- AANGEPAST: ContentControl voor dynamische view (Scene lijst OF Fixture Registry) -->
-            <ContentControl Grid.Row="4"
-                           Content="{Binding LeftPanelView}"
-                           HorizontalAlignment="Left"
-                           Width="180"/>
-        </Grid>
+        <!-- GridSplitter for horizontal resizing -->
+        <GridSplitter Grid.Column="1"
+                      Width="1"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      Background="#E0E0E0"
+                      ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"/>
 
         <!-- Rechter kolom: hier wordt de SceneEditorView geladen -->
         <ContentControl Grid.Column="2" 
-                       Content="{Binding CurrentView}"/>
+                       Content="{Binding CurrentView}"
+                       Margin="0"/>
     </Grid>
 </UserControl>

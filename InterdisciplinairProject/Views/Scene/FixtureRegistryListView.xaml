@@ -4,26 +4,150 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:InterdisciplinairProject.Views.Scene"
+             xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="180">
+    <UserControl.Resources>
+        <converters:FixtureEndAddressConverter x:Key="EndAddressConverter"/>
+        
+        <!-- Style for Close/Delete Buttons -->
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFEBEE"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
     <Border Background="#FFE6D5E6" 
             CornerRadius="8" 
             BorderBrush="#FFCC99CC" 
-            HorizontalAlignment="Stretch"
-            BorderThickness="2"
-            Margin="0">
-        <DockPanel Margin="12">
+            BorderThickness="2">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
             <!-- Header -->
-            <TextBlock DockPanel.Dock="Top" 
-                       Text="Fixture Inventaris" 
-                       FontWeight="Bold"
-                       FontSize="14"
-                       Margin="0,0,0,12"/>
+            <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock Text="Fixture Inventaris" 
+                           FontWeight="Bold"
+                           FontSize="14"
+                           Foreground="#333"
+                           VerticalAlignment="Center"/>
+                
+                <Button DockPanel.Dock="Right"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="Annuleren"
+                        Command="{Binding CancelSelectionCommand}"
+                        HorizontalAlignment="Right">
+                    <TextBlock Text="×" FontSize="20" FontWeight="Bold" Foreground="#D32F2F" Margin="0,-2,0,0"/>
+                </Button>
+            </DockPanel>
+
+            <!-- Fixture List -->
+            <ListBox Grid.Row="1"
+                     x:Name="FixtureListBox"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     HorizontalContentAlignment="Stretch"
+                     SelectionMode="Single"
+                     ItemsSource="{Binding Fixtures}"
+                     SelectionChanged="FixtureListBox_SelectionChanged"
+                     MouseDoubleClick="FixtureListBox_MouseDoubleClick">
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="Border" 
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="#E0E0E0"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Margin="0,0,0,8"
+                                            Padding="8">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#E7F1FF"/>
+                                            <Setter TargetName="Border" Property="BorderBrush" Value="#0056B3"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="#F8F9FA"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Fixture Info -->
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,2"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="DMX: " FontSize="11" Foreground="#666"/>
+                                    <TextBlock Text="{Binding StartAddress}" FontSize="11" FontWeight="SemiBold" Foreground="#444"/>
+                                    <TextBlock Text=" - " FontSize="11" Foreground="#666"/>
+                                    <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#444">
+                                        <TextBlock.Text>
+                                            <Binding Converter="{StaticResource EndAddressConverter}"/>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Delete Button -->
+                            <Button Grid.Column="1"
+                                    Command="{Binding DataContext.DeleteFixtureCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Style="{StaticResource IconButtonStyle}"
+                                    ToolTip="Fixture verwijderen"
+                                    VerticalAlignment="Center"
+                                    Margin="4,0,0,0">
+                                <TextBlock Text="×" FontSize="18" FontWeight="Bold" Foreground="#D32F2F"/>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <!-- Import Button aan de onderkant -->
-            <Button DockPanel.Dock="Bottom"
+            <Button Grid.Row="2"
                     x:Name="ImportFixtureButton"
-                    Content="Import Fixture to Registry"
+                    Content="Importeer Fixture"
                     Background="#FFCC99FF"
                     Foreground="White"
                     FontWeight="SemiBold"
@@ -54,85 +178,6 @@
                     </Style>
                 </Button.Style>
             </Button>
-
-            <!-- Fixture List - AANGEPAST: MouseDoubleClick toegevoegd -->
-            <ListBox x:Name="FixtureListBox"
-                     BorderThickness="0"
-                     Background="Transparent"
-                     HorizontalContentAlignment="Stretch"
-                     SelectionMode="Single"
-                     ItemsSource="{Binding Fixtures}"
-                     SelectionChanged="FixtureListBox_SelectionChanged"
-                     MouseDoubleClick="FixtureListBox_MouseDoubleClick">
-
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="#FFFFFFFF"
-                                CornerRadius="6"
-                                Padding="10,8"
-                                Margin="0,2">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Fixture naam -->
-                                <TextBlock Grid.Column="0"
-                                          Text="{Binding Name}"
-                                          VerticalAlignment="Center"
-                                          FontWeight="Medium"/>
-
-                                <!-- Optionele delete/edit knoppen -->
-                                <StackPanel Grid.Column="1" 
-                                           Orientation="Horizontal"
-                                           Visibility="Collapsed"
-                                           x:Name="ActionButtons">
-                                    <Button Content="✎" 
-                                           Padding="4"
-                                           Margin="4,0"
-                                           Background="Transparent"
-                                           BorderThickness="0"
-                                           Cursor="Hand"
-                                           ToolTip="Bewerken"/>
-                                    <Button Content="✕" 
-                                           Padding="4"
-                                           Background="Transparent"
-                                           BorderThickness="0"
-                                           Cursor="Hand"
-                                           ToolTip="Verwijderen"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="0"
-                                            Margin="0,4">
-                                        <ContentPresenter/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="Transparent"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Cursor" Value="Hand"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-        </DockPanel>
+        </Grid>
     </Border>
 </UserControl>
