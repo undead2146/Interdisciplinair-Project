@@ -76,7 +76,7 @@ public class SceneRepository : ISceneRepository
             _scenes.Remove(scene);
             await SaveToFileAsync();
         }
-    }
+    } 
 
     /// <summary>
     /// Removes a fixture from a scene.

@@ -7,23 +7,48 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using InterdisciplinairProject.Core.Interfaces;
+using InterdisciplinairProject.Core.Models;
 
 namespace InterdisciplinairProject.Services;
 
 /// <summary>
 /// Provides hardware connection functionality for controlling lighting fixtures.
+/// This class serves as the high-level coordination layer between the application and DMX hardware.
+/// Architecture and Service Flow:
+/// 1. FixtureSettingsViewModel: User adjusts a slider in the UI.
+/// 2. HardwareConnection.SetChannelValueAsync: Saves to scenes.json and calls SendFixtureAsync.
+/// 3. HardwareConnection.SendFixtureAsync: Maps fixture channels to DMX addresses.
+/// 4. DmxService.SetChannel: Updates specific addresses in the 512-channel universe.
+/// 5. DmxService.SendFrame: Transmits the complete universe via DMXCommunication.
+/// 6. DMXCommunication: Low-level serial port communication with DMX controller.
+/// Key Features:
+/// - Preserves DMX universe state across individual fixture updates.
+/// - Supports both single-fixture updates and full-scene previews.
+/// - Automatically discovers and uses available COM ports.
+/// - Maintains JSON persistence for scene state.
 /// </summary>
 public class HardwareConnection : IHardwareConnection
 {
     private readonly string _scenesFilePath;
+    private readonly IDmxService _dmxService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HardwareConnection"/> class.
     /// </summary>
     public HardwareConnection()
+        : this(new DmxService())
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HardwareConnection"/> class.
+    /// </summary>
+    /// <param name="dmxService">The DMX service.</param>
+    public HardwareConnection(IDmxService dmxService)
     {
         Debug.WriteLine("[DEBUG] HardwareConnection constructor called");
 
+        _dmxService = dmxService;
         _scenesFilePath = FindScenesFile();
         Debug.WriteLine($"[DEBUG] HardwareConnection scenes file path: {_scenesFilePath}");
 
@@ -41,6 +66,14 @@ public class HardwareConnection : IHardwareConnection
 
     /// <summary>
     /// Sends a value to a specific channel of a fixture asynchronously.
+    /// This method handles the complete flow for updating a single fixture channel:
+    /// 1. Validates the channel value (0-255)
+    /// 2. Updates the scenes.json file with the new channel value
+    /// 3. Retrieves the complete fixture state from the file
+    /// 4. Sends ONLY the affected fixture's channels to the DMX controller via SendFixtureAsync
+    /// 5. The DMX service updates only the fixture's addresses in the 512-channel universe
+    /// 6. All other fixtures in the universe retain their current values
+    /// 7. A complete DMX frame is sent to the controller with the updated state
     /// </summary>
     /// <param name="fixtureInstanceId">The instance ID of the fixture.</param>
     /// <param name="channelName">The name of the channel (e.g. "dimmer").</param>
@@ -54,7 +87,7 @@ public class HardwareConnection : IHardwareConnection
 
         try
         {
-            // Valideer de waarde (0-255)
+            // Validate the value (0-255)
             if (value < 0 || value > 255)
             {
                 Debug.WriteLine($"[DEBUG] SetChannelValueAsync validation failed: value {value} out of range");
@@ -63,7 +96,7 @@ public class HardwareConnection : IHardwareConnection
 
             Debug.WriteLine("[DEBUG] SetChannelValueAsync validation passed");
 
-            // Lees het scenes bestand
+            // Read the scenes file
             if (!File.Exists(_scenesFilePath))
             {
                 Debug.WriteLine($"[DEBUG] SetChannelValueAsync scenes file not found: {_scenesFilePath}");
@@ -75,7 +108,7 @@ public class HardwareConnection : IHardwareConnection
             string jsonContent = await File.ReadAllTextAsync(_scenesFilePath);
             Debug.WriteLine($"[DEBUG] SetChannelValueAsync read {jsonContent.Length} characters from scenes file");
 
-            // Parse JSON met System.Text.Json
+            // Parse JSON with System.Text.Json
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -86,16 +119,23 @@ public class HardwareConnection : IHardwareConnection
             using MemoryStream stream = new MemoryStream();
             using Utf8JsonWriter writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
 
-            // Schrijf de aangepaste JSON
+            // Write the modified JSON
             Debug.WriteLine("[DEBUG] SetChannelValueAsync writing modified JSON");
             WriteModifiedJson(doc.RootElement, writer, fixtureInstanceId, channelName, value);
 
             writer.Flush();
 
-            // Schrijf terug naar bestand
+            // Write back to file
             string updatedJson = Encoding.UTF8.GetString(stream.ToArray());
             Debug.WriteLine($"[DEBUG] SetChannelValueAsync writing {updatedJson.Length} characters back to scenes file");
             await File.WriteAllTextAsync(_scenesFilePath, updatedJson);
+
+            // Send to DMX hardware: find the fixture and update only its channels
+            var fixture = await FindFixtureInScenesAsync(fixtureInstanceId);
+            if (fixture != null)
+            {
+                await SendFixtureAsync(fixture);
+            }
 
             var successMsg = $"[HARDWARE] ✓ Successfully updated {channelName}={value} in {fixtureInstanceId}";
             Debug.WriteLine(successMsg);
@@ -109,6 +149,230 @@ public class HardwareConnection : IHardwareConnection
             Debug.WriteLine($"[DEBUG] SetChannelValueAsync failed with exception: {ex.Message}");
             Console.WriteLine($"Fout bij het updaten van kanaal: {ex.Message}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Sends the entire scene to the DMX controller asynchronously.
+    /// This method is used for the "Preview Scene" button functionality.
+    /// Flow:
+    /// 1. Clears all 512 DMX channels to zero
+    /// 2. Iterates through all fixtures in the scene
+    /// 3. Maps each fixture's channels to DMX addresses based on StartAddress
+    /// 4. Sets all fixture channel values in the DMX universe
+    /// 5. Sends the complete DMX frame to the controller
+    /// Use this when switching between scenes or previewing a complete scene state.
+    /// For individual channel updates during editing, use SetChannelValueAsync instead.
+    /// </summary>
+    /// <param name="scene">The scene to send.</param>
+    /// <returns>True if successful, otherwise false.</returns>
+    public async Task<bool> SendSceneAsync(Scene scene)
+    {
+        if (scene == null || scene.Fixtures == null)
+        {
+            Debug.WriteLine("[HARDWARE] SendSceneAsync: scene or fixtures is null");
+            return false;
+        }
+
+        Debug.WriteLine($"[HARDWARE] SendSceneAsync: sending scene '{scene.Name}' with {scene.Fixtures.Count} fixtures");
+
+        try
+        {
+            // Clear all channels before sending the scene
+            _dmxService.ClearAllChannels();
+
+            // Set all fixture channels in the DMX universe
+            foreach (var fixture in scene.Fixtures)
+            {
+                if (fixture.Channels == null || fixture.Channels.Count == 0)
+                {
+                    Debug.WriteLine($"[HARDWARE] Fixture {fixture.InstanceId} has no channels, skipping");
+                    continue;
+                }
+
+                Debug.WriteLine($"[HARDWARE] Processing fixture {fixture.InstanceId} at address {fixture.StartAddress}");
+
+                for (int i = 0; i < fixture.Channels.Count; i++)
+                {
+                    var channel = fixture.Channels[i];
+                    int dmxAddress = fixture.StartAddress + i;
+
+                    // Ensure Parameter is set from Value if needed
+                    if (channel.Parameter == 0 && !string.IsNullOrEmpty(channel.Value))
+                    {
+                        if (int.TryParse(channel.Value, out int parsedValue))
+                        {
+                            channel.Parameter = parsedValue;
+                            Debug.WriteLine($"[DEBUG] Parsed channel {channel.Name} Value='{channel.Value}' -> Parameter={channel.Parameter}");
+                        }
+                    }
+
+                    byte value = (byte)channel.Parameter;
+                    _dmxService.SetChannel(dmxAddress, value);
+                    Debug.WriteLine($"[HARDWARE] Set DMX[{dmxAddress}] = {value} ({fixture.InstanceId}.{channel.Name})");
+                }
+            }
+
+            // Send the complete DMX frame
+            bool success = _dmxService.SendFrame();
+
+            if (success)
+            {
+                Debug.WriteLine($"[HARDWARE] ✓ Successfully sent scene '{scene.Name}' to DMX controller");
+            }
+            else
+            {
+                Debug.WriteLine($"[HARDWARE] ✗ Failed to send scene '{scene.Name}' to DMX controller");
+            }
+
+            return success;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HARDWARE] SendSceneAsync failed with exception: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Sends a single fixture's channel values to the DMX controller asynchronously.
+    /// This method updates ONLY the specified fixture's DMX channels while preserving all other
+    /// fixture values in the 512-channel DMX universe.
+    /// Flow:
+    /// 1. Iterates through the fixture's channels
+    /// 2. Maps each channel to its DMX address (StartAddress + channel index)
+    /// 3. Updates only those addresses in the DmxService's universe state
+    /// 4. Sends the complete DMX frame to the controller
+    /// 5. Other fixtures at different addresses remain unchanged
+    /// This allows live, real-time updates to individual fixtures without affecting the rest of the scene.
+    /// </summary>
+    /// <param name="fixture">The fixture to send.</param>
+    /// <returns>True if successful, otherwise false.</returns>
+    public async Task<bool> SendFixtureAsync(Fixture fixture)
+    {
+        if (fixture == null || fixture.Channels == null || fixture.Channels.Count == 0)
+        {
+            Debug.WriteLine("[HARDWARE] SendFixtureAsync: fixture or channels is null/empty");
+            return false;
+        }
+
+        Debug.WriteLine($"[HARDWARE] SendFixtureAsync: sending fixture '{fixture.InstanceId}' at address {fixture.StartAddress}");
+
+        try
+        {
+            // Update only this fixture's channels in the DMX universe
+            for (int i = 0; i < fixture.Channels.Count; i++)
+            {
+                var channel = fixture.Channels[i];
+                int dmxAddress = fixture.StartAddress + i;
+
+                // Ensure Parameter is set from Value if needed
+                if (channel.Parameter == 0 && !string.IsNullOrEmpty(channel.Value))
+                {
+                    if (int.TryParse(channel.Value, out int parsedValue))
+                    {
+                        channel.Parameter = parsedValue;
+                        Debug.WriteLine($"[DEBUG] Parsed channel {channel.Name} Value='{channel.Value}' -> Parameter={channel.Parameter}");
+                    }
+                }
+
+                byte value = (byte)channel.Parameter;
+                _dmxService.SetChannel(dmxAddress, value);
+                Debug.WriteLine($"[HARDWARE] Set DMX[{dmxAddress}] = {value} ({fixture.InstanceId}.{channel.Name})");
+            }
+
+            // Send the DMX frame with updated fixture
+            bool success = _dmxService.SendFrame();
+
+            if (success)
+            {
+                Debug.WriteLine($"[HARDWARE] ✓ Successfully sent fixture '{fixture.InstanceId}' to DMX controller");
+            }
+            else
+            {
+                Debug.WriteLine($"[HARDWARE] ✗ Failed to send fixture '{fixture.InstanceId}' to DMX controller");
+            }
+
+            return await Task.FromResult(success);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HARDWARE] SendFixtureAsync failed with exception: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Finds a fixture in the scenes file by instance ID.
+    /// </summary>
+    /// <param name="fixtureInstanceId">The instance ID of the fixture.</param>
+    /// <returns>The fixture, or null if not found.</returns>
+    private async Task<Fixture?> FindFixtureInScenesAsync(string fixtureInstanceId)
+    {
+        try
+        {
+            if (!File.Exists(_scenesFilePath))
+            {
+                Debug.WriteLine($"[DEBUG] FindFixtureInScenesAsync: scenes file not found: {_scenesFilePath}");
+                return null;
+            }
+
+            string jsonContent = await File.ReadAllTextAsync(_scenesFilePath);
+            using JsonDocument doc = JsonDocument.Parse(jsonContent);
+
+            Debug.WriteLine($"[DEBUG] FindFixtureInScenesAsync: searching for fixture {fixtureInstanceId}");
+
+            // JSON structure is an array of scenes at the root
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                // Iterate through each scene in the array
+                foreach (JsonElement sceneElement in doc.RootElement.EnumerateArray())
+                {
+                    if (sceneElement.TryGetProperty("fixtures", out JsonElement fixturesArray))
+                    {
+                        // Iterate through fixtures in this scene
+                        foreach (JsonElement fixtureElement in fixturesArray.EnumerateArray())
+                        {
+                            if (fixtureElement.TryGetProperty("instanceId", out JsonElement instanceId) &&
+                                instanceId.GetString() == fixtureInstanceId)
+                            {
+                                Debug.WriteLine($"[DEBUG] FindFixtureInScenesAsync: found fixture {fixtureInstanceId}");
+                                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                                var fixture = JsonSerializer.Deserialize<Fixture>(fixtureElement.GetRawText(), options);
+                                
+                                // Convert Value (string) to Parameter (int) for each channel
+                                if (fixture != null && fixture.Channels != null)
+                                {
+                                    foreach (var channel in fixture.Channels)
+                                    {
+                                        if (int.TryParse(channel.Value, out int paramValue))
+                                        {
+                                            channel.Parameter = paramValue;
+                                            Debug.WriteLine($"[DEBUG] Channel {channel.Name}: Value='{channel.Value}' -> Parameter={channel.Parameter}");
+                                        }
+                                        else
+                                        {
+                                            channel.Parameter = 0;
+                                            Debug.WriteLine($"[DEBUG] Channel {channel.Name}: Failed to parse Value='{channel.Value}', defaulting to 0");
+                                        }
+                                    }
+                                }
+                                
+                                return fixture;
+                            }
+                        }
+                    }
+                }
+            }
+
+            Debug.WriteLine($"[DEBUG] FindFixtureInScenesAsync: fixture {fixtureInstanceId} not found");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[HARDWARE] FindFixtureInScenesAsync failed: {ex.Message}");
+            Debug.WriteLine($"[HARDWARE] Exception stack trace: {ex.StackTrace}");
+            return null;
         }
     }
 
@@ -263,8 +527,9 @@ public class HardwareConnection : IHardwareConnection
 
     /// <summary>
     /// Writes the modified channels to the writer.
+    /// Channels are stored as an array of channel objects with "name" and "value" properties.
     /// </summary>
-    /// <param name="channels">The channels JSON element.</param>
+    /// <param name="channels">The channels JSON element (array).</param>
     /// <param name="writer">The UTF-8 JSON writer.</param>
     /// <param name="targetChannel">The target channel name.</param>
     /// <param name="value">The value to set.</param>
@@ -274,95 +539,103 @@ public class HardwareConnection : IHardwareConnection
         string targetChannel,
         byte value)
     {
-        Debug.WriteLine($"[DEBUG] WriteModifiedChannels called: targetChannel='{targetChannel}', value={value}");
-        writer.WriteStartObject();
+        Debug.WriteLine($"[DEBUG] WriteModifiedChannels called: targetChannel='{targetChannel}', value={value}, channelsType={channels.ValueKind}");
 
-        bool channelFound = false;
-        foreach (JsonProperty channel in channels.EnumerateObject())
+        // Channels are stored as an array of channel objects
+        if (channels.ValueKind == JsonValueKind.Array)
         {
-            writer.WritePropertyName(channel.Name);
+            writer.WriteStartArray();
 
-            if (channel.Name.Equals(targetChannel, StringComparison.OrdinalIgnoreCase))
+            foreach (JsonElement channelElement in channels.EnumerateArray())
             {
-                Debug.WriteLine($"[DEBUG] Found matching channel '{channel.Name}', updating from {channel.Value} to {value}");
+                writer.WriteStartObject();
+
+                // Get the channel name to check if this is the target channel
+                string? channelName = null;
+                if (channelElement.TryGetProperty("name", out JsonElement nameElement))
+                {
+                    channelName = nameElement.GetString();
+                }
+
+                bool isTargetChannel = channelName != null &&
+                    channelName.Equals(targetChannel, StringComparison.OrdinalIgnoreCase);
+
+                // Write all properties, modifying "value" if this is the target channel
+                foreach (JsonProperty prop in channelElement.EnumerateObject())
+                {
+                    writer.WritePropertyName(prop.Name);
+
+                    if (isTargetChannel && prop.Name.Equals("value", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Update the value property with the new value as a string
+                        Debug.WriteLine($"[DEBUG] Updating channel '{channelName}' value from '{prop.Value}' to '{value}'");
+                        writer.WriteStringValue(value.ToString());
+                    }
+                    else
+                    {
+                        // Write the property unchanged
+                        WriteJsonValue(prop.Value, writer);
+                    }
+                }
+
+                writer.WriteEndObject();
+            }
+
+            writer.WriteEndArray();
+            Debug.WriteLine($"[DEBUG] WriteModifiedChannels completed (array format)");
+        }
+        else if (channels.ValueKind == JsonValueKind.Object)
+        {
+            // Legacy format: channels as object/dictionary
+            writer.WriteStartObject();
+
+            bool channelFound = false;
+            foreach (JsonProperty channel in channels.EnumerateObject())
+            {
+                writer.WritePropertyName(channel.Name);
+
+                if (channel.Name.Equals(targetChannel, StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.WriteLine($"[DEBUG] Found matching channel '{channel.Name}', updating from {channel.Value} to {value}");
+                    writer.WriteNumberValue(value);
+                    channelFound = true;
+                }
+                else
+                {
+                    WriteJsonValue(channel.Value, writer);
+                }
+            }
+
+            // If the channel doesn't exist, add it
+            if (!channelFound)
+            {
+                Debug.WriteLine($"[DEBUG] Channel '{targetChannel}' not found, adding it with value {value}");
+                writer.WritePropertyName(targetChannel);
                 writer.WriteNumberValue(value);
-                channelFound = true;
             }
-            else
-            {
-                Debug.WriteLine($"[DEBUG] Writing channel '{channel.Name}' unchanged: {channel.Value}");
-                WriteJsonValue(channel.Value, writer);
-            }
-        }
 
-        // Als het kanaal nog niet bestaat, voeg het toe
-        if (!channelFound)
+            writer.WriteEndObject();
+            Debug.WriteLine($"[DEBUG] WriteModifiedChannels completed (object format)");
+        }
+        else
         {
-            Debug.WriteLine($"[DEBUG] Channel '{targetChannel}' not found, adding it with value {value}");
-            writer.WritePropertyName(targetChannel);
-            writer.WriteNumberValue(value);
+            Debug.WriteLine($"[DEBUG] WriteModifiedChannels: unexpected channels type {channels.ValueKind}, writing as-is");
+            WriteJsonValue(channels, writer);
         }
-
-        writer.WriteEndObject();
-        Debug.WriteLine($"[DEBUG] WriteModifiedChannels completed");
     }
 
     private string FindScenesFile()
     {
-        // Try to find project root by searching upwards from BaseDirectory
-        var currentDir = new DirectoryInfo(AppContext.BaseDirectory);
-        Debug.WriteLine($"[DEBUG] Starting search from: {currentDir.FullName}");
-
-        while (currentDir != null)
-        {
-            var scenesPath = Path.Combine(currentDir.FullName, "scenes.json");
-            Debug.WriteLine($"[DEBUG] Checking: {scenesPath}");
-
-            if (File.Exists(scenesPath))
-            {
-                Debug.WriteLine($"[DEBUG] ✓ Found scenes.json in: {scenesPath}");
-                return scenesPath;
-            }
-
-            // Also check if this directory contains the .sln file (project root indicator)
-            var slnFiles = currentDir.GetFiles("*.sln");
-            if (slnFiles.Length > 0)
-            {
-                Debug.WriteLine($"[DEBUG] Found .sln file in: {currentDir.FullName}");
-                var projectRootScenes = Path.Combine(currentDir.FullName, "scenes.json");
-
-                if (File.Exists(projectRootScenes))
-                {
-                    Debug.WriteLine($"[DEBUG] ✓ Found scenes.json at project root: {projectRootScenes}");
-                    return projectRootScenes;
-                }
-
-                Debug.WriteLine($"[DEBUG] No scenes.json at project root, will create it");
-
-                // Create default scenes.json at project root
-                var defaultContent = @"{
-  ""scene"": {
-    ""id"": ""default"",
-    ""name"": ""Default"",
-    ""universe"": 1,
-    ""fixtures"": []
-  }
-}";
-                File.WriteAllText(projectRootScenes, defaultContent);
-                return projectRootScenes;
-            }
-
-            currentDir = currentDir.Parent;
-        }
-
-        Debug.WriteLine($"[DEBUG] Could not find project root, using AppData");
-
-        // Fallback to AppData
-        var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InterdisciplinairProject");
+        // ALWAYS use AppData folder - this is where the application stores scene data
+        // This ensures consistency with MainViewModel, SceneRepository, and other services
+        var appFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "InterdisciplinairProject");
+        
         Directory.CreateDirectory(appFolder);
-        var appDataScenesPath = Path.Combine(appFolder, "scenes.json");
+        var scenesPath = Path.Combine(appFolder, "scenes.json");
 
-        Debug.WriteLine($"[DEBUG] Using AppData scenes path: {appDataScenesPath}");
-        return appDataScenesPath;
+        Debug.WriteLine($"[DEBUG] Using AppData scenes path: {scenesPath}");
+        return scenesPath;
     }
 }

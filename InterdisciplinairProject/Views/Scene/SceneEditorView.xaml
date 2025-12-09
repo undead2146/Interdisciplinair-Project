@@ -64,6 +64,32 @@
                         </Button.Template>
                     </Button>
                 </StackPanel>
+                
+                <!-- Preview Scene Button -->
+                <Button Command="{Binding PreviewSceneCommand}"
+                        Content="▶ Preview Scene"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Background="#FF4CAF50"
+                        Foreground="White"
+                        FontWeight="SemiBold"
+                        Padding="16,8"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        ToolTip="Stuur de volledige scene naar de DMX controller">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF45A049"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </DockPanel>
         </Border>
 
