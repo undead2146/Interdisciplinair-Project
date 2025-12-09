@@ -190,13 +190,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             string name = NewManufacturerName?.Trim() ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                MessageBox.Show("Manufacturer can't be empty.", "Error",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             if (_manufacturerService.RegisterManufacturer(name))
             {
                 LoadManufacturers();
