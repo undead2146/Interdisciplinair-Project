@@ -217,24 +217,26 @@ namespace InterdisciplinairProject.Fixtures.Services
                 return;
             }
 
-            if (!int.TryParse(CustomRangeMinValue, out var min) || !int.TryParse(CustomRangeMaxValue, out var max))
-            {
-                MessageBox.Show("Invalid min/max values.");
-                return;
-            }
+            //if (!int.TryParse(CustomRangeMinValue, out var min) || !int.TryParse(CustomRangeMaxValue, out var max))
+            //{
+            //    MessageBox.Show("Invalid min/max values.");
+            //    return;
+            //}
 
-            if (min < 0 || max > 255 || min >= max)
-            {
-                MessageBox.Show("Min must be >=0, max <=255, and min < max.");
-                return;
-            }
+            //if (min < 0 || max > 99999 || min >= max)
+            //{
+            //    MessageBox.Show("Min must be >=0, max <=99999, and min < max.");
+            //    return;
+            //}
 
             var spec = new TypeSpecification
             {
                 name = typeName,
                 input = "slider",
-                min = min,
-                max = max
+                min = 0,
+                max = 255
+                //min = min,
+                //max = max
             };
 
             if (!TypeCatalogService.AddOrUpdate(spec))

@@ -282,7 +282,7 @@
                                                         <TextBox Text="{Binding CustomTypeName, Mode=TwoWay}"
                                                                  Padding="4"
                                                                  Width="180"/>
-                                                        <TextBlock Text="Enter Type Range:" Margin="0,0,0,2"/>
+                                                        <!--<TextBlock Text="Enter Type Range:" Margin="0,0,0,2"/>
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="1*"/>
@@ -311,7 +311,7 @@
                                                                      MaxWidth="90"
                                                                      HorizontalAlignment="Stretch"
                                                                      TextWrapping="NoWrap"/>
-                                                        </Grid>
+                                                        </Grid>-->
 
                                                         <Button Content="Save"
                                                                 Margin="0,10,0,0"

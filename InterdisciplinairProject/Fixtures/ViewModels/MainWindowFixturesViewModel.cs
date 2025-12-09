@@ -220,6 +220,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void CreateFixture()
         {
+            // 🔹 If we're already on a create screen, warn before nuking the data
+            if (CurrentViewModel is FixtureCreateViewModel)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    "You are already creating a fixture. If you continue, all current information will be lost. Do you want to continue?",
+                    "Confirm & reset",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Warning);
+
+                if (result != System.Windows.MessageBoxResult.Yes)
+                    return; // 🔹 User cancelled -> do nothing
+            }
+
             var createVm = new FixtureCreateViewModel();
             createVm.BackRequested += (_, __) =>
             {
