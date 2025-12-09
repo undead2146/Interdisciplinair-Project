@@ -79,7 +79,24 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         _currentFixture = fixture;
 
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
-        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+        // Use GroupBy to handle potential duplicate channel names - take the first occurrence
+        _initialChannelValues = new Dictionary<string, byte?>(
+            fixture.Channels
+                .GroupBy(c => c.Name)
+                .Select(g => g.First())
+                .ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+
+        // Log warning if duplicates were found
+        var duplicates = fixture.Channels
+            .GroupBy(c => c.Name)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicates.Any())
+        {
+            Debug.WriteLine($"[WARNING] Fixture '{fixture.Name}' has duplicate channel names: {string.Join(", ", duplicates)}");
+        }
 
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));

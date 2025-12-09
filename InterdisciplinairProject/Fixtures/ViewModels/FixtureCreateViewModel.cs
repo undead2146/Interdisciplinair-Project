@@ -225,6 +225,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
+            // Check for duplicate channel names
+            var duplicateChannelNames = Channels
+                .GroupBy(ch => ch.Name)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateChannelNames.Any())
+            {
+                string duplicates = string.Join(", ", duplicateChannelNames);
+                MessageBox.Show($"Channel names must be unique. Duplicate names found: {duplicates}",
+                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             string manufacturer = SelectedManufacturer ?? "Unknown";
             string safeManufacturerName = SanitizeFileName(manufacturer);
             string safeFixtureName = SanitizeFileName(FixtureName);
@@ -295,9 +310,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
+            // Generate unique channel name by counting existing channels
+            int channelNumber = Channels.Count + 1;
+            string channelName = $"Channel {channelNumber}";
+
+            // Ensure uniqueness in case user deleted middle channels
+            while (Channels.Any(c => c.Name == channelName))
+            {
+                channelNumber++;
+                channelName = $"Channel {channelNumber}";
+            }
+
             var newModel = new Channel
             {
-                Name = "Lamp",
+                Name = channelName,
                 Type = "Lamp",
                 Value = "0",
             };
