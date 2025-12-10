@@ -3,13 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Services;
-using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -95,8 +93,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         /// </summary>
         public ICommand AddImageCommand { get; }
 
-        public ICommand AddTypeBtn { get; }
-
         public Fixture CurrentFixture
         {
             get => _currentFixture;
@@ -130,7 +126,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             _manufacturerService = new ManufacturerService();
             LoadManufacturers();
-            RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
