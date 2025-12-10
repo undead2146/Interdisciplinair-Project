@@ -141,20 +141,18 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         Debug.WriteLine($"[DEBUG] CancelChanges called. Restoring initial values for {_currentFixture.Name}");
 
-        // 1. Herstel de _currentFixture.Channels naar de oorspronkelijke (opgeslagen) waarden
-        _currentFixture.Channels = new ObservableCollection<Channel>(_initialChannelValues.Select(kvp => new Channel
+        // Restore the channel Parameter values to their initial state
+        foreach (var channel in _currentFixture.Channels)
         {
-            Name = kvp.Key,
-            Value = kvp.Value?.ToString() ?? "0",
-            Parameter = kvp.Value ?? 0,
-            Type = _currentFixture.ChannelTypes.TryGetValue(kvp.Key, out var ct) ? ct.ToString() : "Unknown",
-            Min = 0,
-            Max = 255,
-            Time = 0,
-            ChannelEffect = new ChannelEffect(),
-        }));
+            if (_initialChannelValues.TryGetValue(channel.Name, out var initialValue))
+            {
+                channel.Parameter = initialValue ?? 0;
+                channel.Value = initialValue?.ToString() ?? "0";
+                Debug.WriteLine($"[DEBUG] Restored channel '{channel.Name}' to initial value: {initialValue}");
+            }
+        }
 
-        // 2. Herlaad de Channel ViewModels om de sliders te updaten (dit stuurt ook de herstelde waarden live naar de hardware)
+        // Reload the Channel ViewModels to update the sliders (this also sends the restored values live to hardware)
         LoadChannelsFromFixture(_currentFixture);
     }
 
@@ -200,9 +198,9 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         foreach (var channel in fixture.Channels)
         {
-            var type = fixture.ChannelTypes.TryGetValue(channel.Name, out var channelType) ? channelType : ChannelType.Unknown;
+            var type = ParseChannelType(channel.Type);
             var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type);
-            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}");
+            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}, Type: {channel.Type} -> {type}");
 
             // Subscribe to channel value changes
             channelVm.PropertyChanged += ChannelViewModel_PropertyChanged;
@@ -211,6 +209,28 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         }
 
         Debug.WriteLine($"[DEBUG] LoadChannelsFromFixture complete. Total channels loaded: {Channels.Count}");
+    }
+
+    /// <summary>
+    /// Parses a channel type string to a ChannelType enum.
+    /// </summary>
+    /// <param name="typeString">The type string from Channel.Type.</param>
+    /// <returns>The parsed ChannelType enum.</returns>
+    private static ChannelType ParseChannelType(string typeString)
+    {
+        if (string.IsNullOrWhiteSpace(typeString))
+        {
+            return ChannelType.Unknown;
+        }
+
+        // Try to parse as enum first (e.g., "Dimmer", "Red", "Blue")
+        if (Enum.TryParse<ChannelType>(typeString, true, out var channelType))
+        {
+            return channelType;
+        }
+
+        // Fall back to name-based inference
+        return ChannelTypeHelper.GetChannelTypeFromName(typeString);
     }
 
     /// <summary>

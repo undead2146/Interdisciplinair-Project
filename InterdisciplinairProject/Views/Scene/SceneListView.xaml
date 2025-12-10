@@ -4,42 +4,88 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="180">
+             d:DesignHeight="450"
+        d:DesignWidth="180">
     <UserControl.Resources>
-        <Style x:Key="IconButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="4"/>
+        <Style x:Key="DeleteButtonStyle"
+                TargetType="Button">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+            <Setter Property="Cursor"
+                    Value="Hand"/>
+            <Setter Property="Padding"
+                    Value="6"/>
+            <Setter Property="Opacity"
+                    Value="0.6"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                    Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#FFEBEE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FFEBEE"/>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Opacity"
+                            Value="1"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="#F0F0F0">
+
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" 
-                   Text="SCENES" 
-                   FontWeight="Bold" 
-                   Foreground="#6C757D"
-                   FontSize="12"
-                   Margin="10,10,0,10"/>
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Padding="12,12,12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
+                <TextBlock Text="SCENES"
+                           FontWeight="Bold"
+                           Foreground="#6C757D"
+                           FontSize="11"
+                           VerticalAlignment="Center"/>
+
+                <!-- Scene count badge -->
+                <Border Grid.Column="1"
+                        Background="#E9ECEF"
+                        CornerRadius="10"
+                        Padding="8,3"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Scenes.Count}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="#6C757D"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Scene List -->
         <ListBox Grid.Row="1"
                  ItemsSource="{Binding Scenes}"
                  BorderThickness="0"
@@ -47,37 +93,55 @@
                  HorizontalContentAlignment="Stretch"
                  SelectedItem="{Binding SelectedScene, Mode=TwoWay}"
                  MouseDoubleClick="ListBox_MouseDoubleClick"
-                 Padding="5">
+                 Padding="8,0,8,8"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment"
+                            Value="Stretch"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
-                                <Border x:Name="Border" 
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="0"
-                                        CornerRadius="4"
-                                        Margin="0,2"
-                                        Padding="8,6">
+                                <Border x:Name="Border"
+                                        Background="White"
+                                        BorderBrush="#E9ECEF"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Margin="0,3"
+                                        Padding="12,10">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#E7F1FF"/>
-                                        <Setter Property="Foreground" Value="#0056B3"/>
+                                    <Trigger Property="IsSelected"
+                                            Value="True">
+                                        <Setter TargetName="Border"
+                                                Property="Background"
+                                                Value="#E7F1FF"/>
+                                        <Setter TargetName="Border"
+                                                Property="BorderBrush"
+                                                Value="#2D6CDF"/>
+                                        <Setter Property="Foreground"
+                                                Value="#0056B3"/>
                                     </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#F8F9FA"/>
-                                        <Setter Property="Cursor" Value="Hand"/>
+                                    <Trigger Property="IsMouseOver"
+                                            Value="True">
+                                        <Setter TargetName="Border"
+                                                Property="Background"
+                                                Value="#F8F9FA"/>
+                                        <Setter Property="Cursor"
+                                                Value="Hand"/>
                                     </Trigger>
                                     <MultiTrigger>
                                         <MultiTrigger.Conditions>
-                                            <Condition Property="IsSelected" Value="True"/>
-                                            <Condition Property="IsMouseOver" Value="True"/>
+                                            <Condition Property="IsSelected"
+                                                    Value="True"/>
+                                            <Condition Property="IsMouseOver"
+                                                    Value="True"/>
                                         </MultiTrigger.Conditions>
-                                        <Setter TargetName="Border" Property="Background" Value="#D0E4FF"/>
+                                        <Setter TargetName="Border"
+                                                Property="Background"
+                                                Value="#D0E4FF"/>
                                     </MultiTrigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -94,19 +158,31 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{Binding Name}" 
-                                   TextTrimming="CharacterEllipsis"
-                                   VerticalAlignment="Center"
-                                   FontWeight="Medium"/>
-                        
+                        <StackPanel Grid.Column="0"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}"
+                                       TextTrimming="CharacterEllipsis"
+                                       FontWeight="Medium"
+                                       FontSize="13"
+                                       Foreground="#212529"/>
+                            <TextBlock FontSize="11"
+                                    Foreground="#6C757D"
+                                    Margin="0,2,0,0">
+                                <Run Text="{Binding Fixtures.Count, Mode=OneWay, FallbackValue=0}"/>
+                                <Run Text=" fixtures"/>
+                            </TextBlock>
+                        </StackPanel>
+
                         <Button Grid.Column="1"
                                 Command="{Binding DataContext.DeleteSceneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 CommandParameter="{Binding}"
-                                Style="{StaticResource IconButtonStyle}"
+                                Style="{StaticResource DeleteButtonStyle}"
                                 ToolTip="Scene verwijderen"
-                                VerticalAlignment="Center"
-                                Margin="4,0,0,0">
-                            <TextBlock Text="×" FontSize="18" FontWeight="Bold" Foreground="#DC3545"/>
+                                VerticalAlignment="Center">
+                            <TextBlock Text="✕"
+                                    FontSize="14"
+                                    FontWeight="Bold"
+                                    Foreground="#DC3545"/>
                         </Button>
                     </Grid>
                 </DataTemplate>

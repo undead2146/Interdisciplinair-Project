@@ -5,71 +5,166 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:converters="clr-namespace:InterdisciplinairProject.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450"
+        d:DesignWidth="800">
     <UserControl.Resources>
         <converters:HalfConverter x:Key="HalfConverter"/>
-        <Style x:Key="SidebarButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#FF2D6CDF"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="15,12"/>
-            <Setter Property="Margin" Value="0,0,0,10"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="14"/>
+
+        <!-- Primary Button Style (Blue) -->
+        <Style x:Key="PrimaryButtonStyle"
+                TargetType="Button">
+            <Setter Property="Background"
+                    Value="#FF2D6CDF"/>
+            <Setter Property="Foreground"
+                    Value="White"/>
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+            <Setter Property="Padding"
+                    Value="15,12"/>
+            <Setter Property="Margin"
+                    Value="0,0,0,8"/>
+            <Setter Property="BorderThickness"
+                    Value="0"/>
+            <Setter Property="Cursor"
+                    Value="Hand"/>
+            <Setter Property="FontSize"
+                    Value="13"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF1E5BB0"/>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#FF1E5BB0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Success Button Style (Green) -->
+        <Style x:Key="SuccessButtonStyle"
+                TargetType="Button"
+                BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background"
+                    Value="#FF4CAF50"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#FF388E3C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Danger Button Style (Red) -->
+        <Style x:Key="DangerButtonStyle"
+                TargetType="Button"
+                BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background"
+                    Value="#FFDC3545"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#FFC82333"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Warning Button Style (Yellow) -->
+        <Style x:Key="WarningButtonStyle"
+                TargetType="Button"
+                BasedOn="{StaticResource PrimaryButtonStyle}">
+            <Setter Property="Background"
+                    Value="#FFFFC107"/>
+            <Setter Property="Foreground"
+                    Value="#212529"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="#FFE0A800"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="White">
+
+    <Grid Background="#FAFBFC">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" MinWidth="200" MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource HalfConverter}}"/>
+            <ColumnDefinition Width="280"
+                    MinWidth="200"
+                    MaxWidth="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualWidth, Converter={StaticResource HalfConverter}}"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Linker kolom met scene lijst (Sidebar) -->
-        <Border Grid.Column="0" Background="#F8F9FA" BorderBrush="#E9ECEF" BorderThickness="0,0,1,0">
-            <Grid Margin="16">
+        <Border Grid.Column="0"
+                Background="#F8F9FA"
+                BorderBrush="#E9ECEF"
+                BorderThickness="0,0,1,0">
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Nieuwe Scene button -->
-                <Button x:Name="NewSceneButton"
-                        Grid.Row="0"
-                        Content="+ Nieuwe Scene"
-                        Command="{Binding NewSceneCommand}"
-                        Style="{StaticResource SidebarButtonStyle}"/>
+                <!-- Header met knoppen -->
+                <StackPanel Grid.Row="0"
+                        Margin="16,16,16,8">
+                    <!-- Titel -->
+                    <TextBlock Text="Scene Builder"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="#212529"
+                               Margin="0,0,0,16"/>
 
-                <!-- Import Scenes button -->
-                <Button x:Name="ImportScenesButton"
-                        Grid.Row="1"
-                        Content="Import Scenes"
-                        Command="{Binding ImportScenesCommand}"
-                        Style="{StaticResource SidebarButtonStyle}"
-                        Background="#FF4CAF50"/>
+                    <!-- Nieuwe Scene button -->
+                    <Button x:Name="NewSceneButton"
+                            Content="➕ Nieuwe Scene"
+                            Command="{Binding NewSceneCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"/>
+
+                    <!-- Import Scenes button -->
+                    <Button x:Name="ImportScenesButton"
+                            Content="📥 Importeer Scenes"
+                            Command="{Binding ImportScenesCommand}"
+                            Style="{StaticResource SuccessButtonStyle}"/>
+
+                    <!-- Export Scenes button -->
+                    <Button x:Name="ExportScenesButton"
+                            Content="📤 Exporteer Scenes"
+                            Command="{Binding ExportScenesCommand}"
+                            Style="{StaticResource WarningButtonStyle}"/>
+                </StackPanel>
 
                 <!-- ContentControl voor dynamische view (Scene lijst OF Fixture Registry) -->
-                <ContentControl Grid.Row="3"
-                               Content="{Binding LeftPanelView}"
-                               HorizontalAlignment="Stretch"
-                               VerticalContentAlignment="Stretch"/>
+                <ContentControl Grid.Row="1"
+                                Content="{Binding LeftPanelView}"
+                                HorizontalAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                Margin="0"/>
+
+                <!-- Delete All button onderaan -->
+                <Border Grid.Row="2"
+                        BorderBrush="#E9ECEF"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,12">
+                    <Button x:Name="DeleteAllScenesButton"
+                            Content="🗑️ Verwijder Alle Scenes"
+                            Command="{Binding DeleteAllScenesCommand}"
+                            Style="{StaticResource DangerButtonStyle}"
+                            Margin="0"/>
+                </Border>
             </Grid>
         </Border>
 
@@ -83,8 +178,8 @@
                       ResizeDirection="Columns"/>
 
         <!-- Rechter kolom: hier wordt de SceneEditorView geladen -->
-        <ContentControl Grid.Column="2" 
-                       Content="{Binding CurrentView}"
-                       Margin="0"/>
+        <ContentControl Grid.Column="2"
+                        Content="{Binding CurrentView}"
+                        Margin="0"/>
     </Grid>
 </UserControl>
