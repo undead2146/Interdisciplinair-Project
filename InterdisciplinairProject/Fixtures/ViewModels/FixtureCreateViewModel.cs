@@ -234,6 +234,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
+            // Check for duplicate channel names
+            var duplicateChannelNames = Channels
+                .GroupBy(ch => ch.Name)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateChannelNames.Any())
+            {
+                string duplicates = string.Join(", ", duplicateChannelNames);
+                MessageBox.Show($"Channel names must be unique. Duplicate names found: {duplicates}",
+                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             // 🔧 Vul het Fixture model
             _currentFixture.Name = FixtureName;
             _currentFixture.Manufacturer = SelectedManufacturer ?? "Unknown";
@@ -303,23 +318,14 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
-            if (Channels.Count < 512)
+            var newModel = new Channel
             {
-                var newModel = new Channel
-                {
-                    Name = "Select a type",
-                    Type = "Select a type",
-                    Value = "0",
-                    Min = 0,
-                    Max = 255,
-                };
-                Channels.Add(new ChannelItem(newModel));
-                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
-            }
-            else{
-                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+                Name = "Lamp",
+                Type = "Lamp",
+                Value = "0",
+            };
+            Channels.Add(new ChannelItem(newModel));
+            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
         }
 
         private bool CanDeleteChannel(ChannelItem? channel)
