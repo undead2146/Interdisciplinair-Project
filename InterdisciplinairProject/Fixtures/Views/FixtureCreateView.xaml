@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <converters:Base64ToImageConverter  x:Key="Base64ToImageC"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityC"/>
+        <converters:ChannelIndexPlusOneConverter x:Key="ChannelIndexPlusOneConverter"/>
 
         <Style x:Key="WatermarkTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="1" />
@@ -21,27 +22,27 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        Background="{TemplateBinding Background}"
-                        SnapsToDevicePixels="True">
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                SnapsToDevicePixels="True">
                             <Grid>
                                 <!-- real textbox content -->
                                 <ScrollViewer x:Name="PART_ContentHost" />
 
                                 <!-- watermark -->
                                 <TextBlock x:Name="Watermark"
-                                   Text="{TemplateBinding Tag}"
-                                   Margin="4,2,0,0"
-                                   Foreground="Gray"
-                                   IsHitTestVisible="False"
-                                   Visibility="Collapsed" />
+                                           Text="{TemplateBinding Tag}"
+                                           Margin="4,2,0,0"
+                                           Foreground="Gray"
+                                           IsHitTestVisible="False"
+                                           Visibility="Collapsed" />
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="Text" Value="">
                                 <Setter TargetName="Watermark"
-                                Property="Visibility"
-                                Value="Visible" />
+                                        Property="Visibility"
+                                        Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -70,13 +71,13 @@
                 <StackPanel>
                     <TextBlock Text="Fixture name:" FontWeight="Bold"/>
                     <TextBox Text="{Binding FixtureName, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200" Margin="0,4,0,12" Padding="3" HorizontalAlignment="Left"/>
+                             Width="200" Margin="0,4,0,12" Padding="3" HorizontalAlignment="Left"/>
 
                     <TextBlock Text="Manufacturer:" FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <ComboBox ItemsSource="{Binding AvailableManufacturers}"
-                          SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
-                          Width="180" Padding="3"/>
+                                  SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
+                                  Width="180" Padding="3"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -131,34 +132,33 @@
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,12,0,0">
-            <Button
-			Content="+ Add channel"
-			Padding="10"
-			Margin="0,0,0,10"
-			Command="{Binding AddChannelCommand}"
-			Background="#1E90FF"
-			Foreground="White"
-			FontWeight="Bold"/>
+            <Button Content="+ Add channel"
+			        Padding="10"
+			        Margin="0,0,0,10"
+			        Command="{Binding AddChannelCommand}"
+			        Background="#1E90FF"
+			        Foreground="White"
+			        FontWeight="Bold"/>
         </Grid>
 
         <Grid Grid.Row="2" Margin="0,12,0,0">
             <ListBox x:Name="ChannelsListBox"
-                 HorizontalAlignment="Stretch"
-				 Grid.Row="0"
-				 ItemsSource="{Binding Channels}"
-				 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
-                 AlternationCount="255"
-				 SelectionChanged="ChannelsListBox_SelectionChanged"
-				 MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
-				 Margin="0"
-				 AllowDrop="True"
-				 PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
-				 PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
-				 Drop="ChannelsListBox_Drop"
-				 DragOver="ChannelsListBox_DragOver"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto">
-
+                     HorizontalAlignment="Stretch"
+				     Grid.Row="0"
+				     ItemsSource="{Binding Channels}"
+				     SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                     AlternationCount="512"
+				     SelectionChanged="ChannelsListBox_SelectionChanged"
+				     MouseDoubleClick="ChannelsListBox_MouseDoubleClick"
+				     Margin="0"
+				     AllowDrop="True"
+				     PreviewMouseLeftButtonDown="ChannelsListBox_PreviewMouseLeftButtonDown"
+				     PreviewMouseMove="ChannelsListBox_PreviewMouseMove"
+				     Drop="ChannelsListBox_Drop"
+				     DragOver="ChannelsListBox_DragOver"
+                     ScrollViewer.CanContentScroll="True"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" />
@@ -178,7 +178,15 @@
                     <DataTemplate>
                         <Border BorderBrush="LightGray" BorderThickness="1" Padding="8" Margin="8" Background="White" CornerRadius="3">
                             <StackPanel>
-                                <Grid>
+
+                                <Border x:Name="DragBorder"
+                                        Cursor="SizeAll"
+                                        Background="Transparent"
+                                        BorderBrush="Gray"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="4">
+                                    <Grid x:Name="ChannelHeader" Cursor="SizeAll">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -198,21 +206,22 @@
                                           Margin="0,0,8,0"
                                           Cursor="SizeAll"/>
                                     <TextBox x:Name="EditTextBox"
-										 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-										 Visibility="Collapsed"
-										 Grid.Column="1"
-										 Style="{StaticResource EditingTextBoxStyle}"
-										 KeyDown="EditTextBox_KeyDown"
-										 FocusManager.IsFocusScope="True"/>
+										     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+										     Visibility="Collapsed"
+										     Grid.Column="1"
+										     Style="{StaticResource EditingTextBoxStyle}"
+										     KeyDown="EditTextBox_KeyDown"
+										     FocusManager.IsFocusScope="True"/>
 
                                     <StackPanel x:Name="DisplayPanel" Orientation="Horizontal" Grid.Column="1">
-                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=(ItemsControl.AlternationIndex)}"
+                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}, Path=(ItemsControl.AlternationIndex), Converter={StaticResource ChannelIndexPlusOneConverter}}"
                                                    FontWeight="Bold"
                                                    Margin="0,0,6,0"
                                                    VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
+                                </Border>
 
                                 <Border x:Name="OptionsPanel"
 									    Visibility="Visible"
@@ -228,71 +237,58 @@
                                                 TabStripPlacement="Top"
                                                 Height="250"
                                                 Width="200">
+                                        <!-- TabItem range -->
                                         <TabItem Header="Channel">
-                                            <Grid>
+                                            <Grid Margin="4">
                                                 <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" SharedSizeGroup="TabContentHeight"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
+                                                <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
+                                                    <TextBlock Text="Select Channel Type:" 
+                                                               FontWeight="SemiBold" Margin="0,0,0,4"/>
 
-                                                <StackPanel Orientation="Vertical">
-                                                    <TextBlock Text="Select Channel Type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
                                                     <ComboBox ItemsSource="{Binding AvailableTypes}"
-											              SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-											              Width="180"/>
+                                                              SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+                                                              Width="Auto"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1*"/>
+                                                            <ColumnDefinition Width="1*"/>
 
-                                                    <StackPanel x:Name="RgbwPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <Slider Minimum="0" Maximum="255"
-												            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-												            TickFrequency="{Binding TickFrequency}"
-												            IsSnapToTickEnabled="True"
-												            SmallChange="{Binding TickFrequency}"
-												            LargeChange="{Binding TickFrequency}"
-												            TickPlacement="BottomRight"/>
-                                                        <TextBlock x:Name="sliderValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
-                                                    </StackPanel>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding TypeMinValue, Mode=TwoWay}">min</TextBlock>
+                                                        <TextBlock TextAlignment="Right" Grid.Column="1" Text="{Binding TypeMaxValue, Mode=TwoWay}">max</TextBlock>
+                                                    </Grid>
 
-                                                    <StackPanel x:Name="degreePanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
-                                                        <Slider Minimum="0" Maximum="180"
-									                        Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-									                        TickFrequency="{Binding TickFrequency}"
-									                        IsSnapToTickEnabled="True"
-									                        SmallChange="{Binding TickFrequency}"
-									                        LargeChange="{Binding TickFrequency}"
-									                        TickPlacement="BottomRight"/>
-                                                        <TextBlock x:Name="sliderDegreeValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
-                                                    </StackPanel>
 
-                                                    <StackPanel x:Name="degreeFullPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <!--<TextBlock Text="Intensiteit (0–255)" FontWeight="SemiBold" Margin="0,0,0,4"/>-->
-                                                        <Slider Minimum="0" Maximum="360"
-                                                            Value="{Binding Level, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                            TickFrequency="{Binding TickFrequency}"
-                                                            IsSnapToTickEnabled="True"
-                                                            SmallChange="{Binding TickFrequency}"
-                                                            LargeChange="{Binding TickFrequency}"
-                                                            TickPlacement="BottomRight"/>
-                                                        <TextBlock x:Name="sliderDegreeFullValue" Text="{Binding Level}" HorizontalAlignment="Right"/>
-                                                    </StackPanel>
+                                                </StackPanel>
 
-                                                    <StackPanel x:Name="CustomPanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
-                                                            <TextBlock Text="Type name" Margin="0,0,0,2"/>
-                                                            <TextBox Text="{Binding CustomTypeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
-                                                            <TextBlock Text="Range name" Margin="0,0,0,2"/>
-                                                            <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
-                                                        </StackPanel>
+                                                <StackPanel 
+                                                    Name="CustomTypePanel"
+                                                    Grid.Row="1">
+                                                <Border Grid.Row="1"
+                                                        Background="LightGreen"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Padding="10,1,10,10"
+                                                        Width="150"
+                                                        CornerRadius="6"
+                                                        BorderBrush="DarkGreen"
+                                                        BorderThickness="1">
+                                                    <StackPanel Orientation="Vertical">
 
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
-                                                            <TextBlock Text="Type Range" Margin="0,0,0,2"/>
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="1*"/>
-                                                                    <ColumnDefinition Width="1*"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <!-- MIN -->
-                                                                <TextBox Grid.Column="0"
+                                                        <TextBlock Text="New type name:" Margin="0,0,0,2"/>
+                                                        <TextBox Text="{Binding CustomTypeName, Mode=TwoWay}"
+                                                                 Padding="4"
+                                                                 Width="180"/>
+                                                        <!--<TextBlock Text="Enter Type Range:" Margin="0,0,0,2"/>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="1*"/>
+                                                                <ColumnDefinition Width="1*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBox Grid.Column="0"
                                                                      Text="{Binding CustomRangeMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                      Padding="4"
                                                                      Margin="0,0,6,0"
@@ -304,8 +300,7 @@
                                                                      MaxWidth="90"
                                                                      HorizontalAlignment="Stretch"
                                                              TextWrapping="NoWrap"/>
-                                                                <!-- MAX -->
-                                                                <TextBox Grid.Column="1"
+                                                            <TextBox Grid.Column="1"
                                                                      Text="{Binding CustomRangeMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                                      Padding="4"
                                                                      Style="{StaticResource WatermarkTextBoxStyle}"
@@ -316,127 +311,125 @@
                                                                      MaxWidth="90"
                                                                      HorizontalAlignment="Stretch"
                                                                      TextWrapping="NoWrap"/>
-                                                            </Grid>
-                                                        </StackPanel>
+                                                        </Grid>-->
 
-                                                        <StackPanel Orientation="Vertical">
-                                                            <TextBlock Text="Step Value" Margin="0,0,0,2"/>
-
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <Button Grid.Column="1"
-														            x:Name="addType"
-														            Content="Add type"
-														            Padding="6,2"
-														            Visibility="Collapsed"
-														            Command="{Binding AddCustomTypeCommand}"
-														            CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </StackPanel>
+                                                        <Button Content="Save"
+                                                                Margin="0,10,0,0"
+                                                                Padding="0,4"
+                                                                Command="{Binding AddCustomTypeCommand}"
+                                                                CommandParameter="{Binding .}"/>
                                                     </StackPanel>
 
-                                                    <StackPanel x:Name="RangePanel" Margin="0,10,0,0" Visibility="Collapsed">
-                                                        <TextBlock Text="Custom Type" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
-                                                            <TextBlock Text="Type name" Margin="0,0,0,2"/>
-
-                                                            <ComboBox ItemsSource="{Binding AvailableTypes}"
-					                                              SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-					                                              Width="180"/>
-                                                            <TextBlock Text="Range name" Margin="0,0,0,2"/>
-                                                            <TextBox Text="{Binding CustomRangeName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Padding="4"/>
-                                                        </StackPanel>
-
-                                                        <StackPanel Orientation="Vertical" Margin="0,0,0,6">
-                                                            <TextBlock Text="Type Range" Margin="0,0,0,2"/>
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="1*"/>
-                                                                    <ColumnDefinition Width="1*"/>
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <TextBox Grid.Column="0"
-                                                                     Text="{Binding CustomRangeMinValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                     Padding="4"
-                                                                     Margin="0,0,6,0"
-                                                                     Style="{StaticResource WatermarkTextBoxStyle}"
-                                                                     Tag="min"
-                                                                     PreviewTextInput="NumericOnly"
-                                                                     PreviewKeyDown="BlockSpace"
-                                                                     MinWidth="60"
-                                                                     MaxWidth="90"
-                                                                     HorizontalAlignment="Stretch"
-                                                                     TextWrapping="NoWrap"/>
-                                                                <!-- MAX -->
-                                                                <TextBox Grid.Column="1"
-                                                                     Text="{Binding CustomRangeMaxValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                     Padding="4"
-                                                                     Style="{StaticResource WatermarkTextBoxStyle}"
-                                                                     Tag="max"
-                                                                     PreviewTextInput="NumericOnly"
-                                                                     PreviewKeyDown="BlockSpace"
-                                                                     MinWidth="60"
-                                                                     MaxWidth="90"
-                                                                     HorizontalAlignment="Stretch"
-                                                                     TextWrapping="NoWrap"/>
-                                                            </Grid>
-                                                        </StackPanel>
-
-                                                        <StackPanel Orientation="Vertical">
-                                                            <TextBlock Text="Step Value" Margin="0,0,0,2"/>
-
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
-
-                                                                <Button Grid.Column="1"
-													                x:Name="addRange"
-													                Content="Add type"
-													                Padding="6,2"
-													                Visibility="Collapsed"
-													                Command="{Binding AddCustomRangeCommand}"
-													                CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </StackPanel>
-                                                    </StackPanel>
-
+                                                </Border>
                                                 </StackPanel>
                                             </Grid>
                                         </TabItem>
-                                        <TabItem Header="Effects">
-                                            <Grid>
+                                        <!-- TabItem range -->
+                                        <TabItem Header="Range">
+                                            <TabItem.Style>
+                                                <Style TargetType="TabItem">
+                                                    <Setter Property="IsEnabled" Value="True" />
+                                                    <Style.Triggers>
+                                                        <!-- Disable when placeholder type is selected -->
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Select a type">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Custom">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TabItem.Style>
+                                            <Grid Margin="10">
                                                 <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" SharedSizeGroup="TabContentHeight"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
+                                                <Button Grid.Row="0"
+                                                        Content="+ Add Range"
+                                                        Padding="6,4"
+                                                        Margin="0,0,0,10"
+                                                        Command="{Binding AddRangeCommand}" />
+                                                <ListBox Grid.Row="1"
+                                                         ItemsSource="{Binding Ranges}"
+                                                         SelectedItem="{Binding SelectedRange, Mode=TwoWay}"
+                                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                                <StackPanel Orientation="Vertical" Margin="6">
-                                                <CheckBox Content="Enable Effect"
-                                                          IsChecked="{Binding EffectEnabled, Mode=TwoWay}" 
-                                                          Margin="0,0,0,8"/>
+                                                                <TextBox Grid.Column="0"
+                                                                         Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         FontWeight="SemiBold"
+                                                                         VerticalAlignment="Center"
+                                                                         Margin="0,0,10,0"/>
 
-                                                <TextBlock Text="Select Effect Type:" Margin="0,0,0,4" FontWeight="SemiBold"/>
-                                                <ComboBox ItemsSource="{Binding AvailableEffects}"
-                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
-                                                          Width="180"/>
+                                                                <StackPanel Grid.Column="1"
+                                                                            Orientation="Horizontal"
+                                                                            HorizontalAlignment="Stretch"
+                                                                            VerticalAlignment="Center">
+                                                                    <TextBox Text="{Binding MinR, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                             Width="40"
+                                                                             HorizontalAlignment="Left"
+                                                                             VerticalAlignment="Center"/>
+                                                                    <TextBlock Text=" - "
+                                                                               VerticalAlignment="Center"
+                                                                               Margin="5,0"/>
+                                                                    <TextBox Text="{Binding MaxR, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                             Width="40"
+                                                                             HorizontalAlignment="Left"
+                                                                             VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                            </Grid>
+                                        </TabItem>
+                                        <!-- TabItem effect type -->
+                                        <TabItem Header="Effects">
+                                            <Grid Margin="10">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <Button Grid.Row="0"
+                                                        Content="+ Add Effect"
+                                                        Padding="6,4"
+                                                        Margin="0,0,0,10"
+                                                        Command="{Binding AddEffectCommand}" />
+                                                <ListBox Grid.Row="1"
+                                                         ItemsSource="{Binding Effects}"
+                                                         SelectedItem="{Binding SelectedEffect, Mode=TwoWay}"
+                                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding DataContext.AvailableEffects, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center"
+                                                                          Margin="0,0,8,0"/>
 
-                                                <TextBlock Text="Effect Time (ms):" Margin="0,10,0,4"/>
-                                                <TextBox Text="{Binding EffectTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="100"/>
-
-                                                <TextBlock Text="Minimum Value (0-255):" Margin="0,10,0,4"/>
-                                                <TextBox Text="{Binding EffectMin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="100"/>
-
-                                                <TextBlock Text="Maximum Value (0-255):" Margin="0,10,0,4"/>
-                                                <TextBox Text="{Binding EffectMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                         Width="100"/>
-                                            </StackPanel>
+                                                                <Button Grid.Column="1"
+                                                                        Content="🗑"
+                                                                        Command="{Binding DataContext.DeleteEffectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        VerticalAlignment="Center"
+                                                                        HorizontalAlignment="Right"
+                                                                        Width="30"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
                                             </Grid>
                                         </TabItem>
                                     </TabControl>
@@ -456,6 +449,7 @@
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                 <Setter TargetName="DisplayPanel" Property="Visibility" Value="Collapsed" />
+                                
                                 <Setter TargetName="EditTextBox" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="EditTextBox" Property="FocusManager.FocusedElement" Value="{Binding ElementName=EditTextBox}" />
                             </DataTrigger>
@@ -463,44 +457,14 @@
                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                 <Setter TargetName="OptionsPanel" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="DeleteButton" Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsSliderType}" Value="True">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsSliderType}" Value="False">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                                
                             </DataTrigger>
 
                             <DataTrigger Binding="{Binding IsCustomType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="CustomTypePanel" Property="Visibility" Value="Visible" />
                             </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsAddRangeType}" Value="True">
-                                <Setter TargetName="RangePanel" Property="Visibility" Value="Visible"/>
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addRange" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding IsDegreeHType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="degreePanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsDegreeFType}" Value="True">
-                                <Setter TargetName="CustomPanel" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="RgbwPanel"   Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="addType" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="degreeFullPanel" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-
-                            <DataTrigger Binding="{Binding ShowSliderPanel}" Value="True">
-                                <Setter TargetName="RgbwPanel" Property="Visibility" Value="Collapsed"/>
+                            <DataTrigger Binding="{Binding IsCustomType}" Value="False">
+                                <Setter TargetName="CustomTypePanel" Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
 
                         </DataTemplate.Triggers>
