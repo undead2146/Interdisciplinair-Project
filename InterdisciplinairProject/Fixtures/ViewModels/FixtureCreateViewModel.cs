@@ -318,9 +318,20 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
+            // Generate unique channel name by counting existing channels
+            int channelNumber = Channels.Count + 1;
+            string channelName = $"Channel {channelNumber}";
+
+            // Ensure uniqueness in case user deleted middle channels
+            while (Channels.Any(c => c.Name == channelName))
+            {
+                channelNumber++;
+                channelName = $"Channel {channelNumber}";
+            }
+
             var newModel = new Channel
             {
-                Name = "Lamp",
+                Name = channelName,
                 Type = "Lamp",
                 Value = "0",
             };
