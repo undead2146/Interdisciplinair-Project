@@ -193,7 +193,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             // Kan niet hernoemen als de oude map niet bestaat of de nieuwe map al bestaat.
             if (!Directory.Exists(oldPath) || Directory.Exists(newPath))
             {
-                MessageBox.Show($"Kan niet hernoemen. De map '{newName}' bestaat al, of de map '{oldName}' is niet gevonden.", "Hernoemfout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Can't rename. '{newName}' already exists, or '{oldName}' couldn't be found", "Renaming error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -294,7 +294,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         // --------------------------------------------------------------------------------------
         // COMMANDS
         // --------------------------------------------------------------------------------------
-
         private bool CanStartEdit(ManufacturerItem? item)
         {
             if (item == null || item.IsSystemItem)
