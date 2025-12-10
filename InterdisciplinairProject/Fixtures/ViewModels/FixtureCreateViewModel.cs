@@ -234,6 +234,21 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
+            // Check for duplicate channel names
+            var duplicateChannelNames = Channels
+                .GroupBy(ch => ch.Name)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicateChannelNames.Any())
+            {
+                string duplicates = string.Join(", ", duplicateChannelNames);
+                MessageBox.Show($"Channel names must be unique. Duplicate names found: {duplicates}",
+                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             // 🔧 Vul het Fixture model
             _currentFixture.Name = FixtureName;
             _currentFixture.Manufacturer = SelectedManufacturer ?? "Unknown";
@@ -303,23 +318,33 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
-            if (Channels.Count < 512)
+            if (Channels.Count >= 512)
             {
-                var newModel = new Channel
-                {
-                    Name = "Select a type",
-                    Type = "Select a type",
-                    Value = "0",
-                    Min = 0,
-                    Max = 255,
-                };
-                Channels.Add(new ChannelItem(newModel));
-                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
+                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            else{
-                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            // Generate unique channel name by counting existing channels
+            int channelNumber = Channels.Count + 1;
+            string channelName = $"Channel {channelNumber}";
+
+            // Ensure uniqueness in case user deleted middle channels
+            while (Channels.Any(c => c.Name == channelName))
+            {
+                channelNumber++;
+                channelName = $"Channel {channelNumber}";
             }
+
+            var newModel = new Channel
+            {
+                Name = channelName,
+                Type = "Select a type",
+                Value = "0",
+                Min = 0,
+                Max = 255,
+            };
+            Channels.Add(new ChannelItem(newModel));
+            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
         }
 
         private bool CanDeleteChannel(ChannelItem? channel)

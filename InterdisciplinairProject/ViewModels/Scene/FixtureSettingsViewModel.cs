@@ -11,7 +11,12 @@ namespace InterdisciplinairProject.ViewModels;
 /// </summary>
 public class FixtureSettingsViewModel : INotifyPropertyChanged
 {
+    private const int DebounceDelayMs = 50; // Debounce delay in milliseconds
+
     private readonly IHardwareConnection _hardwareConnection;
+    private readonly Dictionary<string, CancellationTokenSource> _debounceTokens = new();
+    private readonly object _debounceLock = new();
+
     private Fixture? _currentFixture;
 
     // NIEUW: Houdt de laatst opgeslagen waarden bij voor de Cancel-functionaliteit.
@@ -74,7 +79,24 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         _currentFixture = fixture;
 
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
-        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+        // Use GroupBy to handle potential duplicate channel names - take the first occurrence
+        _initialChannelValues = new Dictionary<string, byte?>(
+            fixture.Channels
+                .GroupBy(c => c.Name)
+                .Select(g => g.First())
+                .ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+
+        // Log warning if duplicates were found
+        var duplicates = fixture.Channels
+            .GroupBy(c => c.Name)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicates.Any())
+        {
+            Debug.WriteLine($"[WARNING] Fixture '{fixture.Name}' has duplicate channel names: {string.Join(", ", duplicates)}");
+        }
 
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
@@ -191,14 +213,24 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] LoadChannelsFromFixture complete. Total channels loaded: {Channels.Count}");
     }
 
-    // Deze methode blijft verantwoordelijk voor de LIVE update naar de hardware
+    /// <summary>
+    /// Handles channel value changes and sends updates to the DMX hardware in real-time.
+    /// Uses debouncing to prevent UI lag during rapid slider movements.
+    /// This method is responsible for the LIVE DMX update flow:
+    /// 1. User adjusts a slider in the UI.
+    /// 2. Channel value is updated in the fixture model immediately (for UI responsiveness).
+    /// 3. After a short debounce delay, hardware connection sends the DMX update.
+    /// 4. Multiple rapid changes are coalesced into a single DMX update.
+    /// </summary>
+    /// <param name="sender">The channel view model that changed.</param>
+    /// <param name="e">The property changed event args.</param>
     private async void ChannelViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ChannelViewModel.Value) && sender is ChannelViewModel channelVm)
         {
             Debug.WriteLine($"[DEBUG] Channel value changed: {channelVm.Name} = {channelVm.Value}");
 
-            // Update the fixture model (tijdelijk)
+            // Update the fixture model immediately (for UI responsiveness)
             if (_currentFixture != null)
             {
                 var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
@@ -209,13 +241,68 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
                 Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
 
-                // Send to hardware connection (LIVE)
+                // Debounce the DMX hardware update
+                await DebouncedSendToHardwareAsync(channelVm.Name, channelVm.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sends the channel value to hardware with debouncing.
+    /// Cancels any pending update for the same channel and schedules a new one.
+    /// </summary>
+    /// <param name="channelName">The name of the channel.</param>
+    /// <param name="value">The value to send.</param>
+    private async Task DebouncedSendToHardwareAsync(string channelName, byte value)
+    {
+        CancellationTokenSource newCts;
+
+        lock (_debounceLock)
+        {
+            // Cancel any existing pending update for this channel
+            if (_debounceTokens.TryGetValue(channelName, out var existingCts))
+            {
+                existingCts.Cancel();
+                existingCts.Dispose();
+            }
+
+            // Create a new cancellation token for this update
+            newCts = new CancellationTokenSource();
+            _debounceTokens[channelName] = newCts;
+        }
+
+        try
+        {
+            // Wait for the debounce delay
+            await Task.Delay(DebounceDelayMs, newCts.Token);
+
+            // If we get here, the delay completed without cancellation
+            // Send the update to hardware
+            if (_currentFixture != null)
+            {
                 var result = await _hardwareConnection.SetChannelValueAsync(
                     _currentFixture.InstanceId,
-                    channelVm.Name,
-                    channelVm.Value);
+                    channelName,
+                    value);
 
                 Debug.WriteLine($"[DEBUG] SetChannelValueAsync returned: {result}");
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // This is expected when a newer value comes in before the delay completes
+            Debug.WriteLine($"[DEBUG] Debounced update cancelled for {channelName} (newer value pending)");
+        }
+        finally
+        {
+            // Clean up the token if it's still the current one
+            lock (_debounceLock)
+            {
+                if (_debounceTokens.TryGetValue(channelName, out var currentCts) && currentCts == newCts)
+                {
+                    _debounceTokens.Remove(channelName);
+                    newCts.Dispose();
+                }
             }
         }
     }

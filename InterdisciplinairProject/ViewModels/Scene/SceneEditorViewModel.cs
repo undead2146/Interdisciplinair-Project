@@ -71,7 +71,7 @@ public partial class SceneEditorViewModel : ObservableObject
     public event EventHandler<SceneModel>? SceneUpdated;
 
     /// <summary>
-    /// Action to request showing the Fixture Registry.
+    /// Gets or sets the action to request showing the Fixture Registry.
     /// The ScenebuilderViewModel will set this callback.
     /// </summary>
     public Action<Action<Fixture>>? OnRequestFixtureRegistry { get; set; }
@@ -180,6 +180,44 @@ public partial class SceneEditorViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Previews the scene by sending all fixture values to the DMX controller.
+    /// </summary>
+    [RelayCommand]
+    private async Task PreviewScene()
+    {
+        try
+        {
+            Debug.WriteLine($"[DEBUG] PreviewScene button clicked for scene '{Scene.Name}'");
+
+            if (Scene.Fixtures == null || Scene.Fixtures.Count == 0)
+            {
+                MessageBox.Show("De scene bevat geen fixtures om te testen.", "Geen Fixtures", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            Debug.WriteLine($"[DEBUG] Sending scene with {Scene.Fixtures.Count} fixtures to DMX controller");
+
+            bool success = await _hardwareConnection.SendSceneAsync(Scene);
+
+            if (success)
+            {
+                Debug.WriteLine("[DEBUG] Scene preview sent successfully");
+                MessageBox.Show($"Scene '{Scene.Name}' succesvol naar DMX controller gestuurd!", "Preview Gelukt", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                Debug.WriteLine("[DEBUG] Scene preview failed");
+                MessageBox.Show("Fout bij het versturen van de scene naar de DMX controller. Controleer of een COM poort beschikbaar is.", "Preview Mislukt", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Error previewing scene: {ex.Message}");
+            MessageBox.Show($"Error bij het versturen van de scene: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
     /// Adds a new fixture to the scene.
     /// Shows the Fixture Registry List in the left panel.
     /// </summary>
@@ -243,6 +281,7 @@ public partial class SceneEditorViewModel : ObservableObject
                         Debug.WriteLine($"[DEBUG] User cancelled adding fixture due to address conflict");
                         return;
                     }
+
                     // If No: add with conflicting address (user knows what they're doing)
                 }
                 else
@@ -273,21 +312,25 @@ public partial class SceneEditorViewModel : ObservableObject
                     Min = ch.Min,
                     Max = ch.Max,
                     Time = ch.Time,
-                    ChannelEffect = ch.ChannelEffect
+                    ChannelEffect = ch.ChannelEffect,
                 })),
                 ChannelDescriptions = new Dictionary<string, string>(selectedFixture.ChannelDescriptions),
                 StartAddress = selectedFixture.StartAddress,
-                ImageBase64 = selectedFixture.ImageBase64
+                ImageBase64 = selectedFixture.ImageBase64,
             };
 
             // Add to the scene
             SceneFixtures.Add(new SceneFixture
             {
                 Fixture = newFixture,
-                StartChannel = newFixture.StartAddress
+                StartChannel = newFixture.StartAddress,
             });
 
             Debug.WriteLine($"[DEBUG] Fixture '{newFixture.Name}' added to scene at DMX address {newFixture.StartAddress}");
+
+            // Save the scene to persist the new fixture
+            await AutoSaveScene();
+            Debug.WriteLine($"[DEBUG] Scene auto-saved after adding fixture '{newFixture.Name}'");
 
             MessageBox.Show(
                 $"Fixture '{newFixture.Name}' succesvol toegevoegd aan scene!",
