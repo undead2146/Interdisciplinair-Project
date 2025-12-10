@@ -129,9 +129,30 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void OpenFixtureBuilder()
     {
+        // If you're already *inside* fixture builder AND currently creating a fixture -> warn first
+        if (_mainWindowFixturesViewModel.CurrentViewModel is FixtureCreateViewModel)
+        {
+            var result = MessageBox.Show(
+                "You are currently creating a fixture.\n\n" +
+                "If you continue, all unsaved changes will be lost.\n\n" +
+                "Do you want to discard your changes and return to the fixture list?",
+                "Discard changes?",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (result != MessageBoxResult.Yes)
+                return;
+        }
+
+        // Always reset inner view back to the list
+        _mainWindowFixturesViewModel.GoBackCommand.Execute(null);
+
+        // Show fixture screen in main window
         CurrentView = new MainWindowFixtures(_mainWindowFixturesViewModel);
         Title = "InterdisciplinairProject - Fixture Builder";
     }
+
 
     /// <summary>
     /// Opens the show builder view.
