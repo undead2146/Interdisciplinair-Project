@@ -9,14 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Fixtures\Data\allTypes.json" />
     <None Remove="Fixtures\Views\defaultFixturePng.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Fixtures\Data\allTypes.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Fixtures\Views\defaultFixturePng.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

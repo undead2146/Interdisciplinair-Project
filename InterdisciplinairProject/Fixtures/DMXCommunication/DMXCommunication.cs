@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace InterdisciplinairProject.Fixtures.Communication
@@ -12,32 +13,27 @@ namespace InterdisciplinairProject.Fixtures.Communication
         /// <summary>
         /// Sends a standard DMX512 frame to the specified COM port.
         /// </summary>
-        /// <param name="comPort">The COM port name (e.g., "COM3").</param>
-        /// <param name="data">The DMX channel data (up to 512 bytes).</param>
-        public static void SendDMXFrame(string comPort, byte[] data)
+        /// <param name="serialPort">The COM port name (e.g., "COM3").</param>
+        /// <param name="universe">The DMX channel data (up to 512 bytes).</param>
+        public static void SendDMXFrame(string serialPort, byte[] universe)
         {
             try
             {
-                // Ensure all values are 0–255 using modulo 255
-                for (int i = 0; i < data.Length; i++)
-                    data[i] = (byte)(data[i] % 255);
-
-                using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two);
+                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Open();
-                Thread.Sleep(1); // small delay
 
-                // BREAK
+                // Break + start code
+                Thread.Sleep(1);
                 sp.BreakState = true;
                 Thread.Sleep(1);
                 sp.BreakState = false;
 
-                // MAB
                 SpinWait.SpinUntil(() => false, TimeSpan.FromTicks(10));
 
-                // STARTCODE + DATA
-                byte[] frame = new byte[data.Length + 1];
-                frame[0] = 0x00; // STARTCODE
-                Array.Copy(data, 0, frame, 1, data.Length);
+                // DMX frame: start code + universe
+                byte[] frame = new byte[universe.Length + 1];
+                frame[0] = 0x00;
+                Array.Copy(universe, 0, frame, 1, universe.Length);
 
                 sp.Write(frame, 0, frame.Length);
             }
@@ -50,14 +46,13 @@ namespace InterdisciplinairProject.Fixtures.Communication
         /// <summary>
         /// Sends an ELO (Cable) frame to the specified COM port.
         /// </summary>
-        /// <param name="comPort">The COM port name (e.g., "COM3").</param>
-        /// <param name="channelBytes">The channel data bytes to send.</param>
-        public static void SendELOFrame(string comPort, byte[] channelBytes)
+        /// <param name="serialPort">The COM port name (e.g., "COM3").</param>
+        /// <param name="universe">The channel data bytes to send.</param>
+        public static void SendELOFrame(string serialPort, byte[] universe)
         {
             try
             {
-                // Byte values are already constrained to 0-255, no modification needed
-                using var sp = new SerialPort(comPort, 250000, Parity.None, 8, StopBits.Two)
+                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
                 {
                     Handshake = Handshake.None,
                     ReadTimeout = 100,
@@ -65,25 +60,73 @@ namespace InterdisciplinairProject.Fixtures.Communication
                 };
                 sp.Open();
 
-                // Give adapter time to settle
-                Thread.Sleep(20);
+                Thread.Sleep(5);
 
                 byte[] start = { 0x00, 0xFF, 0x00 };
                 byte[] stop = { 0xFF, 0xF0, 0xF0 };
 
-                // Build complete frame: START + DATA + STOP
-                byte[] frame = new byte[start.Length + channelBytes.Length];
+                // Pad data to at least 10 bytes for single-channel sends
+                int minLength = 10;
+                byte[] padded = new byte[Math.Max(universe.Length, minLength)];
+                Array.Copy(universe, padded, universe.Length);
+
+                // Build complete frame: START + PADDED DATA + STOP
+                byte[] frame = new byte[start.Length + padded.Length + stop.Length];
                 Array.Copy(start, 0, frame, 0, start.Length);
-                Array.Copy(channelBytes, 0, frame, start.Length, channelBytes.Length);
+                Array.Copy(padded, 0, frame, start.Length, padded.Length);
+                Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
 
-                // Array.Copy(stop, 0, frame, start.Length + channelBytes.Length, stop.Length);
-
-                // Send everything in ONE WRITE
                 sp.Write(frame, 0, frame.Length);
             }
             catch (Exception ex)
             {
                 throw new Exception("ELO ERROR: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Sends an ELO frame over WiFi/TCP to the specified IP address and port.
+        /// </summary>
+        /// <param name="ipAddress">The IP address of the DMX controller.</param>
+        /// <param name="port">The port number to connect to.</param>
+        /// <param name="channelBytes">The channel data bytes to send.</param>
+        public static void SendELOWifiFrame(string ipAddress, int port, byte[] channelBytes)
+        {
+            try
+            {
+                for (int i = 0; i < channelBytes.Length; i++)
+                    channelBytes[i] = (byte)(channelBytes[i] % 255);
+
+                byte[] start = { 0x00, 0xFF, 0x00 };
+                byte[] stop = { 0xFF, 0xF0, 0xF0 };
+
+                // Pad data to at least 10 bytes for single-channel sends
+                int minLength = 10;
+                byte[] padded = new byte[Math.Max(channelBytes.Length, minLength)];
+                Array.Copy(channelBytes, padded, channelBytes.Length);
+
+                byte[] frame = new byte[start.Length + padded.Length + stop.Length];
+                Array.Copy(start, 0, frame, 0, start.Length);
+                Array.Copy(padded, 0, frame, start.Length, padded.Length);
+                Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
+
+                using TcpClient client = new TcpClient();
+                client.ReceiveTimeout = 500;
+                client.SendTimeout = 500;
+
+                client.Connect(ipAddress, port);
+
+                using NetworkStream stream = client.GetStream();
+                stream.Write(frame, 0, frame.Length);
+                stream.Flush();
+            }
+            catch (SocketException ex)
+            {
+                throw new Exception($"ELO WIFI ERROR: Could not connect to {ipAddress}:{port} — {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("ELO WIFI ERROR: " + ex.Message);
             }
         }
     }

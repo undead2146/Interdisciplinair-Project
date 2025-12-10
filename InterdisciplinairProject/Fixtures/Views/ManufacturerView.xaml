@@ -27,6 +27,11 @@
             <Setter Property="Margin" Value="0,0,0,15"/>
         </Style>
 
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
         <DataTemplate x:Key="ManufacturerItemTemplate" DataType="{x:Type vm:ManufacturerItem}">
             <Grid Margin="0,5">
                 <Grid.ColumnDefinitions>
@@ -54,7 +59,6 @@
                         Command="{Binding DataContext.StartEditCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                         CommandParameter="{Binding}"
                         Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                        
                         />
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" 
@@ -77,14 +81,24 @@
                         Content="🗑 Delete" 
                         Margin="5,0"
                         Command="{Binding DataContext.DeleteManufacturerCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                        CommandParameter="{Binding}"
-                        Foreground="{Binding IsEmpty, Converter={StaticResource DeleteButtonForegroundConverter}}"
-                        
-                        />
+                        CommandParameter="{Binding}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="Gray"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
             </Grid>
         </DataTemplate>
 
     </UserControl.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -92,8 +106,27 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Manufacturer Management" Style="{StaticResource TitleStyle}"/>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
+            <TextBlock Grid.Column="0" Text="Manufacturer Management" HorizontalAlignment="Right" Style="{StaticResource TitleStyle}"/>
+
+            <Button 
+                    Content="Back" 
+                    Width="80"
+                    Height="28"
+                    Style="{StaticResource BackButtonStyle}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Command="{Binding DataContext.GoBackCommand,
+                              RelativeSource={RelativeSource FindAncestor, 
+                              AncestorType={x:Type UserControl}, 
+                              AncestorLevel=2}}" Margin="0,0,0,8"
+                    />
+        </Grid>
 
         <ListView Grid.Row="2" 
                   ItemsSource="{Binding Manufacturers}" 
