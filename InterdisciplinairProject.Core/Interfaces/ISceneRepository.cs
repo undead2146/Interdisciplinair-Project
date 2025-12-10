@@ -41,4 +41,24 @@ public interface ISceneRepository
     /// <param name="fixture">The fixture to remove.</param>
     /// <returns>A task.</returns>
     Task RemoveFixtureAsync(string sceneId, Fixture? fixture);
+
+    /// <summary>
+    /// Deletes all scenes.
+    /// </summary>
+    /// <returns>A task.</returns>
+    Task DeleteAllScenesAsync();
+
+    /// <summary>
+    /// Validates and imports scenes from a JSON file.
+    /// </summary>
+    /// <param name="filePath">The path to the JSON file.</param>
+    /// <returns>A tuple with imported scenes and any validation errors.</returns>
+    Task<(List<Scene> ImportedScenes, string? Error)> ImportScenesFromFileAsync(string filePath);
+
+    /// <summary>
+    /// Exports all scenes to a JSON file.
+    /// </summary>
+    /// <param name="filePath">The path to save the JSON file.</param>
+    /// <returns>A task representing the operation, with an error message if failed.</returns>
+    Task<string?> ExportScenesToFileAsync(string filePath);
 }

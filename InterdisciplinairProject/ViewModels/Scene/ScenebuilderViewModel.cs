@@ -51,7 +51,7 @@ public partial class ScenebuilderViewModel : ObservableObject
         _hardwareConnection = hardwareConnection;
 
         // Seed test fixtures
-       
+
         // Toon standaard de Scene List View
         ShowSceneList();
 
@@ -231,24 +231,23 @@ public partial class ScenebuilderViewModel : ObservableObject
                 {
                     try
                     {
-                        // Extract scene uit JSON bestand (Show.Model.Scene)
-                        var showModelScene = Show.SceneExtractor.ExtractScene(filePath);
+                        // Gebruik de nieuwe import methode met validatie
+                        var (importedScenes, error) = await _sceneRepository.ImportScenesFromFileAsync(filePath);
 
-                        // MAP naar InterdisciplinairProject.Core.Models.Scene
-                        var importedScene = new InterdisciplinairProject.Core.Models.Scene
+                        if (error != null)
                         {
-                            Id = Guid.NewGuid().ToString(),
-                            Name = showModelScene.Name,
-                            Dimmer = showModelScene.Dimmer,
-                            Fixtures = new System.Collections.Generic.List<InterdisciplinairProject.Core.Models.Fixture>(),
-                        };
-
-                        // Sla de scene op via repository
-                        await _sceneRepository.SaveSceneAsync(importedScene);
-
-                        // Voeg toe aan de lijst
-                        Scenes.Add(importedScene);
-                        successCount++;
+                            failCount++;
+                            errorMessages.Add($"{System.IO.Path.GetFileName(filePath)}: {error}");
+                        }
+                        else
+                        {
+                            // Voeg alle geïmporteerde scenes toe aan de lijst
+                            foreach (var scene in importedScenes)
+                            {
+                                Scenes.Add(scene);
+                                successCount++;
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -269,7 +268,7 @@ public partial class ScenebuilderViewModel : ObservableObject
                 else if (successCount > 0 && failCount > 0)
                 {
                     MessageBox.Show(
-                        $"{successCount} scene(s) geïmporteerd, {failCount} gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
+                        $"{successCount} scene(s) geïmporteerd, {failCount} bestand(en) gefaald.\n\nErrors:\n{string.Join("\n", errorMessages)}",
                         "Import gedeeltelijk succesvol",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
@@ -287,6 +286,89 @@ public partial class ScenebuilderViewModel : ObservableObject
         catch (Exception ex)
         {
             MessageBox.Show($"Fout bij importeren van scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Exports all scenes to a JSON file.
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportScenes()
+    {
+        try
+        {
+            if (Scenes.Count == 0)
+            {
+                MessageBox.Show("Er zijn geen scenes om te exporteren.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // Open save file dialog
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Exporteer scenes naar bestand",
+                Filter = "JSON bestanden (*.json)|*.json|Alle bestanden (*.*)|*.*",
+                DefaultExt = "json",
+                FileName = $"scenes_export_{DateTime.Now:yyyyMMdd_HHmmss}",
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                var error = await _sceneRepository.ExportScenesToFileAsync(saveFileDialog.FileName);
+
+                if (error != null)
+                {
+                    MessageBox.Show(error, "Export gefaald", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"{Scenes.Count} scene(s) succesvol geëxporteerd naar:\n{saveFileDialog.FileName}",
+                        "Export succesvol",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij exporteren van scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Deletes all scenes.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteAllScenes()
+    {
+        try
+        {
+            if (Scenes.Count == 0)
+            {
+                MessageBox.Show("Er zijn geen scenes om te verwijderen.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Weet je zeker dat je ALLE {Scenes.Count} scene(s) wilt verwijderen?\n\nDeze actie kan niet ongedaan gemaakt worden.",
+                "Alle scenes verwijderen",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await _sceneRepository.DeleteAllScenesAsync();
+                Scenes.Clear();
+                SelectedScene = null;
+                CurrentView = null;
+
+                MessageBox.Show("Alle scenes zijn verwijderd.", "Verwijderd", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Fout bij verwijderen van alle scenes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
