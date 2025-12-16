@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Models.Enums;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -123,6 +124,21 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             if (channel != null)
             {
                 channel.Parameter = channelVm.Value;
+
+                // Update the channel effects list based on selection
+                channel.ChannelEffects.Clear();
+                foreach (var option in channelVm.EffectOptions)
+                {
+                    if (option.IsSelected)
+                    {
+                        channel.ChannelEffects.Add(new ChannelEffect
+                        {
+                            EffectType = option.Type,
+                            Enabled = true,
+                            // Retain defaults for other properties
+                        });
+                    }
+                }
             }
         }
 
@@ -199,7 +215,9 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         foreach (var channel in fixture.Channels)
         {
             var type = ParseChannelType(channel.Type);
-            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type);
+
+            // Pass the list of effects
+            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type, channel.ChannelEffects);
             Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}, Type: {channel.Type} -> {type}");
 
             // Subscribe to channel value changes

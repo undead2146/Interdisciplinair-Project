@@ -101,7 +101,135 @@
                                 <TextBlock Text="{Binding Name}"
                                            HorizontalAlignment="Center"
                                            FontWeight="SemiBold"
-                                           Margin="0,0,0,10"/>
+                                           Margin="0,0,0,5"/>
+
+                                <!-- Effect Dropdown Button -->
+                                <ToggleButton x:Name="EffectsButton"
+                                              Content="Effects"
+                                              HorizontalAlignment="Center"
+                                              MinWidth="80"
+                                              Margin="0,0,0,10"
+                                              Background="#FF2D6CDF"
+                                              Foreground="White"
+                                              BorderThickness="0"
+                                              Padding="8,4"
+                                              FontSize="11"
+                                              FontWeight="SemiBold"
+                                              Cursor="Hand">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="Border"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="12"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ContentPresenter Grid.Column="0"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"
+                                                                      Margin="0,0,4,0"/>
+                                                    <!-- Chevron Down -->
+                                                    <Path Grid.Column="1"
+                                                          Data="M 0 0 L 4 4 L 8 0 Z"
+                                                          Fill="White"
+                                                          VerticalAlignment="Center"
+                                                          Margin="4,0,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="#FF2458B3"/>
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="#FF1A4A8F"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <!-- Custom Popup for Multi-Selection -->
+                                <Popup PlacementTarget="{Binding ElementName=EffectsButton}"
+                                       Placement="Bottom"
+                                       IsOpen="{Binding ElementName=EffectsButton, Path=IsChecked, Mode=TwoWay}"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True"
+                                       PopupAnimation="Slide">
+                                    <Border Background="White"
+                                            BorderBrush="#FFD0D0D0"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Padding="4"
+                                            Margin="0,4,0,0">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#000000"
+                                                              Opacity="0.1"
+                                                              BlurRadius="4"
+                                                              ShadowDepth="2"/>
+                                        </Border.Effect>
+                                        <ItemsControl ItemsSource="{Binding EffectOptions}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsSelected}"
+                                                              Content="{Binding Name}"
+                                                              Margin="4,2"
+                                                              Padding="4,0,0,0"
+                                                              FontSize="11"
+                                                              Cursor="Hand">
+                                                        <CheckBox.Style>
+                                                            <Style TargetType="CheckBox">
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="CheckBox">
+                                                                            <Border x:Name="RowBorder"
+                                                                                    Background="Transparent"
+                                                                                    CornerRadius="2"
+                                                                                    Padding="6,4">
+                                                                                <Grid>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <!-- Check/Tick Icon -->
+                                                                                    <Path x:Name="CheckMark"
+                                                                                          Grid.Column="0"
+                                                                                          Data="M 0 5 L 3 8 L 8 0"
+                                                                                          Stroke="#FF2D6CDF"
+                                                                                          StrokeThickness="2"
+                                                                                          Visibility="Hidden"
+                                                                                          VerticalAlignment="Center"
+                                                                                          Margin="0,0,8,0"/>
+
+                                                                                    <ContentPresenter Grid.Column="1"
+                                                                                                      Content="{TemplateBinding Content}"
+                                                                                                      VerticalAlignment="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="RowBorder" Property="Background" Value="#F0F5FF"/>
+                                                                                </Trigger>
+                                                                                <Trigger Property="IsChecked" Value="True">
+                                                                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                                                    <Setter TargetName="RowBorder" Property="Background" Value="#E6F0FF"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </CheckBox.Style>
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                </Popup>
                             </StackPanel>
 
                             <!-- Slider - This will fill remaining vertical space -->
