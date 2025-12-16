@@ -2,6 +2,7 @@
 using System.IO.Ports;
 using System.Net.Sockets;
 using System.Threading;
+using System.Diagnostics;
 
 namespace InterdisciplinairProject.Fixtures.Communication
 {
@@ -17,7 +18,6 @@ namespace InterdisciplinairProject.Fixtures.Communication
                 using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Open();
 
-                // Break + start code
                 Thread.Sleep(1);
                 sp.BreakState = true;
                 Thread.Sleep(1);
@@ -25,7 +25,6 @@ namespace InterdisciplinairProject.Fixtures.Communication
 
                 SpinWait.SpinUntil(() => false, TimeSpan.FromTicks(10));
 
-                // DMX frame: start code + universe
                 byte[] frame = new byte[universe.Length + 1];
                 frame[0] = 0x00;
                 Array.Copy(universe, 0, frame, 1, universe.Length);
@@ -39,12 +38,25 @@ namespace InterdisciplinairProject.Fixtures.Communication
         }
 
         // ======================
-        // ELO FRAME (SERIAL CABLE)
+        // DEBUG HELPER (ELO) -- COMMENTED
         // ======================
-        public static void SendELOFrame(string serialPort, byte[] universe)
+        private static void DebugELOFrame(string transport, byte[] data, byte[] frame)
+        {
+            // Debug.WriteLine($"[ELO {transport}] DataLength={data.Length}");
+            // Debug.WriteLine($"[ELO {transport}] Data : {BitConverter.ToString(data).Replace("-", " ")}");
+            // Debug.WriteLine($"[ELO {transport}] Frame: {BitConverter.ToString(frame).Replace("-", " ")}");
+        }
+
+        // ======================
+        // ELO FRAME (SERIAL / CABLE)
+        // ======================
+        public static void SendELOFrame(string serialPort, byte[] data)
         {
             try
             {
+                if (data == null || data.Length == 0)
+                    throw new Exception("ELO ERROR: Data must contain at least 1 byte");
+
                 using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
                 {
                     Handshake = Handshake.None,
@@ -52,61 +64,70 @@ namespace InterdisciplinairProject.Fixtures.Communication
                     WriteTimeout = 100
                 };
                 sp.Open();
-
                 Thread.Sleep(5);
 
+                // Build frame: start bytes + 0x00 + data
                 byte[] start = { 0x00, 0xFF, 0x00 };
-                byte[] stop = { 0xFF, 0xF0, 0xF0 };
+                byte[] frame = new byte[start.Length + 1 + data.Length]; // +1 for zero byte
 
-                int minLength = 10;
-                byte[] padded = new byte[Math.Max(universe.Length, minLength)];
-                Array.Copy(universe, padded, universe.Length);
+                int offset = 0;
+                Array.Copy(start, 0, frame, offset, start.Length);
+                offset += start.Length;
 
-                byte[] frame = new byte[start.Length + padded.Length + stop.Length];
-                Array.Copy(start, 0, frame, 0, start.Length);
-                Array.Copy(padded, 0, frame, start.Length, padded.Length);
-                Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
+                frame[offset++] = 0x00; // additional zero byte
+                Array.Copy(data, 0, frame, offset, data.Length);
 
+                // Send the frame over serial
                 sp.Write(frame, 0, frame.Length);
+
+                // DebugELOFrame("CABLE", data, frame); // still commented
             }
             catch (Exception ex)
             {
-                throw new Exception("ELO ERROR: " + ex.Message);
+                throw new Exception("ELO CABLE ERROR: " + ex.Message);
             }
         }
 
+
         // ======================
-        // ELO FRAME (WiFi / TCP)
+        // ELO FRAME (WiFi)
         // ======================
-        public static void SendELOWifiFrame(string ipAddress, int port, byte[] channelBytes)
+        public static void SendELOWifiFrame(string ipAddress, int port, byte[] data)
         {
             try
             {
-                for (int i = 0; i < channelBytes.Length; i++)
-                    channelBytes[i] = (byte)(channelBytes[i] % 255);
+                if (data == null || data.Length == 0)
+                    throw new Exception("ELO WIFI ERROR: Data must contain at least 1 byte");
+                if (data.Length > 256)
+                    throw new Exception("ELO WIFI ERROR: Data length exceeds protocol limit (256)");
 
                 byte[] start = { 0x00, 0xFF, 0x00 };
                 byte[] stop = { 0xFF, 0xF0, 0xF0 };
+                byte len = (byte)(data.Length - 1);
 
-                // Pad data to at least 10 bytes for single-channel sends
-                int minLength = 10;
-                byte[] padded = new byte[Math.Max(channelBytes.Length, minLength)];
-                Array.Copy(channelBytes, padded, channelBytes.Length);
+                byte[] frame = new byte[start.Length + 1 + data.Length + stop.Length];
+                int offset = 0;
 
-                byte[] frame = new byte[start.Length + padded.Length + stop.Length];
-                Array.Copy(start, 0, frame, 0, start.Length);
-                Array.Copy(padded, 0, frame, start.Length, padded.Length);
-                Array.Copy(stop, 0, frame, start.Length + padded.Length, stop.Length);
+                Array.Copy(start, 0, frame, offset, start.Length);
+                offset += start.Length;
 
-                using TcpClient client = new TcpClient();
-                client.ReceiveTimeout = 500;
-                client.SendTimeout = 500;
+                frame[offset++] = len;
+                Array.Copy(data, 0, frame, offset, data.Length);
+                offset += data.Length;
 
+                Array.Copy(stop, 0, frame, offset, stop.Length);
+
+                using TcpClient client = new TcpClient
+                {
+                    ReceiveTimeout = 500,
+                    SendTimeout = 500
+                };
                 client.Connect(ipAddress, port);
-
                 using NetworkStream stream = client.GetStream();
                 stream.Write(frame, 0, frame.Length);
                 stream.Flush();
+
+                // DebugELOFrame("WIFI", data, frame); // commented for now
             }
             catch (SocketException ex)
             {
