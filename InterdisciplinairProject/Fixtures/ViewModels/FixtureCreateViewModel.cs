@@ -124,6 +124,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
+            //Pull custom types from the json
+            foreach (var ch in existing.Channels)
+            {
+                if (!string.IsNullOrWhiteSpace(ch.Type) && TypeCatalogService.GetByName(ch.Type) == null)
+                {
+                    TypeCatalogService.AddOrUpdate(new TypeSpecification
+                    {
+                        name = ch.Type,
+                        input = "slider",
+                        min = ch.Min,
+                        max = ch.Max,
+                        ranges = ch.Ranges ?? new List<ChannelRange>()
+                    });
+                }
+            }
+
+
             _manufacturerService = new ManufacturerService();
             LoadManufacturers();
 

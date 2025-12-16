@@ -20,7 +20,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private string name;
         [ObservableProperty] private string selectedType;
         [ObservableProperty] private ChannelRange? selectedRange;
-        [ObservableProperty] private int level;
         [ObservableProperty] private int maxValue = 255;
         [ObservableProperty] private int minValue = 0;
         [ObservableProperty] private ObservableCollection<ChannelRange> ranges = new();
@@ -130,6 +129,7 @@ namespace InterdisciplinairProject.Fixtures.Services
 
         private void AddRange()
         {
+
             var newRange = new ChannelRange
             {
                 Name = $"Range{Ranges.Count + 1}",
@@ -145,7 +145,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         {
             _model.Name = Name;
             _model.Type = SelectedType;
-            _model.Value = Level.ToString();
 
             var spec = TypeCatalogService.GetByName(_model.Type);
 
