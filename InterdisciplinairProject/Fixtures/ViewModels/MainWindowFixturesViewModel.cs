@@ -94,20 +94,17 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void ExecuteGoBack()
         {
-            
             if (CurrentViewModel is ManufacturerViewModel mvm)
             {
-                
+
                 if (!mvm.ConfirmExitWhileEditing())
                 {
-                   
                     return;
                 }
 
-               
             }
 
-            CurrentViewModel = fixtureListVm;
+            CurrentViewModel = fixtureListVm; 
         }
 
 

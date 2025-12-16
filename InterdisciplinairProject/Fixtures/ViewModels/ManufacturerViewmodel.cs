@@ -41,7 +41,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         {
             get
             {
-                return IsEmpty ? $"{Name} (Empty: This manufacturer contains no fixture.)" : Name;
+                return IsEmpty ? $"{Name} (Empty)" : Name;
             }
         }
 
