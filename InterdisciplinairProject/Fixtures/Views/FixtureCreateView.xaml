@@ -343,14 +343,25 @@
                                             <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
+                                                    <!-- button -->
+                                                    <RowDefinition Height="Auto"/>
+                                                    <!-- text -->
                                                     <RowDefinition Height="*"/>
+                                                    <!-- list -->
                                                 </Grid.RowDefinitions>
                                                 <Button Grid.Row="0"
                                                         Content="+ Add Range"
                                                         Padding="6,4"
                                                         Margin="0,0,0,10"
                                                         Command="{Binding AddRangeCommand}" />
-                                                <ListBox Grid.Row="1"
+
+                                                <Border Grid.Row="1" Padding="6,4" Margin="0,0,0,10">
+                                                    <TextBlock TextWrapping="Wrap"
+               Text="voeg een modus toe met zijn range (dubbel klik range* om deze aan te passen)"/>
+                                                </Border>
+
+
+                                                <ListBox Grid.Row="2"
                                                          ItemsSource="{Binding Ranges}"
                                                          SelectedItem="{Binding SelectedRange, Mode=TwoWay}"
                                                          ScrollViewer.VerticalScrollBarVisibility="Auto">

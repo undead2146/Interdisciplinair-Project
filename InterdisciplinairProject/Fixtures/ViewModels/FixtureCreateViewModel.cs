@@ -124,21 +124,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
-            //Pull custom types from the json
-            foreach (var ch in existing.Channels)
-            {
-                if (!string.IsNullOrWhiteSpace(ch.Type) && TypeCatalogService.GetByName(ch.Type) == null)
-                {
-                    TypeCatalogService.AddOrUpdate(new TypeSpecification
-                    {
-                        name = ch.Type,
-                        input = "slider",
-                        min = ch.Min,
-                        max = ch.Max,
-                        ranges = ch.Ranges ?? new List<ChannelRange>()
-                    });
-                }
-            }
+            
 
 
             _manufacturerService = new ManufacturerService();
@@ -159,6 +145,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (existing != null)
             {
                 _isEditing = true;
+
+                //Pull custom types from the json
+                foreach (var ch in existing.Channels)
+                {
+                    if (!string.IsNullOrWhiteSpace(ch.Type) && TypeCatalogService.GetByName(ch.Type) == null)
+                    {
+                        TypeCatalogService.AddOrUpdate(new TypeSpecification
+                        {
+                            name = ch.Type,
+                            input = "slider",
+                            min = ch.Min,
+                            max = ch.Max,
+                            ranges = ch.Ranges ?? new List<ChannelRange>()
+                        });
+                    }
+                }
+
                 FixtureName = existing.Name ?? string.Empty;
                 SelectedManufacturer = existing.Manufacturer ?? "Unknown";
                 _originalManufacturer = existing.Manufacturer ?? "Unknown";
