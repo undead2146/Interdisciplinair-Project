@@ -1,5 +1,6 @@
 ﻿using InterdisciplinairProject.ViewModels.Scene;
 using System.Windows;
+using System.Windows.Input;
 
 namespace InterdisciplinairProject.Views.Scene;
 
@@ -41,5 +42,13 @@ public partial class FixtureRegistryDialog : Window
         _viewModel.Cancel();
         DialogResult = false;
         Close();
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left)
+        {
+            this.DragMove();
+        }
     }
 }

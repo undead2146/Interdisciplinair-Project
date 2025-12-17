@@ -6,6 +6,9 @@ using System.Diagnostics;
 
 namespace InterdisciplinairProject.Fixtures.Communication
 {
+    /// <summary>
+    /// Provides low-level DMX communication functionality for sending DMX frames to controllers.
+    /// </summary>
     public static class DMXCommunication
     {
         // ======================

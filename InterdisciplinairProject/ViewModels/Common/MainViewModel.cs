@@ -5,6 +5,7 @@ using InterdisciplinairProject.Core.Repositories;
 using InterdisciplinairProject.Features.Scene;
 using InterdisciplinairProject.Fixtures.ViewModels;
 using InterdisciplinairProject.Fixtures.Views;
+using InterdisciplinairProject.Services;
 using InterdisciplinairProject.Views;
 using System.Diagnostics;
 using System.IO;
@@ -73,9 +74,9 @@ public partial class MainViewModel : ObservableObject
             _fixtureRepository = new FixtureRepository(fixturesPath);
             Debug.WriteLine("[DEBUG] FixtureRepository initialized");
 
-            // Initialiseer HardwareConnection (dummy voor nu)
-            _hardwareConnection = new DummyHardwareConnection();
-            Debug.WriteLine("[DEBUG] DummyHardwareConnection initialized");
+            // Initialize HardwareConnection with real DMX service
+            _hardwareConnection = new HardwareConnection();
+            Debug.WriteLine("[DEBUG] HardwareConnection initialized with DMX service");
 
             _fixtureRegistry = new FixtureRegistry(_fixtureRepository);
 

@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
+using InterdisciplinairProject.Core.Models.Enums;
+using SceneModel = InterdisciplinairProject.Core.Models.Scene;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -11,8 +13,15 @@ namespace InterdisciplinairProject.ViewModels;
 /// </summary>
 public class FixtureSettingsViewModel : INotifyPropertyChanged
 {
+    private const int DebounceDelayMs = 50; // Debounce delay in milliseconds
+
     private readonly IHardwareConnection _hardwareConnection;
+    private readonly ISceneRepository _sceneRepository;
+    private readonly Dictionary<string, CancellationTokenSource> _debounceTokens = new();
+    private readonly object _debounceLock = new();
+
     private Fixture? _currentFixture;
+    private SceneModel? _currentScene;
 
     // NIEUW: Houdt de laatst opgeslagen waarden bij voor de Cancel-functionaliteit.
     private Dictionary<string, byte?> _initialChannelValues = new();
@@ -21,9 +30,11 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// Initializes a new instance of the <see cref="FixtureSettingsViewModel"/> class.
     /// </summary>
     /// <param name="hardwareConnection">The hardware connection service.</param>
-    public FixtureSettingsViewModel(IHardwareConnection hardwareConnection)
+    /// <param name="sceneRepository">The scene repository service.</param>
+    public FixtureSettingsViewModel(IHardwareConnection hardwareConnection, ISceneRepository sceneRepository)
     {
         _hardwareConnection = hardwareConnection;
+        _sceneRepository = sceneRepository;
         Channels = new ObservableCollection<ChannelViewModel>();
     }
 
@@ -62,7 +73,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// Loads a new fixture into the view model.
     /// </summary>
     /// <param name="fixture">The fixture to load.</param>
-    public void LoadFixture(Fixture fixture)
+    /// <param name="scene">The scene that contains this fixture.</param>
+    public void LoadFixture(Fixture fixture, SceneModel? scene = null)
     {
         if (fixture == null)
         {
@@ -72,9 +84,27 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         Debug.WriteLine($"[DEBUG] LoadFixture called for: {fixture.Name}");
         _currentFixture = fixture;
+        _currentScene = scene;
 
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
-        _initialChannelValues = new Dictionary<string, byte?>(fixture.Channels.ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+        // Use GroupBy to handle potential duplicate channel names - take the first occurrence
+        _initialChannelValues = new Dictionary<string, byte?>(
+            fixture.Channels
+                .GroupBy(c => c.Name)
+                .Select(g => g.First())
+                .ToDictionary(c => c.Name, c => (byte?)c.Parameter));
+
+        // Log warning if duplicates were found
+        var duplicates = fixture.Channels
+            .GroupBy(c => c.Name)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicates.Any())
+        {
+            Debug.WriteLine($"[WARNING] Fixture '{fixture.Name}' has duplicate channel names: {string.Join(", ", duplicates)}");
+        }
 
         LoadChannelsFromFixture(fixture);
         OnPropertyChanged(nameof(FixtureName));
@@ -101,6 +131,21 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
             if (channel != null)
             {
                 channel.Parameter = channelVm.Value;
+
+                // Update the channel effects list based on selection
+                channel.ChannelEffects.Clear();
+                foreach (var option in channelVm.EffectOptions)
+                {
+                    if (option.IsSelected)
+                    {
+                        channel.ChannelEffects.Add(new ChannelEffect
+                        {
+                            EffectType = option.Type,
+                            Enabled = true,
+                            // Retain defaults for other properties
+                        });
+                    }
+                }
             }
         }
 
@@ -119,20 +164,18 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         Debug.WriteLine($"[DEBUG] CancelChanges called. Restoring initial values for {_currentFixture.Name}");
 
-        // 1. Herstel de _currentFixture.Channels naar de oorspronkelijke (opgeslagen) waarden
-        _currentFixture.Channels = new ObservableCollection<Channel>(_initialChannelValues.Select(kvp => new Channel
+        // Restore the channel Parameter values to their initial state
+        foreach (var channel in _currentFixture.Channels)
         {
-            Name = kvp.Key,
-            Value = kvp.Value?.ToString() ?? "0",
-            Parameter = kvp.Value ?? 0,
-            Type = _currentFixture.ChannelTypes.TryGetValue(kvp.Key, out var ct) ? ct.ToString() : "Unknown",
-            Min = 0,
-            Max = 255,
-            Time = 0,
-            ChannelEffect = new ChannelEffect(),
-        }));
+            if (_initialChannelValues.TryGetValue(channel.Name, out var initialValue))
+            {
+                channel.Parameter = initialValue ?? 0;
+                channel.Value = initialValue?.ToString() ?? "0";
+                Debug.WriteLine($"[DEBUG] Restored channel '{channel.Name}' to initial value: {initialValue}");
+            }
+        }
 
-        // 2. Herlaad de Channel ViewModels om de sliders te updaten (dit stuurt ook de herstelde waarden live naar de hardware)
+        // Reload the Channel ViewModels to update the sliders (this also sends the restored values live to hardware)
         LoadChannelsFromFixture(_currentFixture);
     }
 
@@ -178,9 +221,11 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         foreach (var channel in fixture.Channels)
         {
-            var type = fixture.ChannelTypes.TryGetValue(channel.Name, out var channelType) ? channelType : ChannelType.Unknown;
-            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type);
-            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}");
+            var type = ParseChannelType(channel.Type);
+
+            // Pass the list of effects and the callback for effect changes
+            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type, channel.ChannelEffects, _ => { Task.Run(async () => await AutoSaveEffectsAsync()); });
+            Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}, Type: {channel.Type} -> {type}");
 
             // Subscribe to channel value changes
             channelVm.PropertyChanged += ChannelViewModel_PropertyChanged;
@@ -191,14 +236,46 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         Debug.WriteLine($"[DEBUG] LoadChannelsFromFixture complete. Total channels loaded: {Channels.Count}");
     }
 
-    // Deze methode blijft verantwoordelijk voor de LIVE update naar de hardware
+    /// <summary>
+    /// Parses a channel type string to a ChannelType enum.
+    /// </summary>
+    /// <param name="typeString">The type string from Channel.Type.</param>
+    /// <returns>The parsed ChannelType enum.</returns>
+    private static ChannelType ParseChannelType(string typeString)
+    {
+        if (string.IsNullOrWhiteSpace(typeString))
+        {
+            return ChannelType.Unknown;
+        }
+
+        // Try to parse as enum first (e.g., "Dimmer", "Red", "Blue")
+        if (Enum.TryParse<ChannelType>(typeString, true, out var channelType))
+        {
+            return channelType;
+        }
+
+        // Fall back to name-based inference
+        return ChannelTypeHelper.GetChannelTypeFromName(typeString);
+    }
+
+    /// <summary>
+    /// Handles channel value changes and sends updates to the DMX hardware in real-time.
+    /// Uses debouncing to prevent UI lag during rapid slider movements.
+    /// This method is responsible for the LIVE DMX update flow:
+    /// 1. User adjusts a slider in the UI.
+    /// 2. Channel value is updated in the fixture model immediately (for UI responsiveness).
+    /// 3. After a short debounce delay, hardware connection sends the DMX update.
+    /// 4. Multiple rapid changes are coalesced into a single DMX update.
+    /// </summary>
+    /// <param name="sender">The channel view model that changed.</param>
+    /// <param name="e">The property changed event args.</param>
     private async void ChannelViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ChannelViewModel.Value) && sender is ChannelViewModel channelVm)
         {
             Debug.WriteLine($"[DEBUG] Channel value changed: {channelVm.Name} = {channelVm.Value}");
 
-            // Update the fixture model (tijdelijk)
+            // Update the fixture model immediately (for UI responsiveness)
             if (_currentFixture != null)
             {
                 var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
@@ -209,14 +286,113 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
                 Debug.WriteLine($"[DEBUG] Updated fixture model: {_currentFixture.InstanceId}.{channelVm.Name} = {channelVm.Value}");
 
-                // Send to hardware connection (LIVE)
+                // Debounce the DMX hardware update
+                await DebouncedSendToHardwareAsync(channelVm.Name, channelVm.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Sends the channel value to hardware with debouncing.
+    /// Cancels any pending update for the same channel and schedules a new one.
+    /// </summary>
+    /// <param name="channelName">The name of the channel.</param>
+    /// <param name="value">The value to send.</param>
+    private async Task DebouncedSendToHardwareAsync(string channelName, byte value)
+    {
+        CancellationTokenSource newCts;
+
+        lock (_debounceLock)
+        {
+            // Cancel any existing pending update for this channel
+            if (_debounceTokens.TryGetValue(channelName, out var existingCts))
+            {
+                existingCts.Cancel();
+                existingCts.Dispose();
+            }
+
+            // Create a new cancellation token for this update
+            newCts = new CancellationTokenSource();
+            _debounceTokens[channelName] = newCts;
+        }
+
+        try
+        {
+            // Wait for the debounce delay
+            await Task.Delay(DebounceDelayMs, newCts.Token);
+
+            // If we get here, the delay completed without cancellation
+            // Send the update to hardware
+            if (_currentFixture != null)
+            {
                 var result = await _hardwareConnection.SetChannelValueAsync(
                     _currentFixture.InstanceId,
-                    channelVm.Name,
-                    channelVm.Value);
+                    channelName,
+                    value);
 
                 Debug.WriteLine($"[DEBUG] SetChannelValueAsync returned: {result}");
             }
+        }
+        catch (TaskCanceledException)
+        {
+            // This is expected when a newer value comes in before the delay completes
+            Debug.WriteLine($"[DEBUG] Debounced update cancelled for {channelName} (newer value pending)");
+        }
+        finally
+        {
+            // Clean up the token if it's still the current one
+            lock (_debounceLock)
+            {
+                if (_debounceTokens.TryGetValue(channelName, out var currentCts) && currentCts == newCts)
+                {
+                    _debounceTokens.Remove(channelName);
+                    newCts.Dispose();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Auto-saves the effects for the current fixture to the scene.
+    /// </summary>
+    private async Task AutoSaveEffectsAsync()
+    {
+        if (_currentFixture == null || _currentScene == null)
+        {
+            Debug.WriteLine("[WARNING] Cannot auto-save effects: CurrentFixture or CurrentScene is null");
+            return;
+        }
+
+        // Update the fixture's channel effects based on current selections
+        foreach (var channelVm in Channels)
+        {
+            var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
+            if (channel != null)
+            {
+                channel.ChannelEffects.Clear();
+                foreach (var option in channelVm.EffectOptions)
+                {
+                    if (option.IsSelected)
+                    {
+                        channel.ChannelEffects.Add(new ChannelEffect
+                        {
+                            EffectType = option.Type,
+                            Enabled = true,
+                        });
+                    }
+                }
+            }
+        }
+
+        try
+        {
+            // Save the scene with updated effects
+            await _sceneRepository.SaveSceneAsync(_currentScene);
+            Debug.WriteLine($"[DEBUG] Auto-saved effects for fixture: {_currentFixture.Name}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Failed to auto-save effects: {ex.Message}");
         }
     }
 }

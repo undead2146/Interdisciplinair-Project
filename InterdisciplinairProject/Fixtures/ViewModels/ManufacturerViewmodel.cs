@@ -22,6 +22,9 @@ public enum UnsavedChangesAction
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
 {
+    /// <summary>
+    /// Representeert een enkele fabrikant in de beheerderslijst.
+    /// </summary>
     public partial class ManufacturerItem : ObservableObject
     {
         [ObservableProperty]
@@ -63,6 +66,10 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         }
     }
 
+    /// <summary>
+    /// ViewModel voor de Manufacturer Management View.
+    /// Beheert het inladen, hernoemen en verwijderen van fabrikanten.
+    /// </summary>
     public partial class ManufacturerViewModel : ObservableObject
     {
         public event EventHandler? ManufacturersUpdated;
@@ -105,6 +112,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             CancelEditCommand = new RelayCommand<ManufacturerItem>(CancelEdit);
             LoadViewCommand = new RelayCommand(LoadManufacturers);
 
+            // Laad fabrikanten bij initialisatie.
             LoadManufacturers();
         }
 
@@ -124,16 +132,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 var unknownItem = items.FirstOrDefault(i => i.IsSystemItem);
 
+                // Sorteer alle items behalve 'Unknown'.
                 var sortedItems = items
                     .Where(i => !i.IsSystemItem)
                     .OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
+                // Voeg 'Unknown' eerst toe.
                 if (unknownItem != null)
                 {
                     Manufacturers.Add(unknownItem);
                 }
 
+                // Voeg de gesorteerde items toe.
                 foreach (var item in sortedItems)
                 {
                     Manufacturers.Add(item);
@@ -145,11 +156,15 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                                  "Loading Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
+            // Zorg ervoor dat de uitvoeringsstatus van de commando's wordt bijgewerkt.
             _deleteManufacturerCommand.NotifyCanExecuteChanged();
             _startEditCommand.NotifyCanExecuteChanged();
         }
 
 
+        /// <summary>
+        /// Controleert of de map van een fabrikant leeg is (bevat geen .json-bestanden).
+        /// </summary>
         private bool IsManufacturerEmpty(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return true;
@@ -183,6 +198,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /// <summary>
+        /// Voert de daadwerkelijke hernoeming van de fabrikantenmap uit.
+        /// </summary>
         private bool ExecuteRenameManufacturer(string oldName, string newName)
         {
             string oldPath = Path.Combine(_rootDirectory, oldName);
@@ -198,11 +216,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             {
                 Directory.Move(oldPath, newPath);
 
+                // Update 'manufacturer' veld in alle JSON-bestanden in de verplaatste map.
                 foreach (var filePath in Directory.EnumerateFiles(newPath, "*.json"))
                 {
                     UpdateManufacturerNameInFixtureJson(filePath, newName);
                 }
 
+                // Update de centrale JSON-lijst.
                 UpdateManufacturerNameInCentralJson(oldName, newName);
 
                 return true;
@@ -214,6 +234,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /// <summary>
+        /// Werkt het 'manufacturer' veld in een individueel armatuur JSON-bestand bij.
+        /// </summary>
         private void UpdateManufacturerNameInFixtureJson(string filePath, string newName)
         {
             try
@@ -233,6 +256,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        /// <summary>
+        /// Werkt de naam in de centrale 'manufacturers.json' lijst bij (verwijderen indien newName leeg is).
+        /// </summary>
         private void UpdateManufacturerNameInCentralJson(string oldName, string newName)
         {
             if (!File.Exists(_centralJsonPath)) return;
@@ -248,16 +274,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
                 for (int i = 0; i < manufacturerArray.Count; i++)
                 {
+                    // Controleer op een overeenkomst met de oude naam (case-insensitive)
                     if (manufacturerArray[i]?.GetValue<string>()?.Equals(oldName, StringComparison.OrdinalIgnoreCase) == true)
                     {
                         if (string.IsNullOrWhiteSpace(newName))
                         {
+                            // Verwijder de vermelding
                             manufacturerArray.RemoveAt(i);
                             changed = true;
                             break;
                         }
                         else
                         {
+                            // Hernoem de vermelding
                             manufacturerArray[i] = newName;
                             changed = true;
                             break;
@@ -277,6 +306,9 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             }
         }
 
+        // --------------------------------------------------------------------------------------
+        // COMMANDS
+        // --------------------------------------------------------------------------------------
         private bool CanStartEdit(ManufacturerItem? item)
         {
             if (item == null || item.IsSystemItem)
@@ -340,6 +372,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
+            // Annuleer de bewerkingsmodus voor alle andere items
             foreach (var existingItem in Manufacturers.Where(i => i.IsEditing))
             {
                 existingItem.IsEditing = false;
@@ -358,6 +391,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             string newName = item.Name.Trim();
             string oldName = item.OriginalName;
 
+            // Als de naam niet is veranderd, is opslaan toegestaan.
             if (newName.Equals(oldName, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
@@ -365,11 +399,13 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
             if (item.IsSystemItem) return false;
 
+            // Controleer op uniciteit (mag niet gelijk zijn aan de OriginalName van een ander item)
             if (Manufacturers.Any(m => m != item && m.OriginalName.Equals(newName, StringComparison.OrdinalIgnoreCase)))
             {
                 return false;
             }
 
+            // Controleer op ongeldige tekens voor een bestandsnaam/map.
             if (newName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
                 return false;
@@ -400,19 +436,24 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
+            // Uitvoeren van de hernoeming
             if (ExecuteRenameManufacturer(oldName, newName))
             {
+                // Success: Update state
                 item.IsEditing = false;
                 item.Name = newName;
                 item.IsEmpty = IsManufacturerEmpty(newName);
                 item.UpdateOriginalName();
 
+                // Herlaad de lijst om de gesorteerde volgorde bij te werken.
                 LoadManufacturers();
 
+                // Notificeer de hoofd-ViewModel dat de lijst met armaturen moet worden herladen.
                 ManufacturersUpdated?.Invoke(this, EventArgs.Empty);
             }
             else
             {
+                // Failure: Blijf in bewerkingsmodus en herstel de naam (ExecuteRenameManufacturer toont al een foutmelding).
                 item.IsEditing = true;
                 item.Name = oldName;
                 item.NotifyDisplayUpdate();
@@ -465,5 +506,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     return false;
             }
         }
+
     }
+
 }

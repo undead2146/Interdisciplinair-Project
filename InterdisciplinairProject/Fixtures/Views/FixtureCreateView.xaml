@@ -510,6 +510,11 @@
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding DataContext.AvailableEffects, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                          SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                                                          VerticalAlignment="Center"
+                                                                          Margin="0,0,8,0"/>
 
                                                                 <ComboBox Grid.Column="0"
                                   ItemsSource="{Binding DataContext.AvailableEffects, RelativeSource={RelativeSource AncestorType=ListBox}}"

@@ -278,9 +278,7 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (!Directory.Exists(manufacturerDir))
                 Directory.CreateDirectory(manufacturerDir);
 
-            string newFilePath = Path.Combine(manufacturerDir, $"{safeFixtureName}.json");
-
-            if (!_isEditing && File.Exists(newFilePath))
+            if (duplicateChannelNames.Any())
             {
                 MessageBox.Show($"There already exists a fixture with name: '{FixtureName}' assigned to '{manufacturer}'. Please choose another.",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
