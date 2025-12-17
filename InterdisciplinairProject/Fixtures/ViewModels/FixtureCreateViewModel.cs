@@ -255,9 +255,19 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             _currentFixture.ImageBase64 = !string.IsNullOrEmpty(ImageBase64)
                 ? ImageCompressionHelpers.CompressBase64(ImageBase64)
                 : string.Empty;
-            _currentFixture.Channels = new ObservableCollection<Channel>(
-                Channels.Select(ci => ci.ToModel())
-            );
+
+
+            // ✅ add this try/catch HERE
+            try
+            {
+                _currentFixture.Channels = new ObservableCollection<Channel>(
+                    Channels.Select(ci => ci.ToModel())
+                );
+            }
+            catch
+            {
+                return; // ToModel() already showed the MessageBox
+            }
 
             // 🔧 Bestandsnaam en map
             string manufacturer = _currentFixture.Manufacturer;

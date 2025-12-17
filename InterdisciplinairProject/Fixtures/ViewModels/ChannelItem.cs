@@ -146,6 +146,26 @@ namespace InterdisciplinairProject.Fixtures.Services
             _model.Name = Name;
             _model.Type = SelectedType;
 
+            // ✅ VALIDATE ranges (least changes: validate only on Save)
+            foreach (var r in Ranges)
+            {
+                // max may never exceed 255
+                if (r.MaxR > 255)
+                {
+                    MessageBox.Show($"Range '{r.Name}': Max cannot exceed 255.",
+                                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new InvalidOperationException("Range Max > 255");
+                }
+
+                // min must be <= max
+                if (r.MinR > r.MaxR)
+                {
+                    MessageBox.Show($"Range '{r.Name}': Min cannot be bigger than Max.",
+                                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new InvalidOperationException("Range Min > Max");
+                }
+            }
+
             var spec = TypeCatalogService.GetByName(_model.Type);
 
             if (spec != null)
