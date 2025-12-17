@@ -512,8 +512,8 @@ public partial class SceneEditorViewModel : ObservableObject
         if (value?.Fixture != null)
         {
             // Maak een nieuwe FixtureSettingsViewModel
-            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection);
-            fixtureSettingsViewModel.LoadFixture(value.Fixture);
+            var fixtureSettingsViewModel = new FixtureSettingsViewModel(_hardwareConnection, _sceneRepository);
+            fixtureSettingsViewModel.LoadFixture(value.Fixture, Scene);
 
             // Laad de FixtureSettingsView
             CurrentView = new FixtureSettingsView

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using InterdisciplinairProject.Core.Interfaces;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Core.Models.Enums;
+using SceneModel = InterdisciplinairProject.Core.Models.Scene;
 
 namespace InterdisciplinairProject.ViewModels;
 
@@ -15,10 +16,12 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     private const int DebounceDelayMs = 50; // Debounce delay in milliseconds
 
     private readonly IHardwareConnection _hardwareConnection;
+    private readonly ISceneRepository _sceneRepository;
     private readonly Dictionary<string, CancellationTokenSource> _debounceTokens = new();
     private readonly object _debounceLock = new();
 
     private Fixture? _currentFixture;
+    private SceneModel? _currentScene;
 
     // NIEUW: Houdt de laatst opgeslagen waarden bij voor de Cancel-functionaliteit.
     private Dictionary<string, byte?> _initialChannelValues = new();
@@ -27,9 +30,11 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// Initializes a new instance of the <see cref="FixtureSettingsViewModel"/> class.
     /// </summary>
     /// <param name="hardwareConnection">The hardware connection service.</param>
-    public FixtureSettingsViewModel(IHardwareConnection hardwareConnection)
+    /// <param name="sceneRepository">The scene repository service.</param>
+    public FixtureSettingsViewModel(IHardwareConnection hardwareConnection, ISceneRepository sceneRepository)
     {
         _hardwareConnection = hardwareConnection;
+        _sceneRepository = sceneRepository;
         Channels = new ObservableCollection<ChannelViewModel>();
     }
 
@@ -68,7 +73,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
     /// Loads a new fixture into the view model.
     /// </summary>
     /// <param name="fixture">The fixture to load.</param>
-    public void LoadFixture(Fixture fixture)
+    /// <param name="scene">The scene that contains this fixture.</param>
+    public void LoadFixture(Fixture fixture, SceneModel? scene = null)
     {
         if (fixture == null)
         {
@@ -78,6 +84,7 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
 
         Debug.WriteLine($"[DEBUG] LoadFixture called for: {fixture.Name}");
         _currentFixture = fixture;
+        _currentScene = scene;
 
         // WIJZIGING: Bewaar een kopie van de oorspronkelijke waarden (de 'opgeslagen' staat).
         // Use GroupBy to handle potential duplicate channel names - take the first occurrence
@@ -216,8 +223,8 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
         {
             var type = ParseChannelType(channel.Type);
 
-            // Pass the list of effects
-            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type, channel.ChannelEffects);
+            // Pass the list of effects and the callback for effect changes
+            var channelVm = new ChannelViewModel(channel.Name, (byte)channel.Parameter, type, channel.ChannelEffects, _ => { Task.Run(async () => await AutoSaveEffectsAsync()); });
             Debug.WriteLine($"[DEBUG] Created ChannelViewModel for channel: {channel.Name} = {channel.Parameter}, Type: {channel.Type} -> {type}");
 
             // Subscribe to channel value changes
@@ -342,6 +349,50 @@ public class FixtureSettingsViewModel : INotifyPropertyChanged
                     newCts.Dispose();
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Auto-saves the effects for the current fixture to the scene.
+    /// </summary>
+    private async Task AutoSaveEffectsAsync()
+    {
+        if (_currentFixture == null || _currentScene == null)
+        {
+            Debug.WriteLine("[WARNING] Cannot auto-save effects: CurrentFixture or CurrentScene is null");
+            return;
+        }
+
+        // Update the fixture's channel effects based on current selections
+        foreach (var channelVm in Channels)
+        {
+            var channel = _currentFixture.Channels.FirstOrDefault(c => c.Name == channelVm.Name);
+            if (channel != null)
+            {
+                channel.ChannelEffects.Clear();
+                foreach (var option in channelVm.EffectOptions)
+                {
+                    if (option.IsSelected)
+                    {
+                        channel.ChannelEffects.Add(new ChannelEffect
+                        {
+                            EffectType = option.Type,
+                            Enabled = true,
+                        });
+                    }
+                }
+            }
+        }
+
+        try
+        {
+            // Save the scene with updated effects
+            await _sceneRepository.SaveSceneAsync(_currentScene);
+            Debug.WriteLine($"[DEBUG] Auto-saved effects for fixture: {_currentFixture.Name}");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Failed to auto-save effects: {ex.Message}");
         }
     }
 }

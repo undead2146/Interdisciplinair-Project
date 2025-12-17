@@ -13,6 +13,7 @@ namespace InterdisciplinairProject.ViewModels;
 public class ChannelViewModel : INotifyPropertyChanged
 {
     private byte _value;
+    private Action<ChannelViewModel>? _onEffectChanged;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ChannelViewModel"/> class.
@@ -21,13 +22,15 @@ public class ChannelViewModel : INotifyPropertyChanged
     /// <param name="value">The initial value of the channel.</param>
     /// <param name="type">The type of the channel, if known.</param>
     /// <param name="currentEffects">The current effects applied to the channel.</param>
-    public ChannelViewModel(string name, byte value, ChannelType? type = null, List<ChannelEffect>? currentEffects = null)
+    /// <param name="onEffectChanged">Callback when effects are changed.</param>
+    public ChannelViewModel(string name, byte value, ChannelType? type = null, List<ChannelEffect>? currentEffects = null, Action<ChannelViewModel>? onEffectChanged = null)
     {
         Name = name;
         _value = value;
         Type = type ?? ChannelTypeHelper.GetChannelTypeFromName(name);
         Symbol = ChannelTypeHelper.GetSymbol(Type);
         ColorHex = ChannelTypeHelper.GetColorHex(Type);
+        _onEffectChanged = onEffectChanged;
 
         // Initialize effect options
         EffectOptions = new ObservableCollection<EffectSelectionViewModel>();
@@ -37,7 +40,18 @@ public class ChannelViewModel : INotifyPropertyChanged
         {
             // Check if this effect is enabled in the passed list
             bool isEnabled = currentEffects?.Any(e => e.EffectType == effectType && e.Enabled) == true;
-            EffectOptions.Add(new EffectSelectionViewModel(effectType, isEnabled));
+            var effectVm = new EffectSelectionViewModel(effectType, isEnabled);
+
+            // Subscribe to effect selection changes
+            effectVm.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(EffectSelectionViewModel.IsSelected))
+                {
+                    _onEffectChanged?.Invoke(this);
+                }
+            };
+
+            EffectOptions.Add(effectVm);
         }
 
         Debug.WriteLine($"[DEBUG] ChannelViewModel created: {Name}, Effects loaded: {EffectOptions.Count(e => e.IsSelected)}");
