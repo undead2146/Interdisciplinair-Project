@@ -33,10 +33,6 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private string typeMinValue = string.Empty;
         [ObservableProperty] private string typeMaxValue = string.Empty;
 
-        [ObservableProperty] private string typeMinValue = string.Empty;
-        [ObservableProperty] private string typeMaxValue = string.Empty;
-        [ObservableProperty] private bool isRangeTabEnabled = true;
-
         // Type flags
         [ObservableProperty] private bool isCustomType;
 
@@ -257,7 +253,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
             {
                 IsCustomType = true;
-                IsRangeTabEnabled = false;
             }
 
             Ranges = spec.ranges != null ? new ObservableCollection<ChannelRange>(spec.ranges) : new ObservableCollection<ChannelRange>();
