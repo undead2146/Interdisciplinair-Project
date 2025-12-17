@@ -57,36 +57,64 @@ namespace InterdisciplinairProject.Fixtures.Communication
                 if (data == null || data.Length == 0)
                     throw new Exception("ELO ERROR: Data must contain at least 1 byte");
 
-                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
-                {
-                    Handshake = Handshake.None,
-                    ReadTimeout = 100,
-                    WriteTimeout = 100
-                };
-                sp.Open();
-                Thread.Sleep(5);
+                if (data.Length > 256)
+                    throw new Exception("ELO ERROR: Data length exceeds protocol limit (256)");
 
-                // Build frame: start bytes + 0x00 + data
+                // ELO protocol bytes
                 byte[] start = { 0x00, 0xFF, 0x00 };
-                byte[] frame = new byte[start.Length + 1 + data.Length]; // +1 for zero byte
+                //byte[] stop = { 0xFF, 0xF0, 0xF0 };
+
+                // Length = data bytes + mandatory zero byte - 1
+                byte length = (byte)(data.Length);
+
+                // Frame format:
+                // [START][LEN][0x00][DATA][STOP]
+                byte[] frame = new byte[
+                    start.Length +
+                    1 +              // length
+                    1 +              // zero byte
+                    data.Length 
+                    //+ stop.Length
+                ];
 
                 int offset = 0;
+
+                // Start bytes
                 Array.Copy(start, 0, frame, offset, start.Length);
                 offset += start.Length;
 
-                frame[offset++] = 0x00; // additional zero byte
+                // Length byte
+                frame[offset++] = length;
+
+                // Mandatory zero byte
+                frame[offset++] = 0x00;
+
+                // Data payload
                 Array.Copy(data, 0, frame, offset, data.Length);
+                offset += data.Length;
 
-                // Send the frame over serial
+                // Stop bytes
+                //Array.Copy(stop, 0, frame, offset, stop.Length);
+
+                using SerialPort sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
+                {
+                    Handshake = Handshake.None,
+                    ReadTimeout = 200,
+                    WriteTimeout = 200
+                };
+
+                sp.Open();
+                Thread.Sleep(5); // allow UART to stabilize
                 sp.Write(frame, 0, frame.Length);
-
-                // DebugELOFrame("CABLE", data, frame); // still commented
+                sp.BaseStream.Flush();
+                sp.Close();
             }
             catch (Exception ex)
             {
                 throw new Exception("ELO CABLE ERROR: " + ex.Message);
             }
         }
+
 
 
         // ======================
@@ -98,8 +126,8 @@ namespace InterdisciplinairProject.Fixtures.Communication
             {
                 if (data == null || data.Length == 0)
                     throw new Exception("ELO WIFI ERROR: Data must contain at least 1 byte");
-                if (data.Length > 256)
-                    throw new Exception("ELO WIFI ERROR: Data length exceeds protocol limit (256)");
+                if (data.Length > 512)
+                    throw new Exception("ELO WIFI ERROR: Data length exceeds protocol limit (512)");
 
                 byte[] start = { 0x00, 0xFF, 0x00 };
                 byte[] stop = { 0xFF, 0xF0, 0xF0 };
