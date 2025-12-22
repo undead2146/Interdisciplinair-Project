@@ -325,35 +325,96 @@
                                             </Grid>
                                         </TabItem>
                                         <!-- TabItem range -->
+                                        <!-- TabItem range -->
                                         <TabItem Header="Range">
                                             <TabItem.Style>
                                                 <Style TargetType="TabItem">
                                                     <Setter Property="IsEnabled" Value="True" />
                                                     <Style.Triggers>
-                                                        <!-- Disable when placeholder type is selected -->
                                                         <DataTrigger Binding="{Binding SelectedType}" Value="Select a type">
                                                             <Setter Property="IsEnabled" Value="False" />
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding SelectedType}" Value="Custom">
                                                             <Setter Property="IsEnabled" Value="False" />
                                                         </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Red">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Green">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Blue">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="White">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding SelectedType}" Value="Brightness">
+                                                            <Setter Property="IsEnabled" Value="False" />
+                                                        </DataTrigger>
+                                                        
                                                     </Style.Triggers>
                                                 </Style>
                                             </TabItem.Style>
+
                                             <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
+                                                    <!-- top row: buttons -->
                                                     <RowDefinition Height="*"/>
+                                                    <!-- list -->
                                                 </Grid.RowDefinitions>
-                                                <Button Grid.Row="0"
-                                                        Content="+ Add Range"
-                                                        Padding="6,4"
-                                                        Margin="0,0,0,10"
-                                                        Command="{Binding AddRangeCommand}" />
+
+                                                <!-- top row: Add + Info -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <!-- Fill -->
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <!-- Info button -->
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Add Range -->
+                                                    <Button Grid.Column="0"
+                                                            Content="+ Add Range"
+                                                            Padding="6,4"
+                                                            HorizontalAlignment="Stretch"
+                                                            Command="{Binding AddRangeCommand}" />
+
+                                                    <!-- Info toggle -->
+                                                    <ToggleButton x:Name="InfoToggle"
+                                                                  Grid.Column="1"
+                                                                  Content="ℹ"
+                                                                  Width="26"
+                                                                  Height="26"
+                                                                  Margin="8,0,0,0"
+                                                                  VerticalAlignment="Center"/>
+
+                                                    <!-- Popup -->
+                                                    <Popup PlacementTarget="{Binding ElementName=InfoToggle}"
+                                                           Placement="Right"
+                                                           StaysOpen="False"
+                                                           IsOpen="{Binding IsChecked, ElementName=InfoToggle}">
+                                                        <Border Background="#FFFBE6"
+                                                                BorderBrush="#C9A400"
+                                                                BorderThickness="1"
+                                                                Padding="8"
+                                                                CornerRadius="4">
+                                                            <TextBlock TextWrapping="Wrap" Width="220">
+                                                                        voeg een modus toe met zijn range
+                                                                        (dubbelklik een range om deze aan te passen)
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Popup>
+                                             </Grid>
+
+
+
+                                                <!-- list -->
                                                 <ListBox Grid.Row="1"
-                                                         ItemsSource="{Binding Ranges}"
-                                                         SelectedItem="{Binding SelectedRange, Mode=TwoWay}"
-                                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                 ItemsSource="{Binding Ranges}"
+                 SelectedItem="{Binding SelectedRange, Mode=TwoWay}"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
                                                     <ListBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <Grid Margin="4">
@@ -363,26 +424,19 @@
                                                                 </Grid.ColumnDefinitions>
 
                                                                 <TextBox Grid.Column="0"
-                                                                         Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                         FontWeight="SemiBold"
-                                                                         VerticalAlignment="Center"
-                                                                         Margin="0,0,10,0"/>
+                                 Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 FontWeight="SemiBold"
+                                 VerticalAlignment="Center"
+                                 Margin="0,0,10,0"/>
 
                                                                 <StackPanel Grid.Column="1"
-                                                                            Orientation="Horizontal"
-                                                                            HorizontalAlignment="Stretch"
-                                                                            VerticalAlignment="Center">
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
                                                                     <TextBox Text="{Binding MinR, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                             Width="40"
-                                                                             HorizontalAlignment="Left"
-                                                                             VerticalAlignment="Center"/>
-                                                                    <TextBlock Text=" - "
-                                                                               VerticalAlignment="Center"
-                                                                               Margin="5,0"/>
+                                     Width="40"/>
+                                                                    <TextBlock Text=" - " VerticalAlignment="Center" Margin="5,0"/>
                                                                     <TextBox Text="{Binding MaxR, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                             Width="40"
-                                                                             HorizontalAlignment="Left"
-                                                                             VerticalAlignment="Center"/>
+                                     Width="40"/>
                                                                 </StackPanel>
                                                             </Grid>
                                                         </DataTemplate>
@@ -390,22 +444,65 @@
                                                 </ListBox>
                                             </Grid>
                                         </TabItem>
+
+
+                                        <!-- TabItem effect type -->
                                         <!-- TabItem effect type -->
                                         <TabItem Header="Effects">
                                             <Grid Margin="10">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
+                                                    <!-- top row -->
                                                     <RowDefinition Height="*"/>
+                                                    <!-- list -->
                                                 </Grid.RowDefinitions>
-                                                <Button Grid.Row="0"
-                                                        Content="+ Add Effect"
-                                                        Padding="6,4"
-                                                        Margin="0,0,0,10"
-                                                        Command="{Binding AddEffectCommand}" />
+
+                                                <!-- top row: Add + Info -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Add Effect -->
+                                                    <Button Grid.Column="0"
+                                                            Content="+ Add Effect"
+                                                            Padding="6,4"
+                                                            HorizontalAlignment="Stretch"
+                                                            Command="{Binding AddEffectCommand}" />
+
+                                                    <!-- Info toggle -->
+                                                    <ToggleButton x:Name="EffectInfoToggle"
+                                                                  Grid.Column="1"
+                                                                  Content="ℹ"
+                                                                  Width="26"
+                                                                  Height="26"
+                                                                  Margin="8,0,0,0"
+                                                                  VerticalAlignment="Center"/>
+
+                                                    <!-- Popup -->
+                                                    <Popup PlacementTarget="{Binding ElementName=EffectInfoToggle}"
+                                                           Placement="Right"
+                                                           StaysOpen="False"
+                                                           IsOpen="{Binding IsChecked, ElementName=EffectInfoToggle}">
+                                                        <Border Background="#FFFBE6"
+                                                                BorderBrush="#C9A400"
+                                                                BorderThickness="1"
+                                                                Padding="8"
+                                                                CornerRadius="4">                               
+                                                            <TextBlock TextWrapping="Wrap" Width="220">
+                                                                        Klik “Add Effect” om een effect toe te voegen.
+                                                                        Kies daarna het type in de dropdown en verwijder met de prullenbak.
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Popup>
+                                                </Grid>
+
+                                                <!-- list -->
                                                 <ListBox Grid.Row="1"
-                                                         ItemsSource="{Binding Effects}"
-                                                         SelectedItem="{Binding SelectedEffect, Mode=TwoWay}"
-                                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                 ItemsSource="{Binding Effects}"
+                 SelectedItem="{Binding SelectedEffect, Mode=TwoWay}"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
                                                     <ListBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <Grid Margin="4">
@@ -419,19 +516,26 @@
                                                                           VerticalAlignment="Center"
                                                                           Margin="0,0,8,0"/>
 
+                                                                <ComboBox Grid.Column="0"
+                                  ItemsSource="{Binding DataContext.AvailableEffects, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                  SelectedItem="{Binding EffectType, Mode=TwoWay}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,8,0"/>
+
                                                                 <Button Grid.Column="1"
-                                                                        Content="🗑"
-                                                                        Command="{Binding DataContext.DeleteEffectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                                        CommandParameter="{Binding}"
-                                                                        VerticalAlignment="Center"
-                                                                        HorizontalAlignment="Right"
-                                                                        Width="30"/>
+                                Content="🗑"
+                                Command="{Binding DataContext.DeleteEffectCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                CommandParameter="{Binding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right"
+                                Width="30"/>
                                                             </Grid>
                                                         </DataTemplate>
                                                     </ListBox.ItemTemplate>
                                                 </ListBox>
                                             </Grid>
                                         </TabItem>
+
                                     </TabControl>
                                 </Border>
 

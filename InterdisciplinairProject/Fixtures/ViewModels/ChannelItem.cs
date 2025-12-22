@@ -20,45 +20,27 @@ namespace InterdisciplinairProject.Fixtures.Services
         [ObservableProperty] private string name;
         [ObservableProperty] private string selectedType;
         [ObservableProperty] private ChannelRange? selectedRange;
-        [ObservableProperty] private string? selectedRangeType;
-        [ObservableProperty] private int level;
         [ObservableProperty] private int maxValue = 255;
         [ObservableProperty] private int minValue = 0;
         [ObservableProperty] private ObservableCollection<ChannelRange> ranges = new();
 
         // Effect properties
-        [ObservableProperty] private bool effectEnabled;
-        [ObservableProperty] private EffectType effectType;
-        [ObservableProperty] private int effectTime;
-        [ObservableProperty] private byte effectMin;
-        [ObservableProperty] private byte effectMax;
         [ObservableProperty] private ChannelEffect? selectedEffect;
 
         // Custom type panel
         [ObservableProperty] private string? customTypeName;
-        [ObservableProperty] private int customTypeSliderValue;
-        [ObservableProperty] private string? customRangeName;
-        [ObservableProperty] private string customRangeMinValue = string.Empty;
-        [ObservableProperty] private string customRangeMaxValue = string.Empty;
 
         [ObservableProperty] private string typeMinValue = string.Empty;
         [ObservableProperty] private string typeMaxValue = string.Empty;
-        [ObservableProperty] private bool isRangeTabEnabled = true;
 
         // Type flags
-        [ObservableProperty] private bool isSliderType;
         [ObservableProperty] private bool isCustomType;
-        [ObservableProperty] private bool isAddRangeType;
-        [ObservableProperty] private bool isDegreeHType;
-        [ObservableProperty] private bool isDegreeFType;
 
         public ObservableCollection<ChannelEffect> Effects { get; } = new();
-        public int TickFrequency => 1;
         public IReadOnlyList<string> AvailableTypes => TypeCatalogService.Names;
         public IEnumerable<EffectType> AvailableEffects { get; } = Enum.GetValues(typeof(EffectType)).Cast<EffectType>();
 
         public IRelayCommand AddCustomTypeCommand { get; }
-        public IRelayCommand AddCustomRangeCommand { get; }
         public IRelayCommand AddRangeCommand { get; }
         public IRelayCommand AddEffectCommand { get; }
         public IRelayCommand<ChannelEffect> DeleteEffectCommand { get; }
@@ -77,12 +59,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             selectedType = string.IsNullOrWhiteSpace(_model.Type) || !available.Contains(_model.Type)
                 ? "Select a type"
                 : _model.Type!;
-
-            if (int.TryParse(_model.Value, out var lvl))
-                level = lvl;
-            else
-                level = 0;
-
             if (_model.ChannelEffect != null && _model.ChannelEffects.Any())
             {
                 foreach (var e in _model.ChannelEffects)
@@ -105,7 +81,6 @@ namespace InterdisciplinairProject.Fixtures.Services
             }
 
             AddCustomTypeCommand = new RelayCommand(DoAddCustomType);
-            AddCustomRangeCommand = new RelayCommand(DoAddCustomRange);
             AddRangeCommand = new RelayCommand(AddRange);
             AddEffectCommand = new RelayCommand(AddEffect);
             DeleteEffectCommand = new RelayCommand<ChannelEffect>(DeleteEffect);
@@ -135,7 +110,6 @@ namespace InterdisciplinairProject.Fixtures.Services
                 Name = newValue;
             }
 
-            Level = Snap(Level, MinValue, MaxValue);
             TypeMinValue = MinValue.ToString();
             TypeMaxValue = MaxValue.ToString();
         }
@@ -155,6 +129,7 @@ namespace InterdisciplinairProject.Fixtures.Services
 
         private void AddRange()
         {
+
             var newRange = new ChannelRange
             {
                 Name = $"Range{Ranges.Count + 1}",
@@ -170,7 +145,26 @@ namespace InterdisciplinairProject.Fixtures.Services
         {
             _model.Name = Name;
             _model.Type = SelectedType;
-            _model.Value = Level.ToString();
+
+            // ✅ VALIDATE ranges (least changes: validate only on Save)
+            foreach (var r in Ranges)
+            {
+                // max may never exceed 255
+                if (r.MaxR > 255)
+                {
+                    MessageBox.Show($"Range '{r.Name}': Max cannot exceed 255.",
+                                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new InvalidOperationException("Range Max > 255");
+                }
+
+                // min must be <= max
+                if (r.MinR > r.MaxR)
+                {
+                    MessageBox.Show($"Range '{r.Name}': Min cannot be bigger than Max.",
+                                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new InvalidOperationException("Range Min > Max");
+                }
+            }
 
             var spec = TypeCatalogService.GetByName(_model.Type);
 
@@ -217,26 +211,12 @@ namespace InterdisciplinairProject.Fixtures.Services
                 return;
             }
 
-            //if (!int.TryParse(CustomRangeMinValue, out var min) || !int.TryParse(CustomRangeMaxValue, out var max))
-            //{
-            //    MessageBox.Show("Invalid min/max values.");
-            //    return;
-            //}
-
-            //if (min < 0 || max > 99999 || min >= max)
-            //{
-            //    MessageBox.Show("Min must be >=0, max <=99999, and min < max.");
-            //    return;
-            //}
-
             var spec = new TypeSpecification
             {
                 name = typeName,
                 input = "slider",
                 min = 0,
                 max = 255
-                //min = min,
-                //max = max
             };
 
             if (!TypeCatalogService.AddOrUpdate(spec))
@@ -248,106 +228,34 @@ namespace InterdisciplinairProject.Fixtures.Services
             OnPropertyChanged(nameof(AvailableTypes));
 
             SelectedType = typeName;
-            Level = Snap(Level, MinValue, MaxValue);
             IsCustomType = false;
         }
 
-        private void DoAddCustomRange()
-        {
-            var rangeName = (CustomRangeName ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(rangeName))
-            {
-                MessageBox.Show("Range name is empty.");
-                return;
-            }
-
-            if (!int.TryParse(CustomRangeMinValue, out var rmin) || !int.TryParse(CustomRangeMaxValue, out var rmax))
-            {
-                MessageBox.Show("Range min/max are not valid numbers.");
-                return;
-            }
-
-            if (rmin < MinValue || rmax > MaxValue || rmin >= rmax)
-            {
-                MessageBox.Show($"Range must be within [{MinValue},{MaxValue}] and min<max.");
-                return;
-            }
-
-            if (ranges.Any(r => r.Name.Equals(rangeName, StringComparison.OrdinalIgnoreCase)))
-            {
-                MessageBox.Show("A range with this name already exists.");
-                return;
-            }
-
-            var newRange = new ChannelRange { Name = rangeName, MinR = rmin, MaxR = rmax };
-            ranges.Add(newRange);
-            _model.Ranges = ranges.ToList();
-
-            CustomRangeName = string.Empty;
-            CustomRangeMinValue = string.Empty;
-            CustomRangeMaxValue = string.Empty;
-
-            MessageBox.Show($"Range '{rangeName}' added.");
-        }
+        
 
         private void ApplyTypeSpec(string? typeName)
         {
-            IsSliderType = false;
             IsCustomType = false;
-            IsDegreeHType = false;
-            IsDegreeFType = false;
-            IsAddRangeType = false;
+
 
             var spec = TypeCatalogService.GetByName(typeName);
             if (spec == null)
             {
-                IsRangeTabEnabled = false;
                 return;
             }
-
-            IsRangeTabEnabled = !spec.input.Equals("noInput", StringComparison.OrdinalIgnoreCase)
-                                && !spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase);
-
             if (spec.input.Equals("slider", StringComparison.OrdinalIgnoreCase))
             {
-                IsSliderType = true;
                 MinValue = spec.min ?? 0;
                 MaxValue = spec.max ?? 255;
                 TypeMinValue = MinValue.ToString();
                 TypeMaxValue = MaxValue.ToString();
             }
-            else if (spec.input.Equals("rangeToType", StringComparison.OrdinalIgnoreCase))
-            {
-                IsAddRangeType = true;
-            }
             else if (spec.input.Equals("custom", StringComparison.OrdinalIgnoreCase))
             {
                 IsCustomType = true;
-                IsRangeTabEnabled = false;
             }
 
             Ranges = spec.ranges != null ? new ObservableCollection<ChannelRange>(spec.ranges) : new ObservableCollection<ChannelRange>();
-        }
-
-        private static int Snap(int value, int min, int max)
-        {
-            if (value < min) return min;
-            if (value > max) return max;
-            return value;
-        }
-
-        partial void OnSelectedRangeTypeChanged(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value)) return;
-
-            var spec = TypeCatalogService.GetByName(value);
-            if (spec == null) return;
-
-            MinValue = spec.min ?? 0;
-            MaxValue = spec.max ?? 255;
-
-            CustomRangeMinValue = MinValue.ToString();
-            CustomRangeMaxValue = MaxValue.ToString();
         }
     }
 }

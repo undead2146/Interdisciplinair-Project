@@ -2,12 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Communication;
-using System.Collections.ObjectModel;
-using System.Text.Json;
-using System.Windows.Input;
 using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics; // For debug logging
 using System.IO.Ports;
+using System.Text.Json;
 using System.Windows;
+using System.Windows.Input;
 using System.Threading;
 
 namespace InterdisciplinairProject.Fixtures.ViewModels
@@ -26,18 +27,47 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         public event EventHandler? BackRequested;
         public event EventHandler<FixtureContentViewModel>? EditRequested;
 
-        public string? Name { get => _name; set => SetProperty(ref _name, value); }
-        public string? Manufacturer { get => _manufacturer; set => SetProperty(ref _manufacturer, value); }
-        public string? ImagePath { get => _imagePath; set => SetProperty(ref _imagePath, value); }
+        public string? Name
+        {
+            get => _name;
+            set => SetProperty(ref _name, value);
+        }
+
+        public string? Manufacturer
+        {
+            get => _manufacturer;
+            set => SetProperty(ref _manufacturer, value);
+        }
+
+        public string? ImagePath
+        {
+            get => _imagePath;
+            set => SetProperty(ref _imagePath, value);
+        }
+
         public string? ImageBase64 { get; set; }
-        public string? ComPort { get => _comPort; set => SetProperty(ref _comPort, value); }
+
+        public string? ComPort
+        {
+            get => _comPort;
+            set => SetProperty(ref _comPort, value);
+        }
 
         // WiFi properties for ELO (WiFi)
-        private string? _wifiIP;
-        private int _wifiPort = 6038; // default port
+        private string _wifiIP = "192.168.4.1";
+        private int _wifiPort = 5000; // default port
 
-        public string? WifiIP { get => _wifiIP; set => SetProperty(ref _wifiIP, value); }
-        public int WifiPort { get => _wifiPort; set => SetProperty(ref _wifiPort, value); }
+        public string? WifiIP
+        {
+            get => _wifiIP;
+            set => SetProperty(ref _wifiIP, value);
+        }
+
+        public int WifiPort
+        {
+            get => _wifiPort;
+            set => SetProperty(ref _wifiPort, value);
+        }
 
         // UPDATED LABELS
         public ObservableCollection<string> LampMethods { get; set; } = new()
@@ -47,7 +77,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             "ELO (WiFi)"
         };
 
-        public string? SelectedMethod { get => _selectedMethod; set => SetProperty(ref _selectedMethod, value); }
+        public string? SelectedMethod
+        {
+            get => _selectedMethod;
+            set => SetProperty(ref _selectedMethod, value);
+        }
 
         public ObservableCollection<string> AvailablePorts { get; set; } = new();
         public ObservableCollection<Channel> Channels { get; set; } = new();
@@ -68,7 +102,8 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void LoadFromJson(string json)
         {
-            if (string.IsNullOrWhiteSpace(json)) return;
+            if (string.IsNullOrWhiteSpace(json))
+                return;
 
             var parsed = JsonSerializer.Deserialize<Fixture>(json);
 
@@ -117,7 +152,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 error = channel.Name;
                 return false;
             }
-
             return true;
         }
 
@@ -155,6 +189,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             else if (SelectedMethod == "ELO (Cable)")
             {
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
+
+                // Debug output for ELO Cable
+                Debug.WriteLine("=== ELO (Cable) Debug ===");
+                Debug.WriteLine($"COM Port: {ComPort}");
+                Debug.WriteLine($"Sent Data: {BitConverter.ToString(eloData)}");
             }
             else if (SelectedMethod == "ELO (WiFi)")
             {
@@ -200,6 +239,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                     eloData[i] = (byte)Channels[i].Parameter;
 
                 DMXCommunication.SendELOFrame(ComPort!, eloData);
+
+                // Debug output for ELO Cable
+                Debug.WriteLine("=== ELO (Cable) Debug ===");
+                Debug.WriteLine($"COM Port: {ComPort}");
+                Debug.WriteLine($"Sent Data: {BitConverter.ToString(eloData)}");
             }
             else if (SelectedMethod == "ELO (WiFi)")
             {

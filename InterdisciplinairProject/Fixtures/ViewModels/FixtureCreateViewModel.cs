@@ -3,13 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using InterdisciplinairProject.Core.Models;
 using InterdisciplinairProject.Fixtures.Converters;
 using InterdisciplinairProject.Fixtures.Services;
-using InterdisciplinairProject.Fixtures.Views;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -95,8 +93,6 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
         /// </summary>
         public ICommand AddImageCommand { get; }
 
-        public ICommand AddTypeBtn { get; }
-
         public Fixture CurrentFixture
         {
             get => _currentFixture;
@@ -128,9 +124,11 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         public FixtureCreateViewModel(FixtureContentViewModel? existing = null)
         {
+            
+
+
             _manufacturerService = new ManufacturerService();
             LoadManufacturers();
-            RegisterManufacturerCommand = new RelayCommand(ExecuteRegisterManufacturer);
 
             string unknownDir = Path.Combine(_dataDir, "Unknown");
             if (!Directory.Exists(unknownDir))
@@ -147,6 +145,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
             if (existing != null)
             {
                 _isEditing = true;
+
+                //Pull custom types from the json
+                foreach (var ch in existing.Channels)
+                {
+                    if (!string.IsNullOrWhiteSpace(ch.Type) && TypeCatalogService.GetByName(ch.Type) == null)
+                    {
+                        TypeCatalogService.AddOrUpdate(new TypeSpecification
+                        {
+                            name = ch.Type,
+                            input = "slider",
+                            min = ch.Min,
+                            max = ch.Max,
+                            ranges = ch.Ranges ?? new List<ChannelRange>()
+                        });
+                    }
+                }
+
                 FixtureName = existing.Name ?? string.Empty;
                 SelectedManufacturer = existing.Manufacturer ?? "Unknown";
                 _originalManufacturer = existing.Manufacturer ?? "Unknown";
@@ -234,30 +249,25 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
                 return;
             }
 
-            // Check for duplicate channel names
-            var duplicateChannelNames = Channels
-                .GroupBy(ch => ch.Name)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToList();
-
-            if (duplicateChannelNames.Any())
-            {
-                string duplicates = string.Join(", ", duplicateChannelNames);
-                MessageBox.Show($"Channel names must be unique. Duplicate names found: {duplicates}",
-                    "Validation error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
             // 🔧 Vul het Fixture model
             _currentFixture.Name = FixtureName;
             _currentFixture.Manufacturer = SelectedManufacturer ?? "Unknown";
             _currentFixture.ImageBase64 = !string.IsNullOrEmpty(ImageBase64)
                 ? ImageCompressionHelpers.CompressBase64(ImageBase64)
                 : string.Empty;
-            _currentFixture.Channels = new ObservableCollection<Channel>(
-                Channels.Select(ci => ci.ToModel())
-            );
+
+
+            // ✅ add this try/catch HERE
+            try
+            {
+                _currentFixture.Channels = new ObservableCollection<Channel>(
+                    Channels.Select(ci => ci.ToModel())
+                );
+            }
+            catch
+            {
+                return; // ToModel() already showed the MessageBox
+            }
 
             // 🔧 Bestandsnaam en map
             string manufacturer = _currentFixture.Manufacturer;
@@ -318,33 +328,23 @@ namespace InterdisciplinairProject.Fixtures.ViewModels
 
         private void AddChannel()
         {
-            if (Channels.Count >= 512)
+            if (Channels.Count < 512)
             {
-                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                var newModel = new Channel
+                {
+                    Name = "Select a type",
+                    Type = "Select a type",
+                    Value = "0",
+                    Min = 0,
+                    Max = 255,
+                };
+                Channels.Add(new ChannelItem(newModel));
+                (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
             }
-
-            // Generate unique channel name by counting existing channels
-            int channelNumber = Channels.Count + 1;
-            string channelName = $"Channel {channelNumber}";
-
-            // Ensure uniqueness in case user deleted middle channels
-            while (Channels.Any(c => c.Name == channelName))
-            {
-                channelNumber++;
-                channelName = $"Channel {channelNumber}";
+            else{
+                MessageBox.Show("Maximum of 512 channels reached.", "Limit reached",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-
-            var newModel = new Channel
-            {
-                Name = channelName,
-                Type = "Select a type",
-                Value = "0",
-                Min = 0,
-                Max = 255,
-            };
-            Channels.Add(new ChannelItem(newModel));
-            (DeleteChannelCommand as RelayCommand<ChannelItem>)?.NotifyCanExecuteChanged();
         }
 
         private bool CanDeleteChannel(ChannelItem? channel)

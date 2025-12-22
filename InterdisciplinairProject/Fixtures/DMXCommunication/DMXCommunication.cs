@@ -1,18 +1,15 @@
-﻿using System.IO.Ports;
+﻿using System;
+using System.IO.Ports;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace InterdisciplinairProject.Fixtures.Communication
 {
-    /// <summary>
-    /// Provides low-level DMX communication functionality for sending DMX frames to controllers.
-    /// </summary>
     public static class DMXCommunication
     {
-        /// <summary>
-        /// Sends a standard DMX512 frame to the specified COM port.
-        /// </summary>
-        /// <param name="serialPort">The COM port name (e.g., "COM3").</param>
-        /// <param name="universe">The DMX channel data (up to 512 bytes).</param>
+        // ======================
+        // STANDARD DMX FRAME (SERIAL)
+        // ======================
         public static void SendDMXFrame(string serialPort, byte[] universe)
         {
             try
@@ -20,7 +17,6 @@ namespace InterdisciplinairProject.Fixtures.Communication
                 using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two);
                 sp.Open();
 
-                // Break + start code
                 Thread.Sleep(1);
                 sp.BreakState = true;
                 Thread.Sleep(1);
@@ -28,7 +24,6 @@ namespace InterdisciplinairProject.Fixtures.Communication
 
                 SpinWait.SpinUntil(() => false, TimeSpan.FromTicks(10));
 
-                // DMX frame: start code + universe
                 byte[] frame = new byte[universe.Length + 1];
                 frame[0] = 0x00;
                 Array.Copy(universe, 0, frame, 1, universe.Length);
@@ -41,127 +36,123 @@ namespace InterdisciplinairProject.Fixtures.Communication
             }
         }
 
-        /// <summary>
-        /// Sends an ELO (Cable) frame to the specified COM port.
-        /// </summary>
-        /// <param name="serialPort">The COM port name (e.g., "COM3").</param>
-        /// <param name="universe">The channel data bytes to send.</param>
+        // ======================
+        // ELO FRAME (USB / SERIAL)
+        // ======================
         public static void SendELOFrame(string serialPort, byte[] data)
         {
+            if (data == null || data.Length == 0)
+                throw new Exception("ELO USB ERROR: Data must contain at least 1 byte");
+
+            // Payload = ZERO byte + data
+            // Len counts starting from ZERO byte
+            if (data.Length + 1 > 255)
+                throw new Exception("ELO USB ERROR: Payload length exceeds 255 bytes");
+
+            // Start sequence
+            byte[] start = { 0x00, 0xFF, 0x00 };
+
+            // Build payload
+            byte[] payload = new byte[1 + data.Length];
+            payload[0] = 0x00;                  // ZERO byte
+            Array.Copy(data, 0, payload, 1, data.Length);
+
+            byte len = (byte)payload.Length;
+
+            // Build final frame
+            byte[] frame = new byte[start.Length + 1 + payload.Length];
+            int offset = 0;
+
+            Array.Copy(start, 0, frame, offset, start.Length);
+            offset += start.Length;
+
+            frame[offset++] = len;
+
+            Array.Copy(payload, 0, frame, offset, payload.Length);
+
             try
             {
-                if (data == null || data.Length == 0)
-                    throw new Exception("ELO ERROR: Data must contain at least 1 byte");
-
-                if (data.Length > 256)
-                    throw new Exception("ELO ERROR: Data length exceeds protocol limit (256)");
-
-                // ELO protocol bytes
-                byte[] start = { 0x00, 0xFF, 0x00 };
-
-                //byte[] stop = { 0xFF, 0xF0, 0xF0 };
-
-                // Length = data bytes + mandatory zero byte - 1
-                byte length = (byte)data.Length;
-
-                // Frame format:
-                // [START][LEN][0x00][DATA][STOP]
-                byte[] frame = new byte[
-                    start.Length +
-                    1 + // length
-                    1 + // zero byte
-                    data.Length
-                    //+ stop.Length
-                ];
-
-                int offset = 0;
-
-                // Start bytes
-                Array.Copy(start, 0, frame, offset, start.Length);
-                offset += start.Length;
-
-                // Length byte
-                frame[offset++] = length;
-
-                // Mandatory zero byte
-                frame[offset++] = 0x00;
-
-                // Data payload
-                Array.Copy(data, 0, frame, offset, data.Length);
-                offset += data.Length;
-
-                // Stop bytes
-                // Array.Copy(stop, 0, frame, offset, stop.Length);
-                using SerialPort sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
+                using var sp = new SerialPort(serialPort, 250000, Parity.None, 8, StopBits.Two)
                 {
                     Handshake = Handshake.None,
-                    ReadTimeout = 200,
-                    WriteTimeout = 200,
+                    ReadTimeout = 500,
+                    WriteTimeout = 500
                 };
 
                 sp.Open();
-                Thread.Sleep(5); // allow UART to stabilize
                 sp.Write(frame, 0, frame.Length);
                 sp.BaseStream.Flush();
-                sp.Close();
             }
             catch (Exception ex)
             {
-                throw new Exception("ELO CABLE ERROR: " + ex.Message);
+                throw new Exception("ELO USB ERROR: " + ex.Message);
             }
         }
 
-        /// <summary>
-        /// Sends an ELO frame over WiFi/TCP to the specified IP address and port.
-        /// </summary>
-        /// <param name="ipAddress">The IP address of the DMX controller.</param>
-        /// <param name="port">The port number to connect to.</param>
-        /// <param name="channelBytes">The channel data bytes to send.</param>
+
+
+        // ======================
+        // ELO FRAME (WiFi)
+        // ======================
         public static void SendELOWifiFrame(string ipAddress, int port, byte[] data)
         {
+            if (data == null || data.Length == 0)
+                throw new Exception("ELO WIFI ERROR: Data must contain at least 1 byte");
+
+            // Payload = ZERO byte + data
+            // Len counts starting from ZERO byte
+            if (data.Length + 1 > 255)
+                throw new Exception("ELO WIFI ERROR: Payload length exceeds 255 bytes");
+
+            byte[] start = { 0x00, 0xFF, 0x00 };
+            byte[] stop = { 0xFF, 0xF0, 0xF0 };
+
+            // Build payload
+            byte[] payload = new byte[1 + data.Length];
+            payload[0] = 0x00;                 // ZERO byte
+            Array.Copy(data, 0, payload, 1, data.Length);
+
+            byte len = (byte)payload.Length;
+
+            // Build final frame
+            byte[] frame = new byte[start.Length + 1 + payload.Length + stop.Length];
+            int offset = 0;
+
+            Array.Copy(start, 0, frame, offset, start.Length);
+            offset += start.Length;
+
+            frame[offset++] = len;
+
+            Array.Copy(payload, 0, frame, offset, payload.Length);
+            offset += payload.Length;
+
+            Array.Copy(stop, 0, frame, offset, stop.Length);
+
             try
             {
-                if (data == null || data.Length == 0)
-                    throw new Exception("ELO WIFI ERROR: Data must contain at least 1 byte");
-                if (data.Length > 512)
-                    throw new Exception("ELO WIFI ERROR: Data length exceeds protocol limit (512)");
-
-                byte[] start = { 0x00, 0xFF, 0x00 };
-                byte[] stop = { 0xFF, 0xF0, 0xF0 };
-                byte len = (byte)(data.Length - 1);
-
-                byte[] frame = new byte[start.Length + 1 + data.Length + stop.Length];
-                int offset = 0;
-
-                Array.Copy(start, 0, frame, offset, start.Length);
-                offset += start.Length;
-
-                frame[offset++] = len;
-                Array.Copy(data, 0, frame, offset, data.Length);
-                offset += data.Length;
-
-                Array.Copy(stop, 0, frame, offset, stop.Length);
-
                 using TcpClient client = new TcpClient
                 {
                     ReceiveTimeout = 500,
-                    SendTimeout = 500,
+                    SendTimeout = 500
                 };
+
                 client.Connect(ipAddress, port);
+
                 using NetworkStream stream = client.GetStream();
                 stream.Write(frame, 0, frame.Length);
                 stream.Flush();
-
-                // DebugELOFrame("WIFI", data, frame); // commented for now
             }
             catch (SocketException ex)
             {
-                throw new Exception($"ELO WIFI ERROR: Could not connect to {ipAddress}:{port} — {ex.Message}");
+                throw new Exception(
+                    $"ELO WIFI ERROR: Could not connect to {ipAddress}:{port} — {ex.Message}"
+                );
             }
             catch (Exception ex)
             {
                 throw new Exception("ELO WIFI ERROR: " + ex.Message);
             }
         }
+
     }
 }
